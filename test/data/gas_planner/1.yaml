@@ -1,0 +1,20 @@
+sac:
+  # options:
+  #   - pressure_rate + tank
+  #   - volume_rate
+  pressure_rate: 40 psi / min
+  # tank information is not required when volume_rate is selected.
+  # it is required contextual information if you provide sac as a pressure rate.
+  tank:
+    # volume of the tank itself, not how much surface air can be shoved in, which 
+    # is what 80cf refers to.
+    # this example is a standard AL80.
+    volume: 10 L
+    max_pressure: 3000psi
+profile:
+  - time: 0 s
+    depth: 130 ft
+  - time: 30s
+    depth: 130 ft
+  - time: 2 min + 15 sec
+    depth: 0 ft

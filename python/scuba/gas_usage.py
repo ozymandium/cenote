@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
@@ -23,6 +22,9 @@ class ProfilePoint:
     def __init__(self, raw_data):
         self.time = UREG.parse_expression(raw_data["time"]).to(self.TIME_UNIT)
         self.depth = UREG.parse_expression(raw_data["depth"]).to(self.DEPTH_UNIT)
+
+    def __str__(self):
+        return "{:.1f}: {:.1f}".format(self.time, self.depth)
 
 
 class Tank:
@@ -69,7 +71,7 @@ class Sac:
             raise Exception("sac field options are pressure_rate + tank or volume_rate")
 
     def __str__(self):
-        return str(self.rate)
+        return "{:.3f}".format(self.rate)
 
 
 class DepthProfile:
@@ -84,6 +86,7 @@ class DepthProfile:
             point = ProfilePoint(raw_point_data)
             if (len(self.points) != 0) and (point.time <= self.points[-1].time):
                     raise Exception("Time into dive must increase at every point in profile.")
+            self.points.append(point)
 
 
 class Dive:
@@ -96,26 +99,3 @@ class Dive:
     def __init__(self, raw_data):
         self.sac = Sac(raw_data["sac"])
         self.profile = DepthProfile(raw_data["profile"])
-
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-d", "--data_path", required=True, 
-        help="Path to YAML file containing dive configuration.")
-    return parser.parse_args()
-
-
-def main(args):
-    print("Data path: {}".format(args.data_path))
-
-    with open(args.data_path, "r") as f:
-        raw_data = yaml.load(f)
-    
-    dive = Dive(raw_data)
-    print("SAC:\n{}".format(str(dive.sac)))
-    print("Profile:\n{}".format(str(dive.profile)))
-
-
-if __name__ == "__main__":
-    main(parse_args())
