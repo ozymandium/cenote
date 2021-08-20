@@ -68,6 +68,9 @@ class Sac:
         else:
             raise Exception("sac field options are pressure_rate + tank or volume_rate")
 
+    def __str__(self):
+        return str(self.rate)
+
 
 class DepthProfile:
     """
