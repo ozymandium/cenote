@@ -10,16 +10,19 @@ UREG = pint.UnitRegistry()
 
 
 class ProfilePoint:
+    """
+    Members
+    -------
+    time : in TIME_UNIT
+    depth : in DEPTH_UNIT
+    """
 
-    def __init__(self, time_s, depth_s):
-        self.time = parse_unit_str(time_s)
-        self.depth = parse_unit_str(depth_s)
+    TIME_UNIT = "minute"
+    DEPTH_UNIT = "foot"
 
-    @staticmethod
-    def from_raw_data(raw) -> ProfilePoint:
-        time_s = raw["time"]
-        depth_s = raw["depth"]
-        return ProfilePoint(time_s, depth_s)
+    def __init__(self, raw_data):
+        self.time = UREG.parse_expression(raw_data["time"]).to(self.TIME_UNIT)
+        self.depth = UREG.parse_expression(raw_data["depth"]).to(self.DEPTH_UNIT)
 
 
 class Tank:
@@ -37,8 +40,7 @@ class Tank:
         self.max_pressure = UREG.parse_expression(raw_data["max_pressure"]).to(self.PRESSURE_UNIT)
 
     def __str__(self):
-        return "{volume} @ {max_pressure}"
-                .format(volume=self.volume, max_pressure=self.max_pressure)
+        return "{volume} @ {max_pressure}".format(volume=self.volume, max_pressure=self.max_pressure)
 
 class Sac:
     """
@@ -58,8 +60,7 @@ class Sac:
         if "pressure_rate" in raw_data:
             if "tank" not in raw_data:
                 raise Exception("pressure rate sac definition requires associated tank information.")
-            press_rate = UREG.parse_expression(raw_data["pressure_rate"])
-                            .to(self.PRESSURE_RATE_UNIT)
+            press_rate = UREG.parse_expression(raw_data["pressure_rate"]).to(self.PRESSURE_RATE_UNIT)
             tank = Tank(raw_data["tank"])
             self.rate = (press_rate * tank.volume / tank.max_pressure).to(self.VOLUME_RATE_UNIT)
         elif "volume_rate" in raw_data:
@@ -76,8 +77,8 @@ class DepthProfile:
     """
     def __init__(self, raw_data):
         self.points = []
-        for raw_point_data in raw_data["points"]:
-            point = ProfilePoint.from_raw_data(raw_point_data)
+        for raw_point_data in raw_data:
+            point = ProfilePoint(raw_point_data)
             if (len(self.points) != 0) and (point.time <= self.points[-1].time):
                     raise Exception("Time into dive must increase at every point in profile.")
 
@@ -89,9 +90,7 @@ class Dive:
     sac : Sac
     profile : DepthProfile
     """
-    def __init__(self, path):
-        raw_data = yaml.load(path)
-
+    def __init__(self, raw_data):
         self.sac = Sac(raw_data["sac"])
         self.profile = DepthProfile(raw_data["profile"])
 
@@ -105,7 +104,11 @@ def parse_args():
 
 
 def main(args):
-    raw_data = yaml.load(data_path)
+    print("Data path: {}".format(args.data_path))
+
+    with open(args.data_path, "r") as f:
+        raw_data = yaml.load(f)
+    
     dive = Dive(raw_data)
     print("SAC:\n{}".format(str(dive.sac)))
     print("Profile:\n{}".format(str(dive.profile)))
