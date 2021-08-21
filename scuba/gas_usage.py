@@ -80,7 +80,7 @@ class ProfileSection:
         self.avg_depth = (pt0.depth + pt1.depth) * 0.5
         self.duration = pt1.time - pt0.time
 
-    def gas_usage(self, rmv):
+    def gas_usage(self, scr):
         """
         For a given surface consumption rate, determine how much gas at surface pressure is
         consumed in this section.
@@ -89,7 +89,7 @@ class ProfileSection:
 
         Parameters
         ----------
-        rmv : Rmv
+        scr : Scr
             Surface consumption rate.
 
         Returns
@@ -99,7 +99,7 @@ class ProfileSection:
         """
         # TODO more accurate formula for this
         volume_scaling = pressure_at_depth(self.avg_depth).to(UREG.atm).magnitude
-        return rmv.volume_rate * self.duration * volume_scaling
+        return scr.volume_rate * self.duration * volume_scaling
 
 
 class Tank:
@@ -145,7 +145,7 @@ class Sac:
         Decrease in pressure over time for the provided tank
     tank : Tank
         The tank that coresponds to this consumption rate
-    rmv : Rmv
+    scr : Scr
         The rate of consumption of 1atm gas by volume.
     """
 
@@ -160,7 +160,7 @@ class Sac:
         """
         self.pressure_rate = pressure_rate.to(PRESSURE_RATE_UNIT)
         self.tank = tank
-        self.rmv = Rmv(self.pressure_rate / self.tank.max_pressure * self.tank.max_gas_volume)
+        self.scr = Scr(self.pressure_rate / self.tank.max_pressure * self.tank.max_gas_volume)
 
     @staticmethod
     def from_dict(data: dict):
@@ -169,7 +169,7 @@ class Sac:
         return Sac(pressure_rate, tank)
 
 
-class Rmv:
+class Scr:
     """
     Respiratory minute volume.
     Gas consumption in volume of surface-pressure gas per minute
@@ -206,24 +206,26 @@ class Profile:
         if len(points) < 2:
             raise Exception("Need at least 2 points")
         self.points = points
+        # check time increase
+        for idx in range(1, len(self.points)):
+            if self.points[idx - 1].time >= self.points[idx].time:
+                raise Exception("Time into dive must increase at every point in profile.")
 
     @staticmethod
     def from_dict(data):
         points = []
         for point_data in data:
             point = ProfilePoint.from_dict(point_data)
-            if len(points) and (point.time <= points[-1].time):
-                raise Exception("Time into dive must increase at every point in profile.")
             points.append(point)
         return Profile(points)
 
-    def gas_usage(self, rmv: Rmv):
+    def gas_usage(self, scr: Scr):
         """
         Compute the volume of surface-pressure gas that is used for this depth profile.
 
         Parameters
         ----------
-        rmv : Rmv
+        scr : Scr
             How fast gas is used on overage for this depth.
 
         Returns
@@ -232,10 +234,8 @@ class Profile:
         """
         volume = 0.0 * UREG.liter
         for idx in range(1, len(self.points)):
-            point0 = self.points[idx - 1]
-            point1 = self.points[idx]
-            section = ProfileSection(point0, point1)
-            volume += section.gas_usage(rmv)
+            section = ProfileSection(self.points[idx - 1], self.points[idx])
+            volume += section.gas_usage(scr)
         return volume
 
 
@@ -243,17 +243,17 @@ class Dive:
     """
     Members
     -------
-    rmv : Rmv
+    scr : Scr
     profile : Profile
     """
 
-    def __init__(self, rmv: Rmv, profile: Profile):
-        self.rmv = rmv
+    def __init__(self, scr: Scr, profile: Profile):
+        self.scr = scr
         self.profile = profile
 
     def gas_usage(self):
         """Compute the surface volume of gas used"""
-        return self.profile.gas_usage(self.rmv)
+        return self.profile.gas_usage(self.scr)
 
     @staticmethod
     def from_yaml(path):
@@ -283,12 +283,12 @@ class Dive:
         -------
         Dive
         """
-        if "rmv" in data:
-            rmv = Rmv(volume_rate=UREG.parse_expression(data["rmv"]))
+        if "scr" in data:
+            scr = Scr(volume_rate=UREG.parse_expression(data["scr"]))
         else:
             if "sac" not in data:
-                raise Exception("Must provid either `rmv` or `sac` section.")
+                raise Exception("Must provid either `scr` or `sac` section.")
             sac = Sac.from_dict(data["sac"])
-            rmv = sac.rmv
+            scr = sac.scr
         profile = Profile.from_dict(data["profile"])
-        return Dive(rmv, profile)
+        return Dive(scr, profile)

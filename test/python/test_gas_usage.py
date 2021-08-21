@@ -6,15 +6,19 @@ import pint
 UREG = gu.UREG
 
 
-class PintAlmostEqual(unittest.TestCase):
+class PintTest(unittest.TestCase):
     """Helper to implement almost equal checking for pint types"""
 
     def assertPintAlmostEqual(self, val0, val1, tol):
         diff = abs(val0 - val1)
         self.assertLess(diff, tol)
 
+    def assertPintEqual(self, val0, val1):
+        val1_eq = val1.to(val0.units)
+        self.assertEqual(val0, val1_eq)
 
-class TestPressureAtDepth(PintAlmostEqual):
+
+class TestPressureAtDepth(PintTest):
     def test_exact(self):
         VALUES = {
             0 * UREG.ft: 1 * UREG.atm,
@@ -35,13 +39,15 @@ class TestPressureAtDepth(PintAlmostEqual):
             self.assertPintAlmostEqual(gu.pressure_at_depth(depth), pressure, PRESSURE_TOLERANCE)
 
 
-class TestProfilePoint(unittest.TestCase):
+class TestProfilePoint(PintTest):
     def test_construction(self):
         time = 0.0 * UREG.second
-        depth = 0.0 * UREG.foot
+        depth = 0.0 * UREG.meter
         point = gu.ProfilePoint(time, depth)
-        self.assertEqual(time, point.time)
-        self.assertEqual(depth, point.depth)
+        self.assertPintEqual(time, point.time)
+        self.assertEqual(point.time.units, gu.TIME_UNIT)
+        self.assertPintEqual(depth, point.depth)
+        self.assertEqual(point.depth.units, gu.DEPTH_UNIT)
 
     def test_from_dict(self):
         data = {
@@ -49,10 +55,10 @@ class TestProfilePoint(unittest.TestCase):
             "depth": "12in",
         }
         point = gu.ProfilePoint.from_dict(data)
-        self.assertEqual(point.time, 1 * UREG.minute)
-        self.assertEqual(point.time.units, UREG.minute)
-        self.assertEqual(point.depth, 1 * UREG.foot)
-        self.assertEqual(point.depth.units, UREG.foot)
+        self.assertPintEqual(point.time, 1 * UREG.minute)
+        self.assertEqual(point.time.units, gu.TIME_UNIT)
+        self.assertPintEqual(point.depth, 1 * UREG.foot)
+        self.assertEqual(point.depth.units, gu.DEPTH_UNIT)
 
     def test_wrong_units(self):
         bad_time = {
@@ -67,40 +73,40 @@ class TestProfilePoint(unittest.TestCase):
         self.assertRaises(pint.errors.DimensionalityError, gu.ProfilePoint.from_dict, bad_depth)
 
 
-class TestProfileSection(unittest.TestCase):
+class TestProfileSection(PintTest):
     def test_construction(self):
         pt0 = gu.ProfilePoint(1 * UREG.minute, depth=12 * UREG.foot)
         pt1 = gu.ProfilePoint(2 * UREG.minute, depth=15 * UREG.foot)
         section = gu.ProfileSection(pt0, pt1)
-        self.assertEqual(section.avg_depth, 13.5 * UREG.foot)
-        self.assertEqual(section.duration, 60 * UREG.second)
+        self.assertPintEqual(section.avg_depth, 13.5 * UREG.foot)
+        self.assertPintEqual(section.duration, 60 * UREG.second)
 
     def test_surface_gas_usage(self):
         pt0 = gu.ProfilePoint(0 * UREG.minute, depth=0 * UREG.foot)
         pt1 = gu.ProfilePoint(2.5 * UREG.minute, depth=0 * UREG.foot)
-        rmv = gu.Rmv(UREG.parse_expression("1.5 l/min"))
+        scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
         section = gu.ProfileSection(pt0, pt1)
-        consumption = section.gas_usage(rmv)
-        self.assertEqual(consumption, 3.75 * UREG.liter)
+        consumption = section.gas_usage(scr)
+        self.assertPintEqual(consumption, 3.75 * UREG.liter)
 
     def test_depth_gas_usage_square(self):
         pt0 = gu.ProfilePoint(0 * UREG.minute, depth=66 * UREG.foot)
         pt1 = gu.ProfilePoint(2.5 * UREG.minute, depth=66 * UREG.foot)
-        rmv = gu.Rmv(UREG.parse_expression("1.5 l/min"))
+        scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
         section = gu.ProfileSection(pt0, pt1)
-        consumption = section.gas_usage(rmv)
-        self.assertEqual(consumption, 3 * 3.75 * UREG.liter)
+        consumption = section.gas_usage(scr)
+        self.assertPintEqual(consumption, 3 * 3.75 * UREG.liter)
 
     def test_trapezoid_gas_usage(self):
         pt0 = gu.ProfilePoint(0 * UREG.minute, depth=0 * UREG.foot)
         pt1 = gu.ProfilePoint(2.5 * UREG.minute, depth=66 * UREG.foot)
-        rmv = gu.Rmv(UREG.parse_expression("1.5 l/min"))
+        scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
         section = gu.ProfileSection(pt0, pt1)
-        consumption = section.gas_usage(rmv)
-        self.assertEqual(consumption, 2 * 3.75 * UREG.liter)
+        consumption = section.gas_usage(scr)
+        self.assertPintEqual(consumption, 2 * 3.75 * UREG.liter)
 
 
-class TestTank(PintAlmostEqual):
+class TestTank(PintTest):
     def test_construction(self):
         # https://www.catalinacylinders.com/product/c80/
         # this is an AL80 tank, manufacturer specs don't agree with one another at all.
@@ -111,9 +117,12 @@ class TestTank(PintAlmostEqual):
         volume = 625 * UREG.inch ** 3
         tolerance = 0.16 * UREG.liter
         tank = gu.Tank(max_gas_volume, max_pressure)
-        self.assertEqual(tank.max_gas_volume, max_gas_volume.to(gu.VOLUME_UNIT))
-        self.assertEqual(max_pressure, tank.max_pressure)
+        self.assertPintEqual(tank.max_gas_volume, max_gas_volume)
+        self.assertPintEqual(max_pressure, tank.max_pressure)
         self.assertPintAlmostEqual(tank.volume, volume, tolerance)
+        self.assertEqual(tank.max_gas_volume.units, gu.VOLUME_UNIT)
+        self.assertEqual(tank.volume.units, gu.VOLUME_UNIT)
+        self.assertEqual(tank.max_pressure.units, gu.PRESSURE_UNIT)
 
     def test_wrong_units(self):
         max_gas_volume = 10 * UREG.cm ** 2
@@ -129,20 +138,20 @@ class TestTank(PintAlmostEqual):
             "max_pressure": "3000 psi",
         }
         tank = gu.Tank.from_dict(data)
-        self.assertEqual(tank.max_gas_volume, 10 * UREG.liter)
-        self.assertEqual(tank.max_pressure, 3000 * UREG.psi)
+        self.assertPintEqual(tank.max_gas_volume, 10 * UREG.liter)
+        self.assertPintEqual(tank.max_pressure, 3000 * UREG.psi)
 
 
-class TestSac(unittest.TestCase):
+class TestSac(PintTest):
     def test_construction(self):
         pressure_rate = 1 * UREG.psi / UREG.minute
         max_gas_volume = 100 * UREG.liter
         max_pressure = 100 * UREG.psi
         tank = gu.Tank(max_gas_volume, max_pressure)
         sac = gu.Sac(pressure_rate, tank)
-        self.assertEqual(sac.pressure_rate, pressure_rate)
-        self.assertEqual(sac.tank.max_gas_volume, max_gas_volume)
-        self.assertEqual(sac.tank.max_pressure, max_pressure)
+        self.assertPintEqual(sac.pressure_rate, pressure_rate)
+        self.assertPintEqual(sac.tank.max_gas_volume, max_gas_volume)
+        self.assertPintEqual(sac.tank.max_pressure, max_pressure)
 
     def test_construction_wrong_units(self):
         pressure_rate = 1 * UREG.psi / UREG.gram
@@ -160,29 +169,29 @@ class TestSac(unittest.TestCase):
             },
         }
         sac = gu.Sac.from_dict(data)
-        self.assertEqual(sac.pressure_rate, 30 * UREG.psi / UREG.minute)
-        self.assertEqual(sac.tank.max_gas_volume, 3000 * UREG.liter)
-        self.assertEqual(sac.tank.max_pressure, 3000 * UREG.psi)
+        self.assertPintEqual(sac.pressure_rate, 30 * UREG.psi / UREG.minute)
+        self.assertPintEqual(sac.tank.max_gas_volume, 3000 * UREG.liter)
+        self.assertPintEqual(sac.tank.max_pressure, 3000 * UREG.psi)
 
-    def test_rmv(self):
+    def test_scr(self):
         pressure_rate = UREG.parse_expression("30psi/min")
         max_gas_volume = 3000 * UREG.liter
         max_pressure = max_pressure = 3000 * UREG.psi
         tank = gu.Tank(max_gas_volume, max_pressure)
         sac = gu.Sac(pressure_rate, tank)
-        self.assertEqual(sac.rmv.volume_rate, 30 * UREG.liter / UREG.minute)
+        self.assertPintEqual(sac.scr.volume_rate, 30 * UREG.liter / UREG.minute)
 
 
-class TestRmv(unittest.TestCase):
+class TestScr(PintTest):
     def test_construction(self):
         volume_rate = 0.1 * UREG.parse_expression("L/min")
-        rmv = gu.Rmv(volume_rate)
-        self.assertEqual(rmv.volume_rate, volume_rate)
+        scr = gu.Scr(volume_rate)
+        self.assertPintEqual(scr.volume_rate, volume_rate)
 
     def test_construction_wrong_units(self):
         self.assertRaises(
             pint.errors.DimensionalityError,
-            gu.Rmv,
+            gu.Scr,
             50 * UREG.parse_expression("psi / min"),
         )
 
@@ -191,21 +200,47 @@ class TestRmv(unittest.TestCase):
         max_gas_volume = 100 * UREG.liter
         max_pressure = 100 * UREG.psi
         tank = gu.Tank(max_gas_volume, max_pressure)
-        rmv = gu.Rmv(volume_rate)
-        sac = rmv.sac(tank)
+        scr = gu.Scr(volume_rate)
+        sac = scr.sac(tank)
         self.assertEqual(sac.pressure_rate, 1 * UREG.psi / UREG.minute)
         self.assertEqual(sac.tank.max_gas_volume, max_gas_volume)
         self.assertEqual(sac.tank.max_pressure, max_pressure)
 
 
-class TestSacRmvRoundTrip(unittest.TestCase):
+class TestSacScrRoundTrip(PintTest):
     def test_round_trip(self):
         pressure_rate = 30 * UREG.psi / UREG.minute
         max_gas_volume = 80 * UREG.ft ** 3
         max_pressure = 3000 * UREG.psi
         tank = gu.Tank(max_gas_volume, max_pressure)
         sac = gu.Sac(pressure_rate, tank)
-        self.assertEqual(sac.rmv.volume_rate, sac.rmv.sac(tank).rmv.volume_rate)
+        self.assertEqual(sac.scr.volume_rate, sac.scr.sac(tank).scr.volume_rate)
+
+
+class TestProfile(PintTest):
+
+    def test_construction(self):
+        pt0 = gu.ProfilePoint(0 * UREG.minute, depth=0 * UREG.foot)
+        pt1 = gu.ProfilePoint(2.5 * UREG.minute, depth=0 * UREG.foot)
+        self.assertRaises(AttributeError, gu.Profile, [1, 2])
+        self.assertRaises(Exception, gu.Profile, [pt0])
+        self.assertRaises(Exception, gu.Profile, [pt1, pt0])
+        profile = gu.Profile([pt0, pt1])
+        self.assertEqual(pt0.time, profile.points[0].time)
+        self.assertEqual(pt0.depth, profile.points[0].depth)
+        self.assertEqual(pt1.time, profile.points[1].time)
+        self.assertEqual(pt1.depth, profile.points[1].depth)
+
+    def test_from_dict(self):
+        data = [
+            {"time": "1sec", "depth": "1meter"},
+            {"time": "2sec", "depth": "2meter"},
+        ]
+        profile = gu.Profile.from_dict(data)
+        self.assertPintEqual(profile.points[0].time, 1 * UREG.sec)
+        self.assertPintEqual(profile.points[0].depth, 1 * UREG.meter)
+        self.assertPintEqual(profile.points[1].time, 2 * UREG.sec)
+        self.assertPintEqual(profile.points[1].depth, 2 * UREG.meter)
 
 
 if __name__ == "__main__":
