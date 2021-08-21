@@ -75,6 +75,7 @@ class ProfileSection:
     duration : pint TIME_UNIT
         Amount of time between the two profile points.
     """
+
     def __init__(self, pt0: ProfilePoint, pt1: ProfilePoint):
         self.avg_depth = (pt0.depth + pt1.depth) * 0.5
         self.duration = pt1.time - pt0.time
@@ -112,6 +113,7 @@ class Tank:
     max_pressure : PRESSURE_UNIT
         The maximum pressure, and the pressure to which the max_gas_volume corresponds.
     """
+
     def __init__(self, max_gas_volume, max_pressure):
         """
         Parameters
@@ -146,6 +148,7 @@ class Sac:
     rmv : Rmv
         The rate of consumption of 1atm gas by volume.
     """
+
     def __init__(self, pressure_rate, tank: Tank):
         """
         Parameters
@@ -164,7 +167,7 @@ class Sac:
         pressure_rate = UREG.parse_expression(data["pressure_rate"])
         tank = Tank.from_dict(data["tank"])
         return Sac(pressure_rate, tank)
-        
+
 
 class Rmv:
     """
@@ -175,6 +178,7 @@ class Rmv:
     -------
     rate : in VOLUME_RATE_UNIT
     """
+
     def __init__(self, volume_rate):
         """
         Parameters
@@ -187,7 +191,7 @@ class Rmv:
         return "{:.3f}".format(self.volume_rate)
 
     def sac(self, tank: Tank) -> Sac:
-        pressure_rate = self.volume_rate * tank.max_pressure / tank.max_gas_volume 
+        pressure_rate = self.volume_rate * tank.max_pressure / tank.max_gas_volume
         return Sac(pressure_rate, tank)
 
 

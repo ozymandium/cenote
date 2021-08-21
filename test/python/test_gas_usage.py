@@ -64,9 +64,7 @@ class TestProfilePoint(unittest.TestCase):
             "depth": "2kPa",
         }
         self.assertRaises(pint.errors.DimensionalityError, gu.ProfilePoint.from_dict, bad_time)
-        self.assertRaises(
-            pint.errors.DimensionalityError, gu.ProfilePoint.from_dict, bad_depth
-        )
+        self.assertRaises(pint.errors.DimensionalityError, gu.ProfilePoint.from_dict, bad_depth)
 
 
 class TestProfileSection(unittest.TestCase):
@@ -110,7 +108,7 @@ class TestTank(PintAlmostEqual):
         # so we use a pretty large tolerance
         max_gas_volume = 2265 * UREG.liter
         max_pressure = 3300 * UREG.psi
-        volume = 625 * UREG.inch**3
+        volume = 625 * UREG.inch ** 3
         tolerance = 0.16 * UREG.liter
         tank = gu.Tank(max_gas_volume, max_pressure)
         self.assertEqual(tank.max_gas_volume, max_gas_volume.to(gu.VOLUME_UNIT))
@@ -136,7 +134,6 @@ class TestTank(PintAlmostEqual):
 
 
 class TestSac(unittest.TestCase):
-
     def test_construction(self):
         pressure_rate = 1 * UREG.psi / UREG.minute
         max_gas_volume = 100 * UREG.liter
@@ -160,7 +157,7 @@ class TestSac(unittest.TestCase):
             "tank": {
                 "max_gas_volume": "3000L",
                 "max_pressure": "3000psi",
-            }
+            },
         }
         sac = gu.Sac.from_dict(data)
         self.assertEqual(sac.pressure_rate, 30 * UREG.psi / UREG.minute)
@@ -169,8 +166,8 @@ class TestSac(unittest.TestCase):
 
     def test_rmv(self):
         pressure_rate = UREG.parse_expression("30psi/min")
-        max_gas_volume=3000 * UREG.liter
-        max_pressure = max_pressure=3000*UREG.psi
+        max_gas_volume = 3000 * UREG.liter
+        max_pressure = max_pressure = 3000 * UREG.psi
         tank = gu.Tank(max_gas_volume, max_pressure)
         sac = gu.Sac(pressure_rate, tank)
         self.assertEqual(sac.rmv.volume_rate, 30 * UREG.liter / UREG.minute)
@@ -204,7 +201,7 @@ class TestRmv(unittest.TestCase):
 class TestSacRmvRoundTrip(unittest.TestCase):
     def test_round_trip(self):
         pressure_rate = 30 * UREG.psi / UREG.minute
-        max_gas_volume = 80 * UREG.ft**3
+        max_gas_volume = 80 * UREG.ft ** 3
         max_pressure = 3000 * UREG.psi
         tank = gu.Tank(max_gas_volume, max_pressure)
         sac = gu.Sac(pressure_rate, tank)
