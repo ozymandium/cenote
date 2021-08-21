@@ -70,13 +70,27 @@ class TestDepthProfileSection(PintAlmostEqual):
 
     def test_surface_gas_usage(self):
         pt0 = gu.DepthProfilePoint(0 * UREG.minute, depth=0 * UREG.foot)
-        pt1 = gu.DepthProfilePoint(1 * UREG.minute, depth=0 * UREG.foot)
+        pt1 = gu.DepthProfilePoint(2.5 * UREG.minute, depth=0 * UREG.foot)
+        scr = gu.SurfaceConsumptionRate(UREG.parse_expression("1.5 l/min"))
+        section = gu.DepthProfileSection(pt0, pt1)
+        consumption = section.gas_usage(scr)
+        self.assertEqual(consumption, 3.75 * UREG.liter)
 
     def test_depth_gas_usage_square(self):
-        pass
+        pt0 = gu.DepthProfilePoint(0 * UREG.minute, depth=66 * UREG.foot)
+        pt1 = gu.DepthProfilePoint(2.5 * UREG.minute, depth=66 * UREG.foot)
+        scr = gu.SurfaceConsumptionRate(UREG.parse_expression("1.5 l/min"))
+        section = gu.DepthProfileSection(pt0, pt1)
+        consumption = section.gas_usage(scr)
+        self.assertEqual(consumption, 3 * 3.75 * UREG.liter)
 
     def test_trapezoid_gas_usage(self):
-        pass
+        pt0 = gu.DepthProfilePoint(0 * UREG.minute, depth=0 * UREG.foot)
+        pt1 = gu.DepthProfilePoint(2.5 * UREG.minute, depth=66 * UREG.foot)
+        scr = gu.SurfaceConsumptionRate(UREG.parse_expression("1.5 l/min"))
+        section = gu.DepthProfileSection(pt0, pt1)
+        consumption = section.gas_usage(scr)
+        self.assertEqual(consumption, 2 * 3.75 * UREG.liter)
 
 
 if __name__ == "__main__":
