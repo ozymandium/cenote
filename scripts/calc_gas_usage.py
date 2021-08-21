@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from scuba import gas_usage as gu
 import argparse
+import os
 
 
 def parse_args():
@@ -10,9 +11,10 @@ def parse_args():
 
 
 def main(args):
-    print("YAML path: {}".format(args.data_path))
+    data_path = os.path.abspath(args.data_path)
+    print("YAML path: {}".format(data_path))
 
-    dive = gu.Dive.from_yaml(args.data_path)
+    dive = gu.Dive.from_yaml(data_path)
 
     print("SAC: {}".format(str(dive.scr)))
     print(

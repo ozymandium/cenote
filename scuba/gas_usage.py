@@ -107,13 +107,13 @@ class Tank:
     """
 
     def __init__(self, volume, max_pressure):
-        self.volume = volume
-        self.max_pressure = max_pressure
+        self.volume = volume.to(VOLUME_UNIT)
+        self.max_pressure = max_pressure.to(PRESSURE_UNIT)
 
     @staticmethod
     def from_dict(data):
-        volume = UREG.parse_expression(data["volume"]).to(VOLUME_UNIT)
-        max_pressure = UREG.parse_expression(data["max_pressure"]).to(PRESSURE_UNIT)
+        volume = UREG.parse_expression(data["volume"])
+        max_pressure = UREG.parse_expression(data["max_pressure"])
         return Tank(volume, max_pressure)
 
     def __str__(self):
@@ -138,7 +138,7 @@ class SurfaceConsumptionRate:
         self.rate = rate.to(VOLUME_RATE_UNIT)
 
     @staticmethod
-    def from_dict(data):
+    def from_dict(data: dict):
         """
         Parameters
         ----------
@@ -172,7 +172,7 @@ class DepthProfile:
     points : list of DepthProfilePoint
     """
 
-    def __init__(self, points):
+    def __init__(self, points: list[DepthProfilePoint]):
         self.points = points
 
     @staticmethod
