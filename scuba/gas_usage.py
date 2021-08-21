@@ -124,9 +124,9 @@ class Tank:
 
     @staticmethod
     def from_dict(data):
-        volume = UREG.parse_expression(data["volume"])
+        max_gas_volume = UREG.parse_expression(data["max_gas_volume"])
         max_pressure = UREG.parse_expression(data["max_pressure"])
-        return Tank(volume, max_pressure)
+        return Tank(max_gas_volume, max_pressure)
 
     def __str__(self):
         return "{} @ {}".format(self.gas_volume, self.max_pressure)
@@ -137,7 +137,7 @@ class Sac:
     def __init__(self, pressure_rate, tank: Tank):
         self.pressure_rate = pressure_rate.to(PRESSURE_RATE_UNIT)
         self.tank = tank
-        self.rmv = Rmv(self.pressure_rate / self.tank.max_pressure * self.tank.volume)
+        self.rmv = Rmv(self.pressure_rate / self.tank.max_pressure * self.tank.max_gas_volume)
 
     @staticmethod
     def from_dict(data: dict):
@@ -167,7 +167,7 @@ class Rmv:
         return "{:.3f}".format(self.volume_rate)
 
     def sac(self, tank: Tank) -> Sac:
-        pressure_rate = self.volume_rate * tank.max_pressure / tank.volume 
+        pressure_rate = self.volume_rate * tank.max_pressure / tank.max_gas_volume 
         return Sac(pressure_rate, tank)
 
 
@@ -259,6 +259,12 @@ class Dive:
         -------
         Dive
         """
-        rmv = Rmv.from_dict(data["rmv"])
+        if "rmv" in data:
+            rmv = Rmv(volume_rate=UREG.parse_expression(data["rmv"]))
+        else:
+            if "sac" not in data:
+                raise Exception("Must provid either `rmv` or `sac` section.")
+            sac = Sac.from_dict(data["sac"])
+            rmv = sac.rmv
         profile = Profile.from_dict(data["profile"])
         return Dive(rmv, profile)

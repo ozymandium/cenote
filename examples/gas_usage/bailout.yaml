@@ -9,7 +9,7 @@ sac:
     # volume of the tank itself, not how much surface air can be shoved in, which 
     # is what 80cf refers to.
     # this example is a standard AL80.
-    volume: 11.1 L
+    max_gas_volume: 77.5 ft^3
     max_pressure: 3000psi
 profile:
   - time: 0 s

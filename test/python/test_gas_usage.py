@@ -104,77 +104,88 @@ class TestProfileSection(unittest.TestCase):
 
 class TestTank(PintAlmostEqual):
     def test_construction(self):
-        # https://www.xsscuba.com/metalimpactaluminum
-        max_gas_volume = 77.5 * UREG.ft**3
-        max_pressure = 3000 * UREG.psi
+        # https://www.catalinacylinders.com/product/c80/
+        # this is an AL80 tank, manufacturer specs don't agree with one another at all.
+        # even for the same data sheet
+        # so we use a pretty large tolerance
+        max_gas_volume = 2265 * UREG.liter
+        max_pressure = 3300 * UREG.psi
+        volume = 625 * UREG.inch**3
+        tolerance = 0.16 * UREG.liter
         tank = gu.Tank(max_gas_volume, max_pressure)
-        self.assertEqual(tank.max_gas_volume, max_gas_volume)
+        self.assertEqual(tank.max_gas_volume, max_gas_volume.to(gu.VOLUME_UNIT))
         self.assertEqual(max_pressure, tank.max_pressure)
-        self.assertPintAlmostEqual(tank.volume, 11.1 * UREG.liter, 0.1 * UREG.liter)
+        self.assertPintAlmostEqual(tank.volume, volume, tolerance)
 
-    # def test_wrong_units(self):
-    #     volume = 10 * UREG.cm ** 2
-    #     max_pressure = 3000 * UREG.psi
-    #     self.assertRaises(pint.errors.DimensionalityError, gu.Tank, volume, max_pressure)
-    #     volume = 10 * UREG.liter
-    #     max_pressure = 3000 * UREG.foot
-    #     self.assertRaises(pint.errors.DimensionalityError, gu.Tank, volume, max_pressure)
+    def test_wrong_units(self):
+        max_gas_volume = 10 * UREG.cm ** 2
+        max_pressure = 3000 * UREG.psi
+        self.assertRaises(pint.errors.DimensionalityError, gu.Tank, max_gas_volume, max_pressure)
+        max_gas_volume = 10 * UREG.liter
+        max_pressure = 3000 * UREG.foot
+        self.assertRaises(pint.errors.DimensionalityError, gu.Tank, max_gas_volume, max_pressure)
 
-    # def test_from_dict(self):
-    #     data = {
-    #         "volume": "10 liter",
-    #         "max_pressure": "3000 psi",
-    #     }
-    #     tank = gu.Tank.from_dict(data)
-    #     self.assertEqual(tank.volume, 10 * UREG.liter)
-    #     self.assertEqual(tank.max_pressure, 3000 * UREG.psi)
-
-
-# class TestRmv(unittest.TestCase):
-#     def test_construction(self):
-#         volume_rate = 0.1 * UREG.parse_expression("L/min")
-#         rmv = gu.Rmv(volume_rate)
-#         self.assertEqual(rmv.volume_rate, volume_rate)
-
-#     def test_construction_wrong_units(self):
-#         self.assertRaises(
-#             pint.errors.DimensionalityError,
-#             gu.Rmv,
-#             50 * UREG.parse_expression("psi / min"),
-#         )
-
-#     def test_to_sac(self):
-#         pass
+    def test_from_dict(self):
+        data = {
+            "max_gas_volume": "10 liter",
+            "max_pressure": "3000 psi",
+        }
+        tank = gu.Tank.from_dict(data)
+        self.assertEqual(tank.max_gas_volume, 10 * UREG.liter)
+        self.assertEqual(tank.max_pressure, 3000 * UREG.psi)
 
 
-# class TestSac(unittest.TestCase):
+class TestRmv(unittest.TestCase):
+    def test_construction(self):
+        volume_rate = 0.1 * UREG.parse_expression("L/min")
+        rmv = gu.Rmv(volume_rate)
+        self.assertEqual(rmv.volume_rate, volume_rate)
 
-#     def test_construction(self):
-#         pass
+    def test_construction_wrong_units(self):
+        self.assertRaises(
+            pint.errors.DimensionalityError,
+            gu.Rmv,
+            50 * UREG.parse_expression("psi / min"),
+        )
 
-#     def test_construction_wrong_units(self):
-#         pass
+    def test_sac(self):
+        volume_rate = 1 * UREG.liter / UREG.minute
+        max_gas_volume = 100 * UREG.liter
+        max_pressure = 100 * UREG.psi
+        tank = gu.Tank(max_gas_volume, max_pressure)
+        rmv = gu.Rmv(volume_rate)
+        sac = rmv.sac(tank)
+        self.assertEqual(sac.pressure_rate, 1 * UREG.psi / UREG.minute)
 
-#     def test_from_dict_pressure_rate(self):
-#         data = {
-#             "pressure_rate": "30psi/min",
-#             "tank": {
-#                 "volume": "10L",
-#                 "max_pressure": "3000psi",
-#             }
-#         }
-#         sac = gu.Sac.from_dict(data)
-#         self.assertEqual(sac.pressure_rate, 30 * UREG.psi / UREG.minute)
-#         self.assertEqual(sac.tank.volume, 10 * UREG.liter)
-#         self.assertEqual(sac.tank.max_pressure, 3000 * UREG.psi)
 
-#     def test_rmv(self):
-#         pressure_rate = UREG.parse_expression("30psi/min")
-#         volume=10 * UREG.liter
-#         max_pressure = max_pressure=3000*UREG.psi
-#         tank = gu.Tank(volume, max_pressure)
-#         sac = gu.Sac(pressure_rate, tank)
-#         self.assertEqual(sac.rmv.volume_rate, 0.1 * UREG.liter / UREG.minute)
+class TestSac(unittest.TestCase):
+
+    def test_construction(self):
+        pass
+
+    def test_construction_wrong_units(self):
+        pass
+
+    def test_from_dict_pressure_rate(self):
+        data = {
+            "pressure_rate": "30psi/min",
+            "tank": {
+                "max_gas_volume": "3000L",
+                "max_pressure": "3000psi",
+            }
+        }
+        sac = gu.Sac.from_dict(data)
+        self.assertEqual(sac.pressure_rate, 30 * UREG.psi / UREG.minute)
+        self.assertEqual(sac.tank.max_gas_volume, 3000 * UREG.liter)
+        self.assertEqual(sac.tank.max_pressure, 3000 * UREG.psi)
+
+    def test_rmv(self):
+        pressure_rate = UREG.parse_expression("30psi/min")
+        max_gas_volume=3000 * UREG.liter
+        max_pressure = max_pressure=3000*UREG.psi
+        tank = gu.Tank(max_gas_volume, max_pressure)
+        sac = gu.Sac(pressure_rate, tank)
+        self.assertEqual(sac.rmv.volume_rate, 30 * UREG.liter / UREG.minute)
 
 
 class TestSacRmvRoundTrip(unittest.TestCase):
