@@ -15,7 +15,6 @@ class PintAlmostEqual(unittest.TestCase):
 
 
 class TestPressureAtDepth(PintAlmostEqual):
-
     def test_exact(self):
         VALUES = {
             0 * UREG.ft: 1 * UREG.atm,
@@ -37,7 +36,6 @@ class TestPressureAtDepth(PintAlmostEqual):
 
 
 class TestDepthProfilePoint(unittest.TestCase):
-
     def test_construction(self):
         time = 0.0 * UREG.second
         depth = 0.0 * UREG.foot
@@ -72,7 +70,6 @@ class TestDepthProfilePoint(unittest.TestCase):
 
 
 class TestDepthProfileSection(unittest.TestCase):
-
     def test_construction(self):
         pt0 = gu.DepthProfilePoint(1 * UREG.minute, depth=12 * UREG.foot)
         pt1 = gu.DepthProfilePoint(2 * UREG.minute, depth=15 * UREG.foot)
@@ -106,7 +103,6 @@ class TestDepthProfileSection(unittest.TestCase):
 
 
 class TestTank(unittest.TestCase):
-
     def test_construction(self):
         volume = 10 * UREG.liter
         max_pressure = 3000 * UREG.psi
@@ -115,7 +111,7 @@ class TestTank(unittest.TestCase):
         self.assertEqual(max_pressure, tank.max_pressure)
 
     def test_wrong_units(self):
-        volume = 10 * UREG.cm**2
+        volume = 10 * UREG.cm ** 2
         max_pressure = 3000 * UREG.psi
         self.assertRaises(pint.errors.DimensionalityError, gu.Tank, volume, max_pressure)
         volume = 10 * UREG.liter
@@ -133,21 +129,25 @@ class TestTank(unittest.TestCase):
 
 
 class TestSurfaceConsumptionRate(unittest.TestCase):
-
     def test_construction(self):
         rate = 0.1 * UREG.parse_expression("L/min")
         scr = gu.SurfaceConsumptionRate(rate)
         self.assertEqual(scr.rate, rate)
 
     def test_construction_wrong_units(self):
-        self.assertRaises(pint.errors.DimensionalityError, gu.SurfaceConsumptionRate, 50 * UREG.parse_expression("psi / min"))
+        self.assertRaises(
+            pint.errors.DimensionalityError,
+            gu.SurfaceConsumptionRate,
+            50 * UREG.parse_expression("psi / min"),
+        )
 
     def test_from_dict_volume_rate(self):
         data = {
             "volume_rate": "1 L/min",
         }
         scr = gu.SurfaceConsumptionRate.from_dict(data)
-        self.assertEqual(scr.rate, 1*UREG.liter/UREG.minute)
+        self.assertEqual(scr.rate, 1 * UREG.liter / UREG.minute)
+
 
 if __name__ == "__main__":
     unittest.main()
