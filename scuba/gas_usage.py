@@ -8,7 +8,8 @@ UREG = pint.UnitRegistry()
 
 TIME_UNIT = UREG.minute
 DEPTH_UNIT = UREG.foot
-VOLUME_UNIT = UREG.liter
+TANK_VOLUME_UNIT = UREG.liter
+GAS_VOLUME_UNIT = UREG.ft**3
 PRESSURE_UNIT = UREG.psi
 VOLUME_RATE_UNIT = VOLUME_UNIT / TIME_UNIT
 PRESSURE_RATE_UNIT = PRESSURE_UNIT / TIME_UNIT
@@ -95,7 +96,7 @@ class ProfileSection:
         """
         # TODO more accurate formula for this
         volume_scaling = pressure_at_depth(self.avg_depth).to(UREG.atm).magnitude
-        return rmv.rate * self.duration * volume_scaling
+        return rmv.volume_rate * self.duration * volume_scaling
 
 
 class Tank:
@@ -105,10 +106,10 @@ class Tank:
     volume : in VOLUME_UNIT
     max_pressure : PRESSURE_UNIT
     """
-
-    def __init__(self, volume, max_pressure):
-        self.volume = volume.to(VOLUME_UNIT)
+    def __init__(self, gas_volume, max_pressure):
+        self.tank_volume = volume.to(VOLUME_UNIT)
         self.max_pressure = max_pressure.to(PRESSURE_UNIT)
+        self.max_gas_volume = self.volume * self.max_pressure.to(UREG.atm).magnitude
 
     @staticmethod
     def from_dict(data):
@@ -117,8 +118,22 @@ class Tank:
         return Tank(volume, max_pressure)
 
     def __str__(self):
-        return "{} @ {}".format(self.volume, self.max_pressure)
+        return "{} @ {}".format(self.gas_volume, self.max_pressure)
 
+
+class Sac:
+
+    def __init__(self, pressure_rate, tank: Tank):
+        self.pressure_rate = pressure_rate.to(PRESSURE_RATE_UNIT)
+        self.tank = tank
+        self.rmv = Rmv(self.pressure_rate / self.tank.max_pressure * self.tank.volume)
+
+    @staticmethod
+    def from_dict(data: dict):
+        pressure_rate = UREG.parse_expression(data["pressure_rate"])
+        tank = Tank.from_dict(data["tank"])
+        return Sac(pressure_rate, tank)
+        
 
 class Rmv:
     """
@@ -129,46 +144,20 @@ class Rmv:
     -------
     rate : in VOLUME_RATE_UNIT
     """
-
-    class MissingTank(Exception):
-        """When SCR is specified as a pressure rate but no tank information is given"""
-        pass
-
-    def __init__(self, rate):
+    def __init__(self, volume_rate):
         """
         Parameters
         ----------
         rate : in VOLUME_RATE_UNIT
         """
-        self.rate = rate.to(VOLUME_RATE_UNIT)
-
-    @staticmethod
-    def from_dict(data: dict):
-        """
-
-        Parameters
-        ----------
-        data : dict
-            of the "sac" section from the profile yaml
-
-        Returns
-        -------
-        Rmv
-        """
-        if "volume_rate" in data:
-            volume_rate = UREG.parse_expression(data["volume_rate"])
-        elif "pressure_rate" in data:
-            if "tank" not in data:
-                raise MissingTank("pressure rate SCR requires tank information.")
-            pressure_rate = UREG.parse_expression(data["pressure_rate"]).to(PRESSURE_RATE_UNIT)
-            tank = Tank.from_dict(data["tank"])
-            volume_rate = pressure_rate * tank.volume / tank.max_pressure
-        else:
-            raise Exception("sac field options are pressure_rate + tank or volume_rate")
-        return Rmv(volume_rate)
+        self.volume_rate = volume_rate.to(VOLUME_RATE_UNIT)
 
     def __str__(self):
-        return "{:.3f}".format(self.rate)
+        return "{:.3f}".format(self.volume_rate)
+
+    def sac(self, tank: Tank) -> Sac:
+        pressure_rate = self.volume_rate * tank.max_pressure / tank.volume 
+        return Sac(pressure_rate, tank)
 
 
 class Profile:
@@ -193,7 +182,7 @@ class Profile:
             points.append(point)
         return Profile(points)
 
-    def gas_usage(self, rmv):
+    def gas_usage(self, rmv: Rmv):
         """
         Compute the volume of surface-pressure gas that is used for this depth profile.
 
@@ -223,7 +212,7 @@ class Dive:
     profile : Profile
     """
 
-    def __init__(self, rmv, profile):
+    def __init__(self, rmv: Rmv, profile: Profile):
         self.rmv = rmv
         self.profile = profile
 

@@ -130,9 +130,9 @@ class TestTank(unittest.TestCase):
 
 class TestRmv(unittest.TestCase):
     def test_construction(self):
-        rate = 0.1 * UREG.parse_expression("L/min")
-        rmv = gu.Rmv(rate)
-        self.assertEqual(rmv.rate, rate)
+        volume_rate = 0.1 * UREG.parse_expression("L/min")
+        rmv = gu.Rmv(volume_rate)
+        self.assertEqual(rmv.volume_rate, volume_rate)
 
     def test_construction_wrong_units(self):
         self.assertRaises(
@@ -141,34 +141,44 @@ class TestRmv(unittest.TestCase):
             50 * UREG.parse_expression("psi / min"),
         )
 
-    def test_from_dict_volume_rate(self):
-        data = {
-            "volume_rate": "1 L/min",
-        }
-        rmv = gu.Rmv.from_dict(data)
-        self.assertEqual(rmv.rate, 1 * UREG.liter / UREG.minute)
+    def test_to_sac(self):
+        pass
+
+
+class TestSac(unittest.TestCase):
+
+    def test_construction(self):
+        pass
+
+    def test_construction_wrong_units(self):
+        pass
 
     def test_from_dict_pressure_rate(self):
-        """
-        PV = nRT
-        p1 V = n1 R T
-        P2 V = n2 R T
-        """
         data = {
-            "pressure_rate": "1psi/min",
+            "pressure_rate": "30psi/min",
             "tank": {
-                "volume": "1L",
-                "max_pressure": "10psi",
+                "volume": "10L",
+                "max_pressure": "3000psi",
             }
         }
-        rmv = gu.Rmv.from_dict(data)
-        self.assertEqual(rmv.rate, 1 * UREG.liter / UREG.minute)
+        sac = gu.Sac.from_dict(data)
+        self.assertEqual(sac.pressure_rate, 30 * UREG.psi / UREG.minute)
+        self.assertEqual(sac.tank.volume, 10 * UREG.liter)
+        self.assertEqual(sac.tank.max_pressure, 3000 * UREG.psi)
 
-    def test_from_dict_pressure_rate_missing_tank(self):
-        data = {
-            "pressure_rate": "1psi/min",
-        }
-        self.assertRaises(gu.Rmv.MissingTank, gu.Rmv.from_dict, data)
+    def test_rmv(self):
+        pressure_rate = UREG.parse_expression("30psi/min")
+        volume=10 * UREG.liter
+        max_pressure = max_pressure=3000*UREG.psi
+        tank = gu.Tank(volume, max_pressure)
+        sac = gu.Sac(pressure_rate, tank)
+        self.assertEqual(sac.rmv.volume_rate, 0.1 * UREG.liter / UREG.minute)
+
+
+class TestSacRmvRoundTrip(unittest.TestCase):
+    def test_round_trip(self):
+        pass
+
 
 if __name__ == "__main__":
     unittest.main()
