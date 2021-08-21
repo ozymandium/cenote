@@ -173,6 +173,8 @@ class DepthProfile:
     """
 
     def __init__(self, points: list[DepthProfilePoint]):
+        if len(points) < 2:
+            raise Exception("Need at least 2 points")
         self.points = points
 
     @staticmethod
