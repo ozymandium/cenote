@@ -18,7 +18,7 @@ load("@rules_python//python:defs.bzl", "py_library")
 # load("@pip_deps//:requirements.bzl", "requirement")
 
 py_library(
-    name = "gas_usage",
+    name = "scuba",
     srcs = [
         "scuba/gas_usage.py",
     ],
@@ -33,7 +33,7 @@ py_binary(
         "scripts/calc_gas_usage.py",
     ],
     deps = [
-        ":gas_usage",
+        ":scuba",
     ],
 )
 
@@ -45,6 +45,6 @@ py_binary(
         "test/python/test_gas_usage.py",
     ],
     deps = [
-        ":gas_usage",
+        ":scuba",
     ],
 )

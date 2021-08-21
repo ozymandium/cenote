@@ -35,6 +35,11 @@ class TestPressureAtDepth(PintAlmostEqual):
             self.assertPintAlmostEqual(gu.pressure_at_depth(depth), pressure, PRESSURE_TOLERANCE)
 
 
+class TestDepthProfileSection(PintAlmostEqual):
+
+    def test_surface(self):
+        # pt0 = gu.DepthProfilePoint()
+        pass
 
 
 if __name__ == "__main__":

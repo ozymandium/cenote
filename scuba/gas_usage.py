@@ -16,30 +16,52 @@ PRESSURE_RATE_UNIT = PRESSURE_UNIT / TIME_UNIT
 
 def pressure_at_depth(depth):
     """
+    Get the pressure [atm] (including surface atmospheric pressure) for a given depth of sea water.
     https://oceanservice.noaa.gov/facts/pressure.html
 
     TODO: make this apply to fresh water
 
+    Parameters
+    ----------
+    depth : pint distance
+
+    Returns
+    -------
+    pint pressure
     """
     SCALING = (1.0 * UREG.atm) / (33.0 * UREG.foot)
-    return 1.0 * UREG.atm + depth * SCALING
+    return 1.0 * UREG.atm + depth.to(UREG.foot) * SCALING
 
 
 class DepthProfilePoint:
     """
     Members
     -------
-    time : Time elapsed since the beginning of the dive, in TIME_UNIT
-    depth : Distance below surface () in DEPTH_UNIT
+    time : pint time
+        Time elapsed since the beginning of the dive, in TIME_UNIT
+    depth : pint distance
+        Distance below surface () in DEPTH_UNIT
     """
-
-
-    def __init__(self, raw_data):
-        self.time = UREG.parse_expression(raw_data["time"]).to(TIME_UNIT)
-        self.depth = UREG.parse_expression(raw_data["depth"]).to(DEPTH_UNIT)
+    def __init__(self, time, depth):
+        """
+        Parameters
+        ----------
+        time : pint time
+            Time elapsed since the beginning of the dive, in TIME_UNIT
+        depth : pint distance
+            Distance below surface () in DEPTH_UNIT
+        """
+        self.time = time
+        self.depth = depth
 
     def __str__(self):
         return "{:.1f}: {:.1f}".format(self.time, self.depth)
+
+    @staticmethod
+    def from_dict(data):
+        time = UREG.parse_expression(data["time"]).to(TIME_UNIT)
+        depth = UREG.parse_expression(data["depth"]).to(DEPTH_UNIT)
+        return DepthProfilePoint(time, depth)
 
 
 class DepthProfileSection:  
@@ -50,7 +72,7 @@ class DepthProfileSection:
     """
     def __init__(self, pt0, pt1):
         self.avg_depth = (pt0.depth + pt1.depth) * 0.5
-        self.elapsed_time = pt1.time - pt0.time
+        self.duration = pt1.time - pt0.time
 
     def gas_usage(self, scr):
         """
@@ -71,7 +93,7 @@ class DepthProfileSection:
         """
         # TODO more accurate formula for this
         volume_scaling = pressure_at_depth(self.avg_depth).to(UREG.atm).magnitude
-        return scr.rate * self.elapsed_time * volume_scaling
+        return scr.rate * self.duration * volume_scaling
 
 class Tank:
     """
@@ -81,12 +103,18 @@ class Tank:
     max_pressure : PRESSURE_UNIT
     """
 
-    def __init__(self, raw_data):
-        self.volume = UREG.parse_expression(raw_data["volume"]).to(VOLUME_UNIT)
-        self.max_pressure = UREG.parse_expression(raw_data["max_pressure"]).to(PRESSURE_UNIT)
+    def __init__(self, volume, max_pressure):
+        self.volume = volume
+        self.max_pressure = max_pressure
+
+    @staticmethod
+    def from_dict(data):
+        volume = UREG.parse_expression(data["volume"]).to(VOLUME_UNIT)
+        max_pressure = UREG.parse_expression(data["max_pressure"]).to(PRESSURE_UNIT)
+        return Tank(volume, max_pressure)
 
     def __str__(self):
-        return "{volume} @ {max_pressure}".format(volume=self.volume, max_pressure=self.max_pressure)
+        return "{} @ {}".format(self.volume, self.max_pressure)
 
 
 class SurfaceConsumptionRate:
@@ -98,20 +126,37 @@ class SurfaceConsumptionRate:
     rate : in VOLUME_RATE_UNIT
     """
 
-    def __init__(self, raw_data):
+    def __init__(self, rate):
         """
-        raw_data : dict of the "sac" section from the profile yaml
+        Parameters
+        ----------
+        rate : in VOLUME_RATE_UNIT
         """
-        if "pressure_rate" in raw_data:
-            if "tank" not in raw_data:
+        self.rate = rate
+
+    @staticmethod
+    def from_dict(data):
+        """
+        Parameters
+        ----------
+        data : dict 
+            of the "sac" section from the profile yaml
+
+        Returns
+        -------
+        SurfaceConsumptionRate
+        """
+        if "volume_rate" in data:
+            volume_rate = UREG.parse_expression(data["volume_rate"]).to(VOLUME_RATE_UNIT)
+        elif "pressure_rate" in data:
+            if "tank" not in data:
                 raise Exception("pressure rate sac definition requires associated tank information.")
-            press_rate = UREG.parse_expression(raw_data["pressure_rate"]).to(PRESSURE_RATE_UNIT)
-            tank = Tank(raw_data["tank"])
-            self.rate = (press_rate * tank.volume / tank.max_pressure).to(VOLUME_RATE_UNIT)
-        elif "volume_rate" in raw_data:
-            self.rate = UREG.parse_expression(raw_data["volume_rate"]).to(VOLUME_RATE_UNIT)
+            pressure_rate = UREG.parse_expression(data["pressure_rate"]).to(PRESSURE_RATE_UNIT)
+            tank = Tank.from_dict(data["tank"])
+            volume_rate = (pressure_rate * tank.volume / tank.max_pressure).to(VOLUME_RATE_UNIT)
         else:
             raise Exception("sac field options are pressure_rate + tank or volume_rate")
+        return SurfaceConsumptionRate(volume_rate)
 
     def __str__(self):
         return "{:.3f}".format(self.rate)
@@ -123,13 +168,19 @@ class DepthProfile:
     -------
     points : list of DepthProfilePoint
     """
-    def __init__(self, raw_data):
-        self.points = []
-        for raw_point_data in raw_data:
-            point = DepthProfilePoint(raw_point_data)
-            if (len(self.points) != 0) and (point.time <= self.points[-1].time):
+
+    def __init__(self, points):
+        self.points = points
+
+    @staticmethod
+    def from_dict(data):
+        points = []
+        for point_data in data:
+            point = DepthProfilePoint.from_dict(point_data)
+            if len(points) and (point.time <= points[-1].time):
                     raise Exception("Time into dive must increase at every point in profile.")
-            self.points.append(point)
+            points.append(point)
+        return DepthProfile(points)
 
     def gas_usage(self, scr):
         """
@@ -160,11 +211,43 @@ class Dive:
     scr : SurfaceConsumptionRate
     profile : DepthProfile
     """
-    def __init__(self, raw_data):
-        self.scr = SurfaceConsumptionRate(raw_data["sac"])
-        self.profile = DepthProfile(raw_data["profile"])
+    def __init__(self, scr, profile):
+        self.scr = scr
+        self.profile = profile
 
     def gas_usage(self):
         """Compute the surface volume of gas used
         """
         return self.profile.gas_usage(self.scr)
+
+    @staticmethod
+    def from_yaml(path):
+        """
+        Parameters
+        ----------
+        path : str
+            File path to a YAML file. Specification set by example for now :/
+
+        Returns
+        -------
+        Dive
+        """
+        with open(path, "r") as f:
+            data = yaml.load(f, Loader=yaml.FullLoader)
+        return Dive.from_dict(data)
+
+    @staticmethod
+    def from_dict(data):
+        """
+        Parameters
+        ----------
+        data : dict
+            Parsed full YAML for a dive.
+
+        Returns
+        -------
+        Dive
+        """
+        scr = SurfaceConsumptionRate.from_dict(data["scr"])
+        profile = DepthProfile.from_dict(data["profile"])
+        return Dive(scr, profile)
