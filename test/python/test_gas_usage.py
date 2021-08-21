@@ -148,6 +148,22 @@ class TestSurfaceConsumptionRate(unittest.TestCase):
         scr = gu.SurfaceConsumptionRate.from_dict(data)
         self.assertEqual(scr.rate, 1 * UREG.liter / UREG.minute)
 
+    def test_from_dict_pressure_rate(self):
+        data = {
+            "pressure_rate": "1psi/min",
+            "tank": {
+                "volume": "1L",
+                "max_pressure": "10psi",
+            }
+        }
+        scr = gu.SurfaceConsumptionRate.from_dict(data)
+        self.assertEqual(scr.rate, 1 * UREG.liter / UREG.minute)
+
+    def test_from_dict_pressure_rate_missing_tank(self):
+        data = {
+            "pressure_rate": "1psi/min",
+        }
+        self.assertRaises(gu.SurfaceConsumptionRate.MissingTank, gu.SurfaceConsumptionRate.from_dict, data)
 
 if __name__ == "__main__":
     unittest.main()

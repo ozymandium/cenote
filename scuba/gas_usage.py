@@ -129,6 +129,10 @@ class SurfaceConsumptionRate:
     rate : in VOLUME_RATE_UNIT
     """
 
+    class MissingTank(Exception):
+        """When SCR is specified as a pressure rate but no tank information is given"""
+        pass
+
     def __init__(self, rate):
         """
         Parameters
@@ -150,13 +154,13 @@ class SurfaceConsumptionRate:
         SurfaceConsumptionRate
         """
         if "volume_rate" in data:
-            volume_rate = UREG.parse_expression(data["volume_rate"]).to(VOLUME_RATE_UNIT)
+            volume_rate = UREG.parse_expression(data["volume_rate"])
         elif "pressure_rate" in data:
             if "tank" not in data:
-                raise Exception("pressure rate SCR requires associated tank information.")
+                raise MissingTank("pressure rate SCR requires tank information.")
             pressure_rate = UREG.parse_expression(data["pressure_rate"]).to(PRESSURE_RATE_UNIT)
             tank = Tank.from_dict(data["tank"])
-            volume_rate = (pressure_rate * tank.volume / tank.max_pressure).to(VOLUME_RATE_UNIT)
+            volume_rate = pressure_rate * tank.volume / tank.max_pressure
         else:
             raise Exception("sac field options are pressure_rate + tank or volume_rate")
         return SurfaceConsumptionRate(volume_rate)
