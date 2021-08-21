@@ -48,11 +48,37 @@ class TestDepthProfilePoint(PintAlmostEqual):
         self.assertEqual(point.depth, 1 * UREG.foot)
         self.assertEqual(point.depth.units, UREG.foot)
 
+    def test_wrong_units(self):
+        bad_time = {
+            "time": "60in^3",
+            "depth": "12in",
+        }
+        bad_depth = {
+            "time": "60s",
+            "depth": "2kPa",
+        }
+        self.assertRaises(pint.errors.DimensionalityError, gu.DepthProfilePoint.from_dict, bad_time)
+        self.assertRaises(pint.errors.DimensionalityError, gu.DepthProfilePoint.from_dict, bad_depth)
+
 
 class TestDepthProfileSection(PintAlmostEqual):
 
-    def test_surface(self):
-        # pt0 = gu.DepthProfilePoint()
+    def test_construction(self):
+        pt0 = gu.DepthProfilePoint(1*UREG.minute, depth=12*UREG.foot)
+        pt1 = gu.DepthProfilePoint(2*UREG.minute, depth=15*UREG.foot)
+        section = gu.DepthProfileSection(pt0, pt1)
+        self.assertEqual(section.avg_depth, 13.5*UREG.foot)
+        self.assertEqual(section.duration, 60*UREG.second)
+
+
+    def test_surface_gas_usage(self):
+        pt0 = gu.DepthProfilePoint(0*UREG.minute, depth=0*UREG.foot)
+        pt1 = gu.DepthProfilePoint(1*UREG.minute, depth=0*UREG.foot)
+
+    def test_depth_gas_usage_square(self):
+        pass
+
+    def test_trapezoid_gas_usage(self):
         pass
 
 

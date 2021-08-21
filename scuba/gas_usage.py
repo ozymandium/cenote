@@ -51,16 +51,16 @@ class DepthProfilePoint:
         depth : pint distance
             Distance below surface () in DEPTH_UNIT
         """
-        self.time = time
-        self.depth = depth
+        self.time = time.to(TIME_UNIT)
+        self.depth = depth.to(DEPTH_UNIT)
 
     def __str__(self):
         return "{:.1f}: {:.1f}".format(self.time, self.depth)
 
     @staticmethod
     def from_dict(data):
-        time = UREG.parse_expression(data["time"]).to(TIME_UNIT)
-        depth = UREG.parse_expression(data["depth"]).to(DEPTH_UNIT)
+        time = UREG.parse_expression(data["time"])
+        depth = UREG.parse_expression(data["depth"])
         return DepthProfilePoint(time, depth)
 
 
@@ -70,7 +70,7 @@ class DepthProfileSection:
     Members
     avg_depth : 
     """
-    def __init__(self, pt0, pt1):
+    def __init__(self, pt0: DepthProfilePoint, pt1: DepthProfilePoint):
         self.avg_depth = (pt0.depth + pt1.depth) * 0.5
         self.duration = pt1.time - pt0.time
 
@@ -132,7 +132,7 @@ class SurfaceConsumptionRate:
         ----------
         rate : in VOLUME_RATE_UNIT
         """
-        self.rate = rate
+        self.rate = rate.to(VOLUME_RATE_UNIT)
 
     @staticmethod
     def from_dict(data):
@@ -150,7 +150,7 @@ class SurfaceConsumptionRate:
             volume_rate = UREG.parse_expression(data["volume_rate"]).to(VOLUME_RATE_UNIT)
         elif "pressure_rate" in data:
             if "tank" not in data:
-                raise Exception("pressure rate sac definition requires associated tank information.")
+                raise Exception("pressure rate SCR requires associated tank information.")
             pressure_rate = UREG.parse_expression(data["pressure_rate"]).to(PRESSURE_RATE_UNIT)
             tank = Tank.from_dict(data["tank"])
             volume_rate = (pressure_rate * tank.volume / tank.max_pressure).to(VOLUME_RATE_UNIT)
