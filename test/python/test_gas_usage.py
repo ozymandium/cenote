@@ -7,14 +7,12 @@ UREG = gu.UREG
 
 
 class PintAlmostEqual(unittest.TestCase):
-
     def assertPintAlmostEqual(self, val0, val1, tol):
         diff = abs(val0 - val1)
         self.assertLess(diff, tol)
 
 
 class TestPressureAtDepth(PintAlmostEqual):
-
     def test_exact(self):
         VALUES = {
             0 * UREG.ft: 1 * UREG.atm,
@@ -32,11 +30,12 @@ class TestPressureAtDepth(PintAlmostEqual):
         PRESSURE_TOLERANCE = 1e-3 * UREG.atm
 
         for depth, pressure in VALUES.items():
-            self.assertPintAlmostEqual(gu.pressure_at_depth(depth), pressure, PRESSURE_TOLERANCE)
+            self.assertPintAlmostEqual(
+                gu.pressure_at_depth(depth), pressure, PRESSURE_TOLERANCE
+            )
 
 
 class TestDepthProfilePoint(PintAlmostEqual):
-
     def test_from_dict(self):
         data = {
             "time": "60s",
@@ -57,22 +56,25 @@ class TestDepthProfilePoint(PintAlmostEqual):
             "time": "60s",
             "depth": "2kPa",
         }
-        self.assertRaises(pint.errors.DimensionalityError, gu.DepthProfilePoint.from_dict, bad_time)
-        self.assertRaises(pint.errors.DimensionalityError, gu.DepthProfilePoint.from_dict, bad_depth)
+        self.assertRaises(
+            pint.errors.DimensionalityError, gu.DepthProfilePoint.from_dict, bad_time
+        )
+        self.assertRaises(
+            pint.errors.DimensionalityError, gu.DepthProfilePoint.from_dict, bad_depth
+        )
 
 
 class TestDepthProfileSection(PintAlmostEqual):
-
     def test_construction(self):
-        pt0 = gu.DepthProfilePoint(1*UREG.minute, depth=12*UREG.foot)
-        pt1 = gu.DepthProfilePoint(2*UREG.minute, depth=15*UREG.foot)
+        pt0 = gu.DepthProfilePoint(1 * UREG.minute, depth=12 * UREG.foot)
+        pt1 = gu.DepthProfilePoint(2 * UREG.minute, depth=15 * UREG.foot)
         section = gu.DepthProfileSection(pt0, pt1)
-        self.assertEqual(section.avg_depth, 13.5*UREG.foot)
-        self.assertEqual(section.duration, 60*UREG.second)
+        self.assertEqual(section.avg_depth, 13.5 * UREG.foot)
+        self.assertEqual(section.duration, 60 * UREG.second)
 
     def test_surface_gas_usage(self):
-        pt0 = gu.DepthProfilePoint(0*UREG.minute, depth=0*UREG.foot)
-        pt1 = gu.DepthProfilePoint(1*UREG.minute, depth=0*UREG.foot)
+        pt0 = gu.DepthProfilePoint(0 * UREG.minute, depth=0 * UREG.foot)
+        pt1 = gu.DepthProfilePoint(1 * UREG.minute, depth=0 * UREG.foot)
 
     def test_depth_gas_usage_square(self):
         pass

@@ -42,6 +42,7 @@ class DepthProfilePoint:
     depth : pint distance
         Distance below surface () in DEPTH_UNIT
     """
+
     def __init__(self, time, depth):
         """
         Parameters
@@ -64,19 +65,20 @@ class DepthProfilePoint:
         return DepthProfilePoint(time, depth)
 
 
-class DepthProfileSection:  
+class DepthProfileSection:
     """Represents a period of elapsed time between two DepthProfilePoint instances.
 
     Members
-    avg_depth : 
+    avg_depth :
     """
+
     def __init__(self, pt0: DepthProfilePoint, pt1: DepthProfilePoint):
         self.avg_depth = (pt0.depth + pt1.depth) * 0.5
         self.duration = pt1.time - pt0.time
 
     def gas_usage(self, scr):
         """
-        For a given surface consumption rate, determine how much gas at surface pressure is 
+        For a given surface consumption rate, determine how much gas at surface pressure is
         consumed in this section.
 
         TODO: find a better place for this to live.
@@ -94,6 +96,7 @@ class DepthProfileSection:
         # TODO more accurate formula for this
         volume_scaling = pressure_at_depth(self.avg_depth).to(UREG.atm).magnitude
         return scr.rate * self.duration * volume_scaling
+
 
 class Tank:
     """
@@ -139,7 +142,7 @@ class SurfaceConsumptionRate:
         """
         Parameters
         ----------
-        data : dict 
+        data : dict
             of the "sac" section from the profile yaml
 
         Returns
@@ -147,13 +150,21 @@ class SurfaceConsumptionRate:
         SurfaceConsumptionRate
         """
         if "volume_rate" in data:
-            volume_rate = UREG.parse_expression(data["volume_rate"]).to(VOLUME_RATE_UNIT)
+            volume_rate = UREG.parse_expression(data["volume_rate"]).to(
+                VOLUME_RATE_UNIT
+            )
         elif "pressure_rate" in data:
             if "tank" not in data:
-                raise Exception("pressure rate SCR requires associated tank information.")
-            pressure_rate = UREG.parse_expression(data["pressure_rate"]).to(PRESSURE_RATE_UNIT)
+                raise Exception(
+                    "pressure rate SCR requires associated tank information."
+                )
+            pressure_rate = UREG.parse_expression(data["pressure_rate"]).to(
+                PRESSURE_RATE_UNIT
+            )
             tank = Tank.from_dict(data["tank"])
-            volume_rate = (pressure_rate * tank.volume / tank.max_pressure).to(VOLUME_RATE_UNIT)
+            volume_rate = (pressure_rate * tank.volume / tank.max_pressure).to(
+                VOLUME_RATE_UNIT
+            )
         else:
             raise Exception("sac field options are pressure_rate + tank or volume_rate")
         return SurfaceConsumptionRate(volume_rate)
@@ -178,7 +189,9 @@ class DepthProfile:
         for point_data in data:
             point = DepthProfilePoint.from_dict(point_data)
             if len(points) and (point.time <= points[-1].time):
-                    raise Exception("Time into dive must increase at every point in profile.")
+                raise Exception(
+                    "Time into dive must increase at every point in profile."
+                )
             points.append(point)
         return DepthProfile(points)
 
@@ -211,13 +224,13 @@ class Dive:
     scr : SurfaceConsumptionRate
     profile : DepthProfile
     """
+
     def __init__(self, scr, profile):
         self.scr = scr
         self.profile = profile
 
     def gas_usage(self):
-        """Compute the surface volume of gas used
-        """
+        """Compute the surface volume of gas used"""
         return self.profile.gas_usage(self.scr)
 
     @staticmethod
