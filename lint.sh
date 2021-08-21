@@ -1,6 +1,7 @@
 #!/bin/sh
 black \
     ./scuba \
-    test/python \
+    ./scripts \
+    ./test/python \
     --line-length 100 \
     -t py39
