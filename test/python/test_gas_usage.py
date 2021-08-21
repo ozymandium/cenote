@@ -35,6 +35,20 @@ class TestPressureAtDepth(PintAlmostEqual):
             self.assertPintAlmostEqual(gu.pressure_at_depth(depth), pressure, PRESSURE_TOLERANCE)
 
 
+class TestDepthProfilePoint(PintAlmostEqual):
+
+    def test_from_dict(self):
+        data = {
+            "time": "60s",
+            "depth": "12in",
+        }
+        point = gu.DepthProfilePoint.from_dict(data)
+        self.assertEqual(point.time, 1 * UREG.minute)
+        self.assertEqual(point.time.units, UREG.minute)
+        self.assertEqual(point.depth, 1 * UREG.foot)
+        self.assertEqual(point.depth.units, UREG.foot)
+
+
 class TestDepthProfileSection(PintAlmostEqual):
 
     def test_surface(self):
