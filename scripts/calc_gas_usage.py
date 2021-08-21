@@ -14,15 +14,15 @@ def main(args):
     print("Data path: {}".format(args.data_path))
 
     with open(args.data_path, "r") as f:
-        raw_data = yaml.load(f)
+        raw_data = yaml.load(f, Loader=yaml.FullLoader)
     
     dive = gu.Dive(raw_data)
     
-    print("SAC:\n{}\n".format(str(dive.scr)))
-    print("Profile:\n{points}\n".format(points="\n".join([str(p) for p in dive.profile.points])))
+    print("SAC: {}".format(str(dive.scr)))
+    print("Profile:\n    {points}".format(points="\n    ".join([str(p) for p in dive.profile.points])))
 
     gas_usage = dive.gas_usage()
-    print("Gas usage: {:.1f}".format(gas_usage))
+    print("Gas usage: {:.2f}".format(gas_usage))
 
 if __name__ == "__main__":
     main(parse_args())
