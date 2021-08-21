@@ -72,6 +72,10 @@ class TestProfilePoint(PintTest):
         self.assertRaises(pint.errors.DimensionalityError, gu.ProfilePoint.from_dict, bad_time)
         self.assertRaises(pint.errors.DimensionalityError, gu.ProfilePoint.from_dict, bad_depth)
 
+    def test_negative_value(self):
+        self.assertRaises(ValueError, gu.ProfilePoint, -1 * UREG.minute, 0 * UREG.meter)
+        self.assertRaises(ValueError, gu.ProfilePoint, 0 * UREG.minute, -1 * UREG.meter)
+
 
 class TestProfileSection(PintTest):
     def test_construction(self):
@@ -218,7 +222,6 @@ class TestSacScrRoundTrip(PintTest):
 
 
 class TestProfile(PintTest):
-
     def test_construction(self):
         pt0 = gu.ProfilePoint(0 * UREG.minute, depth=0 * UREG.foot)
         pt1 = gu.ProfilePoint(2.5 * UREG.minute, depth=0 * UREG.foot)
@@ -241,6 +244,16 @@ class TestProfile(PintTest):
         self.assertPintEqual(profile.points[0].depth, 1 * UREG.meter)
         self.assertPintEqual(profile.points[1].time, 2 * UREG.sec)
         self.assertPintEqual(profile.points[1].depth, 2 * UREG.meter)
+
+    def test_gas_usage(self):
+        data = [
+            {"time": "1 min", "depth": "0 feet"},
+            {"time": "2 min", "depth": "0 feet"},
+            {"time": "3 min", "depth": "66 feet"},
+        ]
+        profile = gu.Profile.from_dict(data)
+        scr = gu.Scr(1.0 * UREG.liter / UREG.minute)
+        self.assertPintEqual(profile.gas_usage(scr), 3.0 * UREG.liter)
 
 
 if __name__ == "__main__":

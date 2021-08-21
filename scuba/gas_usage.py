@@ -33,75 +33,6 @@ def pressure_at_depth(depth):
     return 1.0 * UREG.atm + depth.to(UREG.foot) * SCALING
 
 
-class ProfilePoint:
-    """
-    Members
-    -------
-    time : pint time
-        Time elapsed since the beginning of the dive, in TIME_UNIT
-    depth : pint distance
-        Distance below surface () in DEPTH_UNIT
-    """
-
-    def __init__(self, time, depth):
-        """
-        Parameters
-        ----------
-        time : pint time
-            Time elapsed since the beginning of the dive, in TIME_UNIT
-        depth : pint distance
-            Distance below surface () in DEPTH_UNIT
-        """
-        self.time = time.to(TIME_UNIT)
-        self.depth = depth.to(DEPTH_UNIT)
-
-    def __str__(self):
-        return "{:.1f}: {:.1f}".format(self.time, self.depth)
-
-    @staticmethod
-    def from_dict(data):
-        time = UREG.parse_expression(data["time"])
-        depth = UREG.parse_expression(data["depth"])
-        return ProfilePoint(time, depth)
-
-
-class ProfileSection:
-    """Represents a period of elapsed time between two ProfilePoint instances.
-
-    Members
-    -------
-    avg_depth : pint DEPTH_UNIT
-        Mean depth of the two profile points.
-    duration : pint TIME_UNIT
-        Amount of time between the two profile points.
-    """
-
-    def __init__(self, pt0: ProfilePoint, pt1: ProfilePoint):
-        self.avg_depth = (pt0.depth + pt1.depth) * 0.5
-        self.duration = pt1.time - pt0.time
-
-    def gas_usage(self, scr):
-        """
-        For a given surface consumption rate, determine how much gas at surface pressure is
-        consumed in this section.
-
-        TODO: find a better place for this to live.
-
-        Parameters
-        ----------
-        scr : Scr
-            Surface consumption rate.
-
-        Returns
-        -------
-        pint.volume
-            Volume of gas at the surface (1 atm) that is consumed during this section.
-        """
-        # TODO more accurate formula for this
-        volume_scaling = pressure_at_depth(self.avg_depth).to(UREG.atm).magnitude
-        return scr.volume_rate * self.duration * volume_scaling
-
-
 class Tank:
     """
     Members
@@ -137,8 +68,41 @@ class Tank:
         return "{} @ {}".format(self.gas_volume, self.max_pressure)
 
 
+class Scr:
+    """
+    SCR: Surface Consumption Rate.
+    Gas consumption in volume of surface-pressure gas per minute.
+    This is intended to be the fundamental gas use value, with Sac being a secondary derived value.
+
+    Members
+    -------
+    volume_rate : pint VOLUME_RATE_UNIT
+    """
+
+    def __init__(self, volume_rate):
+        """
+        Parameters
+        ----------
+        volume_rate : pint VOLUME_RATE_UNIT
+        """
+        self.volume_rate = volume_rate.to(VOLUME_RATE_UNIT)
+
+    def __str__(self):
+        return "{:.3f}".format(self.volume_rate)
+
+    def sac(self, tank: Tank):
+        pressure_rate = self.volume_rate * tank.max_pressure / tank.max_gas_volume
+        return Sac(pressure_rate, tank)
+
+
 class Sac:
     """
+    SAC: Surface Air Consumption
+    Consumption of surface-pressure gas from a specific tank measured in how quickly that 
+    tank's pressure is reduced. 
+    This is not supposed to be the primary was of computing gas use, but it is intended to be used
+    often as a way of driving SCR, because this is what a diver is able to observe easilyh.
+
     Members
     -------
     pressure_rate : pint PRESSURE_RATE_UNIT
@@ -168,31 +132,75 @@ class Sac:
         tank = Tank.from_dict(data["tank"])
         return Sac(pressure_rate, tank)
 
-
-class Scr:
+class ProfilePoint:
     """
-    Respiratory minute volume.
-    Gas consumption in volume of surface-pressure gas per minute
-
     Members
     -------
-    rate : in VOLUME_RATE_UNIT
+    time : pint time
+        Time elapsed since the beginning of the dive, in TIME_UNIT
+    depth : pint distance
+        Distance below surface () in DEPTH_UNIT
     """
 
-    def __init__(self, volume_rate):
+    def __init__(self, time, depth):
         """
         Parameters
         ----------
-        rate : in VOLUME_RATE_UNIT
+        time : pint time
+            Time elapsed since the beginning of the dive, in TIME_UNIT
+        depth : pint distance
+            Distance below surface () in DEPTH_UNIT
         """
-        self.volume_rate = volume_rate.to(VOLUME_RATE_UNIT)
+        if depth < 0 or time < 0:
+            raise ValueError("Time and depth must be positive values")
+        self.time = time.to(TIME_UNIT)
+        self.depth = depth.to(DEPTH_UNIT)
 
     def __str__(self):
-        return "{:.3f}".format(self.volume_rate)
+        return "{:.1f}: {:.1f}".format(self.time, self.depth)
 
-    def sac(self, tank: Tank) -> Sac:
-        pressure_rate = self.volume_rate * tank.max_pressure / tank.max_gas_volume
-        return Sac(pressure_rate, tank)
+    @staticmethod
+    def from_dict(data):
+        time = UREG.parse_expression(data["time"])
+        depth = UREG.parse_expression(data["depth"])
+        return ProfilePoint(time, depth)
+
+
+class ProfileSection:
+    """Represents a period of elapsed time between two ProfilePoint instances.
+
+    Members
+    -------
+    avg_depth : pint DEPTH_UNIT
+        Mean depth of the two profile points.
+    duration : pint TIME_UNIT
+        Amount of time between the two profile points.
+    """
+
+    def __init__(self, pt0: ProfilePoint, pt1: ProfilePoint):
+        self.avg_depth = (pt0.depth + pt1.depth) * 0.5
+        self.duration = pt1.time - pt0.time
+
+    def gas_usage(self, scr: Scr):
+        """
+        For a given surface consumption rate, determine how much gas at surface pressure is
+        consumed in this section.
+
+        TODO: find a better place for this to live.
+
+        Parameters
+        ----------
+        scr : Scr
+            Surface consumption rate.
+
+        Returns
+        -------
+        pint.volume
+            Volume of gas at the surface (1 atm) that is consumed during this section.
+        """
+        # TODO more accurate formula for this
+        volume_scaling = pressure_at_depth(self.avg_depth).to(UREG.atm).magnitude
+        return scr.volume_rate * self.duration * volume_scaling
 
 
 class Profile:
@@ -283,8 +291,10 @@ class Dive:
         -------
         Dive
         """
+        # try to use SCR
         if "scr" in data:
             scr = Scr(volume_rate=UREG.parse_expression(data["scr"]))
+        # if no SCR, try to use SAC
         else:
             if "sac" not in data:
                 raise Exception("Must provid either `scr` or `sac` section.")
