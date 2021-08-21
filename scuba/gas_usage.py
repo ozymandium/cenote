@@ -150,21 +150,13 @@ class SurfaceConsumptionRate:
         SurfaceConsumptionRate
         """
         if "volume_rate" in data:
-            volume_rate = UREG.parse_expression(data["volume_rate"]).to(
-                VOLUME_RATE_UNIT
-            )
+            volume_rate = UREG.parse_expression(data["volume_rate"]).to(VOLUME_RATE_UNIT)
         elif "pressure_rate" in data:
             if "tank" not in data:
-                raise Exception(
-                    "pressure rate SCR requires associated tank information."
-                )
-            pressure_rate = UREG.parse_expression(data["pressure_rate"]).to(
-                PRESSURE_RATE_UNIT
-            )
+                raise Exception("pressure rate SCR requires associated tank information.")
+            pressure_rate = UREG.parse_expression(data["pressure_rate"]).to(PRESSURE_RATE_UNIT)
             tank = Tank.from_dict(data["tank"])
-            volume_rate = (pressure_rate * tank.volume / tank.max_pressure).to(
-                VOLUME_RATE_UNIT
-            )
+            volume_rate = (pressure_rate * tank.volume / tank.max_pressure).to(VOLUME_RATE_UNIT)
         else:
             raise Exception("sac field options are pressure_rate + tank or volume_rate")
         return SurfaceConsumptionRate(volume_rate)
@@ -189,9 +181,7 @@ class DepthProfile:
         for point_data in data:
             point = DepthProfilePoint.from_dict(point_data)
             if len(points) and (point.time <= points[-1].time):
-                raise Exception(
-                    "Time into dive must increase at every point in profile."
-                )
+                raise Exception("Time into dive must increase at every point in profile.")
             points.append(point)
         return DepthProfile(points)
 

@@ -30,9 +30,7 @@ class TestPressureAtDepth(PintAlmostEqual):
         PRESSURE_TOLERANCE = 1e-3 * UREG.atm
 
         for depth, pressure in VALUES.items():
-            self.assertPintAlmostEqual(
-                gu.pressure_at_depth(depth), pressure, PRESSURE_TOLERANCE
-            )
+            self.assertPintAlmostEqual(gu.pressure_at_depth(depth), pressure, PRESSURE_TOLERANCE)
 
 
 class TestDepthProfilePoint(PintAlmostEqual):
@@ -56,9 +54,7 @@ class TestDepthProfilePoint(PintAlmostEqual):
             "time": "60s",
             "depth": "2kPa",
         }
-        self.assertRaises(
-            pint.errors.DimensionalityError, gu.DepthProfilePoint.from_dict, bad_time
-        )
+        self.assertRaises(pint.errors.DimensionalityError, gu.DepthProfilePoint.from_dict, bad_time)
         self.assertRaises(
             pint.errors.DimensionalityError, gu.DepthProfilePoint.from_dict, bad_depth
         )
