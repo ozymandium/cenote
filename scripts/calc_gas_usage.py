@@ -16,7 +16,7 @@ def main(args):
 
     dive = gu.Dive.from_yaml(data_path)
 
-    print("SAC: {}".format(str(dive.scr)))
+    print("RMV: {}".format(str(dive.rmv)))
     print(
         "Profile:\n    {points}".format(points="\n    ".join([str(p) for p in dive.profile.points]))
     )

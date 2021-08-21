@@ -33,7 +33,7 @@ def pressure_at_depth(depth):
     return 1.0 * UREG.atm + depth.to(UREG.foot) * SCALING
 
 
-class DepthProfilePoint:
+class ProfilePoint:
     """
     Members
     -------
@@ -62,21 +62,21 @@ class DepthProfilePoint:
     def from_dict(data):
         time = UREG.parse_expression(data["time"])
         depth = UREG.parse_expression(data["depth"])
-        return DepthProfilePoint(time, depth)
+        return ProfilePoint(time, depth)
 
 
-class DepthProfileSection:
-    """Represents a period of elapsed time between two DepthProfilePoint instances.
+class ProfileSection:
+    """Represents a period of elapsed time between two ProfilePoint instances.
 
     Members
     avg_depth :
     """
 
-    def __init__(self, pt0: DepthProfilePoint, pt1: DepthProfilePoint):
+    def __init__(self, pt0: ProfilePoint, pt1: ProfilePoint):
         self.avg_depth = (pt0.depth + pt1.depth) * 0.5
         self.duration = pt1.time - pt0.time
 
-    def gas_usage(self, scr):
+    def gas_usage(self, rmv):
         """
         For a given surface consumption rate, determine how much gas at surface pressure is
         consumed in this section.
@@ -85,7 +85,7 @@ class DepthProfileSection:
 
         Parameters
         ----------
-        scr : SurfaceConsumptionRate
+        rmv : Rmv
             Surface consumption rate.
 
         Returns
@@ -95,7 +95,7 @@ class DepthProfileSection:
         """
         # TODO more accurate formula for this
         volume_scaling = pressure_at_depth(self.avg_depth).to(UREG.atm).magnitude
-        return scr.rate * self.duration * volume_scaling
+        return rmv.rate * self.duration * volume_scaling
 
 
 class Tank:
@@ -120,9 +120,10 @@ class Tank:
         return "{} @ {}".format(self.volume, self.max_pressure)
 
 
-class SurfaceConsumptionRate:
+class Rmv:
     """
-    Surface air consumption in volume of surface air per minute
+    Respiratory minute volume.
+    Gas consumption in volume of surface-pressure gas per minute
 
     Members
     -------
@@ -144,6 +145,7 @@ class SurfaceConsumptionRate:
     @staticmethod
     def from_dict(data: dict):
         """
+
         Parameters
         ----------
         data : dict
@@ -151,7 +153,7 @@ class SurfaceConsumptionRate:
 
         Returns
         -------
-        SurfaceConsumptionRate
+        Rmv
         """
         if "volume_rate" in data:
             volume_rate = UREG.parse_expression(data["volume_rate"])
@@ -163,20 +165,20 @@ class SurfaceConsumptionRate:
             volume_rate = pressure_rate * tank.volume / tank.max_pressure
         else:
             raise Exception("sac field options are pressure_rate + tank or volume_rate")
-        return SurfaceConsumptionRate(volume_rate)
+        return Rmv(volume_rate)
 
     def __str__(self):
         return "{:.3f}".format(self.rate)
 
 
-class DepthProfile:
+class Profile:
     """
     Members
     -------
-    points : list of DepthProfilePoint
+    points : list of ProfilePoint
     """
 
-    def __init__(self, points: list[DepthProfilePoint]):
+    def __init__(self, points: list[ProfilePoint]):
         if len(points) < 2:
             raise Exception("Need at least 2 points")
         self.points = points
@@ -185,19 +187,19 @@ class DepthProfile:
     def from_dict(data):
         points = []
         for point_data in data:
-            point = DepthProfilePoint.from_dict(point_data)
+            point = ProfilePoint.from_dict(point_data)
             if len(points) and (point.time <= points[-1].time):
                 raise Exception("Time into dive must increase at every point in profile.")
             points.append(point)
-        return DepthProfile(points)
+        return Profile(points)
 
-    def gas_usage(self, scr):
+    def gas_usage(self, rmv):
         """
         Compute the volume of surface-pressure gas that is used for this depth profile.
 
         Parameters
         ----------
-        scr : SurfaceConsumptionRate
+        rmv : Rmv
             How fast gas is used on overage for this depth.
 
         Returns
@@ -208,8 +210,8 @@ class DepthProfile:
         for idx in range(1, len(self.points)):
             point0 = self.points[idx - 1]
             point1 = self.points[idx]
-            section = DepthProfileSection(point0, point1)
-            volume += section.gas_usage(scr)
+            section = ProfileSection(point0, point1)
+            volume += section.gas_usage(rmv)
         return volume
 
 
@@ -217,17 +219,17 @@ class Dive:
     """
     Members
     -------
-    scr : SurfaceConsumptionRate
-    profile : DepthProfile
+    rmv : Rmv
+    profile : Profile
     """
 
-    def __init__(self, scr, profile):
-        self.scr = scr
+    def __init__(self, rmv, profile):
+        self.rmv = rmv
         self.profile = profile
 
     def gas_usage(self):
         """Compute the surface volume of gas used"""
-        return self.profile.gas_usage(self.scr)
+        return self.profile.gas_usage(self.rmv)
 
     @staticmethod
     def from_yaml(path):
@@ -257,6 +259,6 @@ class Dive:
         -------
         Dive
         """
-        scr = SurfaceConsumptionRate.from_dict(data["scr"])
-        profile = DepthProfile.from_dict(data["profile"])
-        return Dive(scr, profile)
+        rmv = Rmv.from_dict(data["rmv"])
+        profile = Profile.from_dict(data["profile"])
+        return Dive(rmv, profile)

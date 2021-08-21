@@ -35,11 +35,11 @@ class TestPressureAtDepth(PintAlmostEqual):
             self.assertPintAlmostEqual(gu.pressure_at_depth(depth), pressure, PRESSURE_TOLERANCE)
 
 
-class TestDepthProfilePoint(unittest.TestCase):
+class TestProfilePoint(unittest.TestCase):
     def test_construction(self):
         time = 0.0 * UREG.second
         depth = 0.0 * UREG.foot
-        point = gu.DepthProfilePoint(time, depth)
+        point = gu.ProfilePoint(time, depth)
         self.assertEqual(time, point.time)
         self.assertEqual(depth, point.depth)
 
@@ -48,7 +48,7 @@ class TestDepthProfilePoint(unittest.TestCase):
             "time": "60s",
             "depth": "12in",
         }
-        point = gu.DepthProfilePoint.from_dict(data)
+        point = gu.ProfilePoint.from_dict(data)
         self.assertEqual(point.time, 1 * UREG.minute)
         self.assertEqual(point.time.units, UREG.minute)
         self.assertEqual(point.depth, 1 * UREG.foot)
@@ -63,42 +63,42 @@ class TestDepthProfilePoint(unittest.TestCase):
             "time": "60s",
             "depth": "2kPa",
         }
-        self.assertRaises(pint.errors.DimensionalityError, gu.DepthProfilePoint.from_dict, bad_time)
+        self.assertRaises(pint.errors.DimensionalityError, gu.ProfilePoint.from_dict, bad_time)
         self.assertRaises(
-            pint.errors.DimensionalityError, gu.DepthProfilePoint.from_dict, bad_depth
+            pint.errors.DimensionalityError, gu.ProfilePoint.from_dict, bad_depth
         )
 
 
-class TestDepthProfileSection(unittest.TestCase):
+class TestProfileSection(unittest.TestCase):
     def test_construction(self):
-        pt0 = gu.DepthProfilePoint(1 * UREG.minute, depth=12 * UREG.foot)
-        pt1 = gu.DepthProfilePoint(2 * UREG.minute, depth=15 * UREG.foot)
-        section = gu.DepthProfileSection(pt0, pt1)
+        pt0 = gu.ProfilePoint(1 * UREG.minute, depth=12 * UREG.foot)
+        pt1 = gu.ProfilePoint(2 * UREG.minute, depth=15 * UREG.foot)
+        section = gu.ProfileSection(pt0, pt1)
         self.assertEqual(section.avg_depth, 13.5 * UREG.foot)
         self.assertEqual(section.duration, 60 * UREG.second)
 
     def test_surface_gas_usage(self):
-        pt0 = gu.DepthProfilePoint(0 * UREG.minute, depth=0 * UREG.foot)
-        pt1 = gu.DepthProfilePoint(2.5 * UREG.minute, depth=0 * UREG.foot)
-        scr = gu.SurfaceConsumptionRate(UREG.parse_expression("1.5 l/min"))
-        section = gu.DepthProfileSection(pt0, pt1)
-        consumption = section.gas_usage(scr)
+        pt0 = gu.ProfilePoint(0 * UREG.minute, depth=0 * UREG.foot)
+        pt1 = gu.ProfilePoint(2.5 * UREG.minute, depth=0 * UREG.foot)
+        rmv = gu.Rmv(UREG.parse_expression("1.5 l/min"))
+        section = gu.ProfileSection(pt0, pt1)
+        consumption = section.gas_usage(rmv)
         self.assertEqual(consumption, 3.75 * UREG.liter)
 
     def test_depth_gas_usage_square(self):
-        pt0 = gu.DepthProfilePoint(0 * UREG.minute, depth=66 * UREG.foot)
-        pt1 = gu.DepthProfilePoint(2.5 * UREG.minute, depth=66 * UREG.foot)
-        scr = gu.SurfaceConsumptionRate(UREG.parse_expression("1.5 l/min"))
-        section = gu.DepthProfileSection(pt0, pt1)
-        consumption = section.gas_usage(scr)
+        pt0 = gu.ProfilePoint(0 * UREG.minute, depth=66 * UREG.foot)
+        pt1 = gu.ProfilePoint(2.5 * UREG.minute, depth=66 * UREG.foot)
+        rmv = gu.Rmv(UREG.parse_expression("1.5 l/min"))
+        section = gu.ProfileSection(pt0, pt1)
+        consumption = section.gas_usage(rmv)
         self.assertEqual(consumption, 3 * 3.75 * UREG.liter)
 
     def test_trapezoid_gas_usage(self):
-        pt0 = gu.DepthProfilePoint(0 * UREG.minute, depth=0 * UREG.foot)
-        pt1 = gu.DepthProfilePoint(2.5 * UREG.minute, depth=66 * UREG.foot)
-        scr = gu.SurfaceConsumptionRate(UREG.parse_expression("1.5 l/min"))
-        section = gu.DepthProfileSection(pt0, pt1)
-        consumption = section.gas_usage(scr)
+        pt0 = gu.ProfilePoint(0 * UREG.minute, depth=0 * UREG.foot)
+        pt1 = gu.ProfilePoint(2.5 * UREG.minute, depth=66 * UREG.foot)
+        rmv = gu.Rmv(UREG.parse_expression("1.5 l/min"))
+        section = gu.ProfileSection(pt0, pt1)
+        consumption = section.gas_usage(rmv)
         self.assertEqual(consumption, 2 * 3.75 * UREG.liter)
 
 
@@ -128,16 +128,16 @@ class TestTank(unittest.TestCase):
         self.assertEqual(tank.max_pressure, 3000 * UREG.psi)
 
 
-class TestSurfaceConsumptionRate(unittest.TestCase):
+class TestRmv(unittest.TestCase):
     def test_construction(self):
         rate = 0.1 * UREG.parse_expression("L/min")
-        scr = gu.SurfaceConsumptionRate(rate)
-        self.assertEqual(scr.rate, rate)
+        rmv = gu.Rmv(rate)
+        self.assertEqual(rmv.rate, rate)
 
     def test_construction_wrong_units(self):
         self.assertRaises(
             pint.errors.DimensionalityError,
-            gu.SurfaceConsumptionRate,
+            gu.Rmv,
             50 * UREG.parse_expression("psi / min"),
         )
 
@@ -145,10 +145,15 @@ class TestSurfaceConsumptionRate(unittest.TestCase):
         data = {
             "volume_rate": "1 L/min",
         }
-        scr = gu.SurfaceConsumptionRate.from_dict(data)
-        self.assertEqual(scr.rate, 1 * UREG.liter / UREG.minute)
+        rmv = gu.Rmv.from_dict(data)
+        self.assertEqual(rmv.rate, 1 * UREG.liter / UREG.minute)
 
     def test_from_dict_pressure_rate(self):
+        """
+        PV = nRT
+        p1 V = n1 R T
+        P2 V = n2 R T
+        """
         data = {
             "pressure_rate": "1psi/min",
             "tank": {
@@ -156,14 +161,14 @@ class TestSurfaceConsumptionRate(unittest.TestCase):
                 "max_pressure": "10psi",
             }
         }
-        scr = gu.SurfaceConsumptionRate.from_dict(data)
-        self.assertEqual(scr.rate, 1 * UREG.liter / UREG.minute)
+        rmv = gu.Rmv.from_dict(data)
+        self.assertEqual(rmv.rate, 1 * UREG.liter / UREG.minute)
 
     def test_from_dict_pressure_rate_missing_tank(self):
         data = {
             "pressure_rate": "1psi/min",
         }
-        self.assertRaises(gu.SurfaceConsumptionRate.MissingTank, gu.SurfaceConsumptionRate.from_dict, data)
+        self.assertRaises(gu.Rmv.MissingTank, gu.Rmv.from_dict, data)
 
 if __name__ == "__main__":
     unittest.main()
