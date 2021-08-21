@@ -70,7 +70,6 @@ class TestDepthProfileSection(PintAlmostEqual):
         self.assertEqual(section.avg_depth, 13.5*UREG.foot)
         self.assertEqual(section.duration, 60*UREG.second)
 
-
     def test_surface_gas_usage(self):
         pt0 = gu.DepthProfilePoint(0*UREG.minute, depth=0*UREG.foot)
         pt1 = gu.DepthProfilePoint(1*UREG.minute, depth=0*UREG.foot)
