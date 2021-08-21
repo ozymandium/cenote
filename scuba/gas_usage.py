@@ -69,9 +69,12 @@ class ProfileSection:
     """Represents a period of elapsed time between two ProfilePoint instances.
 
     Members
-    avg_depth :
+    -------
+    avg_depth : pint DEPTH_UNIT
+        Mean depth of the two profile points.
+    duration : pint TIME_UNIT
+        Amount of time between the two profile points.
     """
-
     def __init__(self, pt0: ProfilePoint, pt1: ProfilePoint):
         self.avg_depth = (pt0.depth + pt1.depth) * 0.5
         self.duration = pt1.time - pt0.time
@@ -133,8 +136,25 @@ class Tank:
 
 
 class Sac:
-
+    """
+    Members
+    -------
+    pressure_rate : pint PRESSURE_RATE_UNIT
+        Decrease in pressure over time for the provided tank
+    tank : Tank
+        The tank that coresponds to this consumption rate
+    rmv : Rmv
+        The rate of consumption of 1atm gas by volume.
+    """
     def __init__(self, pressure_rate, tank: Tank):
+        """
+        Parameters
+        ----------
+        pressure_rate : pint PRESSURE_RATE_UNIT
+            Decrease in pressure over time for the provided tank
+        tank : Tank
+            The tank that coresponds to this consumption rate
+        """
         self.pressure_rate = pressure_rate.to(PRESSURE_RATE_UNIT)
         self.tank = tank
         self.rmv = Rmv(self.pressure_rate / self.tank.max_pressure * self.tank.max_gas_volume)
