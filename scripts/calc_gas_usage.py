@@ -18,9 +18,11 @@ def main(args):
     
     dive = gu.Dive(raw_data)
     
-    print("SAC:\n{}\n".format(str(dive.sac)))
+    print("SAC:\n{}\n".format(str(dive.scr)))
     print("Profile:\n{points}\n".format(points="\n".join([str(p) for p in dive.profile.points])))
 
+    gas_usage = dive.gas_usage()
+    print("Gas usage: {:.1f}".format(gas_usage))
 
 if __name__ == "__main__":
     main(parse_args())
