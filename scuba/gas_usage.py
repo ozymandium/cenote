@@ -8,8 +8,7 @@ UREG = pint.UnitRegistry()
 
 TIME_UNIT = UREG.minute
 DEPTH_UNIT = UREG.foot
-TANK_VOLUME_UNIT = UREG.liter
-GAS_VOLUME_UNIT = UREG.ft**3
+VOLUME_UNIT = UREG.liter
 PRESSURE_UNIT = UREG.psi
 VOLUME_RATE_UNIT = VOLUME_UNIT / TIME_UNIT
 PRESSURE_RATE_UNIT = PRESSURE_UNIT / TIME_UNIT
@@ -104,12 +103,24 @@ class Tank:
     Members
     -------
     volume : in VOLUME_UNIT
+        The absolute volume of the tank itself
+    max_gas_volume : in VOLUME_UNIT
+        The volume of gas at 1 atm that the tank holds when the tank is at max_pressure.
     max_pressure : PRESSURE_UNIT
+        The maximum pressure, and the pressure to which the max_gas_volume corresponds.
     """
-    def __init__(self, gas_volume, max_pressure):
-        self.tank_volume = volume.to(VOLUME_UNIT)
+    def __init__(self, max_gas_volume, max_pressure):
+        """
+        Parameters
+        ----------
+        max_gas_volume : in VOLUME_UNIT
+            The volume of gas at 1 atm that the tank holds when the tank is at max_pressure.
+        max_pressure : PRESSURE_UNIT
+            The maximum pressure, and the pressure to which the max_gas_volume corresponds.
+        """
         self.max_pressure = max_pressure.to(PRESSURE_UNIT)
-        self.max_gas_volume = self.volume * self.max_pressure.to(UREG.atm).magnitude
+        self.max_gas_volume = max_gas_volume.to(VOLUME_UNIT)
+        self.volume = self.max_gas_volume / self.max_pressure.to(UREG.atm).magnitude
 
     @staticmethod
     def from_dict(data):
