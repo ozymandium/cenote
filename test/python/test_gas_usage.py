@@ -220,6 +220,14 @@ class TestScr(PintTest):
         self.assertPintEqual(sac.tank.max_gas_volume, max_gas_volume)
         self.assertPintEqual(sac.tank.max_pressure, max_pressure)
 
+    def test_at_depth(self):
+        volume_rate = 1 * UREG.L / UREG.min
+        tolerance = volume_rate * 1e-12
+        scr = gu.Scr(volume_rate)
+        self.assertPintAlmostEqual(scr.at_depth(0 * UREG.ft), volume_rate, tolerance)
+        self.assertPintAlmostEqual(scr.at_depth(33 * UREG.ft), 2 * volume_rate, tolerance)
+        self.assertPintAlmostEqual(scr.at_depth(66 * UREG.ft), 3 * volume_rate, tolerance)
+
 
 class TestSacScrRoundTrip(PintTest):
     def test_round_trip(self):

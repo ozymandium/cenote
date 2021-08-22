@@ -89,6 +89,20 @@ class Scr:
         pressure_rate = self.volume_rate * tank.max_pressure / tank.max_gas_volume
         return Sac(pressure_rate, tank)
 
+    def at_depth(self, depth):
+        """Translate SCR to volume rate at a particular depth
+
+        Parameters
+        ----------
+        depth : pint length
+
+        Returns
+        -------
+        pint volume rate
+        """
+        scaling = pressure_at_depth(depth).to(UREG.atm).magnitude
+        return self.volume_rate * scaling
+
 
 class Sac:
     """
@@ -136,12 +150,9 @@ class ProfilePoint:
         Time elapsed since the beginning of the dive, in config.TIME_UNIT
     depth : pint distance
         Distance below surface () in config.DEPTH_UNIT
-    scr : pint VOLUME_RATE_UNIT
-        The SCR at this point, which is assumed the have been constant from the previous point until
-        this point.
     """
 
-    def __init__(self, time, depth, scr):
+    def __init__(self, time, depth):
         """
         Parameters
         ----------
@@ -154,21 +165,14 @@ class ProfilePoint:
             raise ValueError("Time and depth must be positive values")
         self.time = time.to(config.TIME_UNIT)
         self.depth = depth.to(config.DEPTH_UNIT)
-        self.scr = scr.to(config.VOLUME_RATE_UNIT)
 
     def __str__(self):
         return "{:.1f}: {:.1f}".format(self.time, self.depth)
 
     @staticmethod
-    def from_dict(data, default_scr=None):
+    def from_dict(data):
         time = UREG.parse_expression(data["time"])
         depth = UREG.parse_expression(data["depth"])
-        if "scr" not in data:
-            if default_scr is None:
-                raise Exception("default SCR must be provided if none is in the point data")
-            scr = default_scr
-        else:
-            scr = UREG.parse_expression(data["scr"])
         return ProfilePoint(time, depth)
 
 
@@ -205,8 +209,8 @@ class ProfileSection:
             Volume of gas at the surface (1 atm) that is consumed during this section.
         """
         # TODO more accurate formula for this
-        volume_scaling = pressure_at_depth(self.avg_depth).to(UREG.atm).magnitude
-        return scr.volume_rate * self.duration * volume_scaling
+        gas_use_rate = scr.at_depth(self.avg_depth)
+        return gas_use_rate * self.duration
 
 
 class Profile:
