@@ -16,10 +16,10 @@ def main(args):
 
     dive = gu.Dive.from_yaml(data_path)
 
-    print("RMV: {}".format(str(dive.rmv)))
-    print(
-        "Profile:\n    {points}".format(points="\n    ".join([str(p) for p in dive.profile.points]))
-    )
+    print("SCR: {}".format(str(dive.scr)))
+    print("Profile:")
+    for point in dive.profile.points:
+        print("    {}".format(str(point)))
 
     gas_usage = dive.gas_usage()
     print("Gas usage: {:.2f}".format(gas_usage))
