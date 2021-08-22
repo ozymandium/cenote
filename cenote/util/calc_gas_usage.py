@@ -15,24 +15,26 @@ def parse_args():
 def parse_dive(data: dict):
     # SCR
     volume_rate = UREG.parse_expression(data["scr"])
-    scr = gu.Scr(volume_rate)
+    default_scr = gu.Scr(volume_rate)
 
     # Profile
-    points = []
+    profile = []
     for point_data in data["profile"]:
         time = UREG.parse_expression(point_data["time"])
         depth = UREG.parse_expression(point_data["depth"])
-        point = gu.ProfilePoint(time, depth)
-        points.append(point)
-    profile = gu.Profile(points)
+        if "scr" in point_data:
+            scr = UREG.parse_expression(point_data["scr"])
+        else:
+            scr = default_scr
+        point = gu.ProfilePoint(time, depth, scr)
+        profile.append(point)
 
-    return gu.Dive(scr, profile)
+    return gu.Dive(profile)
 
 
 def print_dive(dive: gu.Dive):
-    print("SCR: {}".format(str(dive.scr)))
     print("Profile:")
-    for point in dive.profile.points:
+    for point in dive.profile:
         print("    {}".format(str(point)))
     gas_usage = dive.gas_usage()
     print("Gas usage: {:.2f}".format(gas_usage))

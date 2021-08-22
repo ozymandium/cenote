@@ -29,12 +29,14 @@ py_library(
     ],
 )
 
+py_library
+
 # scripts
 
 py_binary(
     name = "calc_gas_usage",
     srcs = [
-        "scripts/calc_gas_usage.py",
+        "cenote/util/calc_gas_usage.py",
     ],
     deps = [
         ":cenote",
@@ -44,7 +46,7 @@ py_binary(
 py_binary(
     name = "scr_from_sac",
     srcs = [
-        "scripts/scr_from_sac.py",
+        "cenote/util/scr_from_sac.py",
     ],
     deps = [
         ":cenote",
@@ -54,7 +56,7 @@ py_binary(
 py_binary(
     name = "sac_from_scr",
     srcs = [
-        "scripts/sac_from_scr.py",
+        "cenote/util/sac_from_scr.py",
     ],
     deps = [
         ":cenote",

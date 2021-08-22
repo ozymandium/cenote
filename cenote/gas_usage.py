@@ -138,7 +138,7 @@ class ProfilePoint:
         Distance below surface () in config.DEPTH_UNIT
     """
 
-    def __init__(self, time, depth):
+    def __init__(self, time, depth, scr: Scr):
         """
         Parameters
         ----------
@@ -151,6 +151,7 @@ class ProfilePoint:
             raise ValueError("Time and depth must be positive values")
         self.time = time.to(config.TIME_UNIT)
         self.depth = depth.to(config.DEPTH_UNIT)
+        self.scr = scr
 
     def __str__(self):
         return "{:.1f}: {:.1f}".format(self.time, self.depth)
@@ -165,23 +166,30 @@ class ProfileSection:
         Mean depth of the two profile points.
     duration : pint config.TIME_UNIT
         Amount of time between the two profile points.
+    scr : Scr
+        Assumed the be constant throughout the entire section.s
     """
 
     def __init__(self, pt0: ProfilePoint, pt1: ProfilePoint):
-        self.avg_depth = (pt0.depth + pt1.depth) * 0.5
-        self.duration = pt1.time - pt0.time
-
-    def gas_usage(self, scr: Scr):
         """
-        For a given surface consumption rate, determine how much gas at surface pressure is
-        consumed in this section.
-
-        TODO: find a better place for this to live.
-
         Parameters
         ----------
-        scr : Scr
-            Surface consumption rate.
+        pt0 : ProfilePoint
+            Beginning of the section.
+        pt1 : ProfilePoint
+            End of the section. The SCR of this point will be used as the SCR for the entireity
+            of the section.
+        """
+        self.avg_depth = (pt0.depth + pt1.depth) * 0.5
+        self.duration = pt1.time - pt0.time
+        # assume that the SCR at the end of the section was computed as an average of the SCR
+        # throughout the section
+        self.scr = pt1.scr
+
+    def gas_usage(self):
+        """
+        Determine how much gas at surface pressure is
+        consumed in this section.
 
         Returns
         -------
@@ -189,26 +197,8 @@ class ProfileSection:
             Volume of gas at the surface (1 atm) that is consumed during this section.
         """
         # TODO more accurate formula for this
-        gas_use_rate = scr.at_depth(self.avg_depth)
+        gas_use_rate = self.scr.at_depth(self.avg_depth)
         return gas_use_rate * self.duration
-
-
-class Profile:
-    """
-    Members
-    -------
-    points : list of ProfilePoint
-    """
-
-    def __init__(self, points: list[ProfilePoint]):
-        if len(points) < 2:
-            raise Exception("Need at least 2 points")
-        if points[0].time != 0:
-            raise Exception("starting point time must be zero")
-        for idx in range(1, len(points)):
-            if points[idx - 1].time >= points[idx].time:
-                raise Exception("Time into dive must increase at every point in profile.")
-        self.points = points
 
 
 class Dive:
@@ -219,9 +209,18 @@ class Dive:
     profile : Profile
     """
 
-    def __init__(self, scr: Scr, profile: Profile):
-        self.scr = scr
+    def __init__(self, profile: list[ProfilePoint]):
         self.profile = profile
+        self.update_sections()
+
+    def update_sections(self):
+        """
+        Compute `sections` using the data in `points`
+        """
+        self.sections = []
+        for idx in range(1, len(self.profile)):
+            section = ProfileSection(self.profile[idx - 1], self.profile[idx])
+            self.sections.append(section)
 
     def gas_usage(self):
         """
@@ -232,7 +231,6 @@ class Dive:
         pint volume
         """
         volume = 0.0 * config.VOLUME_UNIT
-        for idx in range(1, len(self.profile.points)):
-            section = ProfileSection(self.profile.points[idx - 1], self.profile.points[idx])
-            volume += section.gas_usage(self.scr)
+        for section in self.sections:
+            volume += section.gas_usage()
         return volume

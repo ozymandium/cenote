@@ -44,23 +44,32 @@ class TestProfilePoint(PintTest):
     def test_construction(self):
         time = 0.0 * UREG.second
         depth = 0.0 * UREG.meter
-        point = gu.ProfilePoint(time, depth)
+        scr = gu.Scr(0.0 * UREG.liter / UREG.minute)
+        point = gu.ProfilePoint(time, depth, scr)
         self.assertPintEqual(time, point.time)
         self.assertEqual(point.time.units, config.TIME_UNIT)
         self.assertPintEqual(depth, point.depth)
         self.assertEqual(point.depth.units, config.DEPTH_UNIT)
+        self.assertPintEqual(scr.volume_rate, point.scr.volume_rate)
+        self.assertEqual(point.scr.volume_rate.units, config.VOLUME_RATE_UNIT)
 
     def test_wrong_units(self):
         good_time = 0.0 * UREG.second
         bad_time = UREG.parse_expression("60in^3")
         good_depth = UREG.parse_expression("12in")
         bad_depth = UREG.parse_expression("2kPa")
-        self.assertRaises(pint.errors.DimensionalityError, gu.ProfilePoint, bad_time, good_depth)
-        self.assertRaises(pint.errors.DimensionalityError, gu.ProfilePoint, good_time, bad_depth)
+        scr = gu.Scr(0.0 * UREG.liter / UREG.minute)
+        self.assertRaises(
+            pint.errors.DimensionalityError, gu.ProfilePoint, bad_time, good_depth, scr
+        )
+        self.assertRaises(
+            pint.errors.DimensionalityError, gu.ProfilePoint, good_time, bad_depth, scr
+        )
 
     def test_negative_value(self):
-        self.assertRaises(ValueError, gu.ProfilePoint, -1 * UREG.minute, 0 * UREG.meter)
-        self.assertRaises(ValueError, gu.ProfilePoint, 0 * UREG.minute, -1 * UREG.meter)
+        scr = gu.Scr(0.0 * UREG.liter / UREG.minute)
+        self.assertRaises(ValueError, gu.ProfilePoint, -1 * UREG.minute, 0 * UREG.meter, scr)
+        self.assertRaises(ValueError, gu.ProfilePoint, 0 * UREG.minute, -1 * UREG.meter, scr)
 
 
 class TestProfileSection(PintTest):
@@ -70,36 +79,41 @@ class TestProfileSection(PintTest):
     GAS_USAGE_VOLUME_TOLERANCE = 1e-12 * config.VOLUME_UNIT
 
     def test_construction(self):
-        pt0 = gu.ProfilePoint(1 * UREG.minute, depth=12 * UREG.foot)
-        pt1 = gu.ProfilePoint(2 * UREG.minute, depth=15 * UREG.foot)
+        pt0 = gu.ProfilePoint(
+            1 * UREG.minute, depth=12 * UREG.foot, scr=gu.Scr(1 * UREG.liter / UREG.minute)
+        )
+        pt1 = gu.ProfilePoint(
+            2 * UREG.minute, depth=15 * UREG.foot, scr=gu.Scr(2 * UREG.liter / UREG.minute)
+        )
         section = gu.ProfileSection(pt0, pt1)
         self.assertPintEqual(section.avg_depth, 13.5 * UREG.foot)
         self.assertPintEqual(section.duration, 60 * UREG.second)
+        self.assertPintEqual(section.scr.volume_rate, pt1.scr.volume_rate)
 
     def test_surface_gas_usage(self):
-        pt0 = gu.ProfilePoint(0 * UREG.minute, depth=0 * UREG.foot)
-        pt1 = gu.ProfilePoint(2.5 * UREG.minute, depth=0 * UREG.foot)
         scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
+        pt0 = gu.ProfilePoint(0 * UREG.minute, depth=0 * UREG.foot, scr=scr)
+        pt1 = gu.ProfilePoint(2.5 * UREG.minute, depth=0 * UREG.foot, scr=scr)
         section = gu.ProfileSection(pt0, pt1)
-        consumption = section.gas_usage(scr)
+        consumption = section.gas_usage()
         self.assertPintAlmostEqual(consumption, 3.75 * UREG.liter, self.GAS_USAGE_VOLUME_TOLERANCE)
 
     def test_depth_gas_usage_square(self):
-        pt0 = gu.ProfilePoint(0 * UREG.minute, depth=66 * UREG.foot)
-        pt1 = gu.ProfilePoint(2.5 * UREG.minute, depth=66 * UREG.foot)
         scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
+        pt0 = gu.ProfilePoint(0 * UREG.minute, depth=66 * UREG.foot, scr=scr)
+        pt1 = gu.ProfilePoint(2.5 * UREG.minute, depth=66 * UREG.foot, scr=scr)
         section = gu.ProfileSection(pt0, pt1)
-        consumption = section.gas_usage(scr)
+        consumption = section.gas_usage()
         self.assertPintAlmostEqual(
             consumption, 3 * 3.75 * UREG.liter, self.GAS_USAGE_VOLUME_TOLERANCE
         )
 
     def test_trapezoid_gas_usage(self):
-        pt0 = gu.ProfilePoint(0 * UREG.minute, depth=0 * UREG.foot)
-        pt1 = gu.ProfilePoint(2.5 * UREG.minute, depth=66 * UREG.foot)
         scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
+        pt0 = gu.ProfilePoint(0 * UREG.minute, depth=0 * UREG.foot, scr=scr)
+        pt1 = gu.ProfilePoint(2.5 * UREG.minute, depth=66 * UREG.foot, scr=scr)
         section = gu.ProfileSection(pt0, pt1)
-        consumption = section.gas_usage(scr)
+        consumption = section.gas_usage()
         self.assertPintAlmostEqual(
             consumption, 2 * 3.75 * UREG.liter, self.GAS_USAGE_VOLUME_TOLERANCE
         )
@@ -189,37 +203,15 @@ class TestSacScrRoundTrip(PintTest):
         self.assertPintEqual(sac_from_scr, pressure_rate)
 
 
-class TestProfile(PintTest):
-    def test_construction(self):
-        pt0 = gu.ProfilePoint(0 * UREG.minute, depth=0 * UREG.foot)
-        pt1 = gu.ProfilePoint(2.5 * UREG.minute, depth=0 * UREG.foot)
-        self.assertRaises(AttributeError, gu.Profile, [1, 2])
-        self.assertRaises(Exception, gu.Profile, [pt0])
-        self.assertRaises(Exception, gu.Profile, [pt1, pt0])
-        profile = gu.Profile([pt0, pt1])
-        self.assertEqual(pt0.time, profile.points[0].time)
-        self.assertEqual(pt0.depth, profile.points[0].depth)
-        self.assertEqual(pt1.time, profile.points[1].time)
-        self.assertEqual(pt1.depth, profile.points[1].depth)
-
-    def test_nonzero_first_point(self):
-        points = [
-            gu.ProfilePoint(UREG.parse_expression("1sec"), UREG.parse_expression("1meter")),
-            gu.ProfilePoint(UREG.parse_expression("2sec"), UREG.parse_expression("2meter")),
-        ]
-        self.assertRaises(Exception, gu.Profile, points)
-
-
 class TestDive(PintTest):
     def test_gas_usage(self):
-        points = [
-            gu.ProfilePoint(UREG.parse_expression("0 min"), UREG.parse_expression("0 feet")),
-            gu.ProfilePoint(UREG.parse_expression("1 min"), UREG.parse_expression("0 feet")),
-            gu.ProfilePoint(UREG.parse_expression("2 min"), UREG.parse_expression("66 feet")),
-        ]
-        profile = gu.Profile(points)
         scr = gu.Scr(1.0 * UREG.liter / UREG.minute)
-        dive = gu.Dive(scr, profile)
+        profile = [
+            gu.ProfilePoint(UREG.parse_expression("0 min"), UREG.parse_expression("0 feet"), scr),
+            gu.ProfilePoint(UREG.parse_expression("1 min"), UREG.parse_expression("0 feet"), scr),
+            gu.ProfilePoint(UREG.parse_expression("2 min"), UREG.parse_expression("66 feet"), scr),
+        ]
+        dive = gu.Dive(profile)
         self.assertPintAlmostEqual(dive.gas_usage(), 3.0 * UREG.liter, 1e-12 * config.VOLUME_UNIT)
 
 
