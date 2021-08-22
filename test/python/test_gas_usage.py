@@ -264,5 +264,48 @@ class TestProfile(PintTest):
         self.assertPintAlmostEqual(profile.gas_usage(scr), 3.0 * UREG.liter, 1e-12 * config.VOLUME_UNIT)
 
 
+class TestDive(PintTest):
+    def test_gas_usage(self):
+        data = [
+            {"time": "1 min", "depth": "0 feet"},
+            {"time": "2 min", "depth": "0 feet"},
+            {"time": "3 min", "depth": "66 feet"},
+        ]
+        profile = gu.Profile.from_dict(data)
+        scr = gu.Scr(1.0 * UREG.liter / UREG.minute)
+        dive = gu.Dive(scr, profile)        
+        self.assertPintEqual(profile.gas_usage(scr), dive.gas_usage())
+
+    def test_from_dict_scr(self):
+        data = {
+            "scr": "1 l/min",
+            "profile": [
+                {"time": "1 min", "depth": "0 feet"},
+                {"time": "2 min", "depth": "0 feet"},
+                {"time": "3 min", "depth": "66 feet"},
+            ],
+        }
+        dive = gu.Dive.from_dict(data)
+        self.assertPintAlmostEqual(dive.gas_usage(), 3.0 * UREG.liter, 1e-12 * config.VOLUME_UNIT)
+
+    def test_from_dict_sac(self):
+        data = {
+            "sac": {
+                "pressure_rate": "1 psi/min",
+                "tank": {
+                    "max_gas_volume": "1L",
+                    "max_pressure": "1psi"
+                }
+            },
+            "profile": [
+                {"time": "1 min", "depth": "0 feet"},
+                {"time": "2 min", "depth": "0 feet"},
+                {"time": "3 min", "depth": "66 feet"},
+            ],
+        }
+        dive = gu.Dive.from_dict(data)
+        self.assertPintAlmostEqual(dive.gas_usage(), 3.0 * UREG.liter, 1e-12 * config.VOLUME_UNIT)
+
+
 if __name__ == "__main__":
     unittest.main()
