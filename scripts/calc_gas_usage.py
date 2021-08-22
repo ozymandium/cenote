@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from scuba import gas_usage as gu
+from cenote import gas_usage as gu
 import argparse
 import os
 

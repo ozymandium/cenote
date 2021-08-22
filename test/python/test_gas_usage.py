@@ -1,5 +1,5 @@
-from scuba import gas_usage as gu
-from scuba import config
+from cenote import gas_usage as gu
+from cenote import config
 import unittest
 import pint
 

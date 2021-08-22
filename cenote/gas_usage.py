@@ -1,4 +1,4 @@
-from scuba import config
+from cenote import config
 
 import matplotlib.pyplot as plt
 import numpy as np

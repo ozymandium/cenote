@@ -1,6 +1,6 @@
 #!/bin/sh
 black \
-    ./scuba \
+    ./cenote \
     ./scripts \
     ./test/python \
     --line-length 100 \

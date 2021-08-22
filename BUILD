@@ -18,11 +18,11 @@ load("@rules_python//python:defs.bzl", "py_library")
 # load("@pip_deps//:requirements.bzl", "requirement")
 
 py_library(
-    name = "scuba",
+    name = "cenote",
     srcs = [
-        "scuba/__init__.py",
-        "scuba/config.py",
-        "scuba/gas_usage.py",
+        "cenote/__init__.py",
+        "cenote/config.py",
+        "cenote/gas_usage.py",
     ],
     deps = [
         # requirement("pint"),        
@@ -37,17 +37,27 @@ py_binary(
         "scripts/calc_gas_usage.py",
     ],
     deps = [
-        ":scuba",
+        ":cenote",
     ],
 )
 
 py_binary(
-    name = "calc_scr",
+    name = "scr_from_sac",
     srcs = [
-        "scripts/calc_scr.py",
+        "scripts/scr_from_sac.py",
     ],
     deps = [
-        ":scuba",
+        ":cenote",
+    ],
+)
+
+py_binary(
+    name = "sac_from_scr",
+    srcs = [
+        "scripts/sac_from_scr.py",
+    ],
+    deps = [
+        ":cenote",
     ],
 )
 
@@ -59,6 +69,6 @@ py_binary(
         "test/python/test_gas_usage.py",
     ],
     deps = [
-        ":scuba",
+        ":cenote",
     ],
 )
