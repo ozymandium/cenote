@@ -210,11 +210,10 @@ class Profile:
             raise Exception("Need at least 2 points")
         if points[0].time != 0:
             raise Exception("starting point time must be zero")
-        self.points = points
-        # check time increase
         for idx in range(1, len(self.points)):
             if self.points[idx - 1].time >= self.points[idx].time:
                 raise Exception("Time into dive must increase at every point in profile.")
+        self.points = points
 
     @staticmethod
     def from_dict(data):
