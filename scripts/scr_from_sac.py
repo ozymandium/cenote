@@ -37,8 +37,8 @@ def main(args):
 
     # create objects
     tank = gu.Tank(max_gas_volume, max_pressure)
-    sac = gu.Sac(pressure_rate, tank)
-    volume_rate = sac.scr.volume_rate
+    scr = gu.Scr.from_sac(pressure_rate, tank)
+    volume_rate = scr.volume_rate
 
     # convert to output units if requested
     if units:

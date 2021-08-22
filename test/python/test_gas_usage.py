@@ -132,33 +132,6 @@ class TestTank(PintTest):
         self.assertRaises(pint.errors.DimensionalityError, gu.Tank, max_gas_volume, max_pressure)
 
 
-class TestSac(PintTest):
-    def test_construction(self):
-        pressure_rate = 1 * UREG.psi / UREG.minute
-        max_gas_volume = 100 * UREG.liter
-        max_pressure = 100 * UREG.psi
-        tank = gu.Tank(max_gas_volume, max_pressure)
-        sac = gu.Sac(pressure_rate, tank)
-        self.assertPintEqual(sac.pressure_rate, pressure_rate)
-        self.assertPintEqual(sac.tank.max_gas_volume, max_gas_volume)
-        self.assertPintEqual(sac.tank.max_pressure, max_pressure)
-
-    def test_construction_wrong_units(self):
-        pressure_rate = 1 * UREG.psi / UREG.gram
-        max_gas_volume = 100 * UREG.liter
-        max_pressure = 100 * UREG.psi
-        tank = gu.Tank(max_gas_volume, max_pressure)
-        self.assertRaises(pint.errors.DimensionalityError, gu.Sac, pressure_rate, tank)
-
-    def test_scr(self):
-        pressure_rate = UREG.parse_expression("30psi/min")
-        max_gas_volume = 3000 * UREG.liter
-        max_pressure = max_pressure = 3000 * UREG.psi
-        tank = gu.Tank(max_gas_volume, max_pressure)
-        sac = gu.Sac(pressure_rate, tank)
-        self.assertPintEqual(sac.scr.volume_rate, 30 * UREG.liter / UREG.minute)
-
-
 class TestScr(PintTest):
     def test_construction(self):
         volume_rate = 0.1 * UREG.parse_expression("L/min")
@@ -179,9 +152,7 @@ class TestScr(PintTest):
         tank = gu.Tank(max_gas_volume, max_pressure)
         scr = gu.Scr(volume_rate)
         sac = scr.sac(tank)
-        self.assertPintEqual(sac.pressure_rate, 1 * UREG.psi / UREG.minute)
-        self.assertPintEqual(sac.tank.max_gas_volume, max_gas_volume)
-        self.assertPintEqual(sac.tank.max_pressure, max_pressure)
+        self.assertPintEqual(sac, 1 * UREG.psi / UREG.minute)
 
     def test_at_depth(self):
         volume_rate = 1 * UREG.L / UREG.min
@@ -191,6 +162,21 @@ class TestScr(PintTest):
         self.assertPintAlmostEqual(scr.at_depth(33 * UREG.ft), 2 * volume_rate, tolerance)
         self.assertPintAlmostEqual(scr.at_depth(66 * UREG.ft), 3 * volume_rate, tolerance)
 
+    def test_from_sac(self):
+        pressure_rate = UREG.parse_expression("30psi/min")
+        max_gas_volume = 3000 * UREG.liter
+        max_pressure = max_pressure = 3000 * UREG.psi
+        tank = gu.Tank(max_gas_volume, max_pressure)
+        scr = gu.Scr.from_sac(pressure_rate, tank)
+        self.assertPintEqual(scr.volume_rate, 30 * UREG.liter / UREG.minute)
+
+    def test_from_sac_wrong_units(self):
+        bad_pressure_rate = UREG.parse_expression("30inch/min")
+        max_gas_volume = 3000 * UREG.liter
+        max_pressure = max_pressure = 3000 * UREG.psi
+        tank = gu.Tank(max_gas_volume, max_pressure)
+        self.assertRaises(pint.errors.DimensionalityError, gu.Scr.from_sac, bad_pressure_rate, tank)
+
 
 class TestSacScrRoundTrip(PintTest):
     def test_round_trip(self):
@@ -198,9 +184,9 @@ class TestSacScrRoundTrip(PintTest):
         max_gas_volume = 80 * UREG.ft ** 3
         max_pressure = 3000 * UREG.psi
         tank = gu.Tank(max_gas_volume, max_pressure)
-        sac = gu.Sac(pressure_rate, tank)
-        # leave out the unit conversion here to ensure that units are the same.
-        self.assertEqual(sac.scr.volume_rate, sac.scr.sac(tank).scr.volume_rate)
+        scr_from_sac = gu.Scr.from_sac(pressure_rate, tank)
+        sac_from_scr = scr_from_sac.sac(tank)
+        self.assertPintEqual(sac_from_scr, pressure_rate)
 
 
 class TestProfile(PintTest):

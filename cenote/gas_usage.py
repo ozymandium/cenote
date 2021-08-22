@@ -61,7 +61,7 @@ class Scr:
     """
     SCR: Surface Consumption Rate.
     Gas consumption in volume of surface-pressure gas per minute.
-    This is intended to be the fundamental gas use value, with Sac being a secondary derived value.
+    This is intended to be the fundamental gas use value, with SAC being a secondary derived value.
 
     Members
     -------
@@ -79,9 +79,39 @@ class Scr:
     def __str__(self):
         return "{:.3f}".format(self.volume_rate)
 
+    @staticmethod
+    def from_sac(pressure_rate, tank: Tank):
+        """
+        Compute SCR from Surface Air Consumption (SAC).
+
+        Parameters
+        ----------
+        pressure_rate : pint config.PRESSURE_RATE_UNIT
+            Decrease in pressure over time for the provided tank
+        tank : Tank
+            The tank that coresponds to this consumption rate.
+        """
+        volume_rate = (
+            pressure_rate.to(config.PRESSURE_RATE_UNIT) / tank.max_pressure * tank.max_gas_volume
+        )
+        return Scr(volume_rate)
+
     def sac(self, tank: Tank):
-        pressure_rate = self.volume_rate * tank.max_pressure / tank.max_gas_volume
-        return Sac(pressure_rate, tank)
+        """SAC: Surface Air Consumption
+        Consumption of gas from a specific tank measured in how quickly that tank's pressure is reduced.
+
+        Parameters
+        ----------
+        pressure_rate : pint config.PRESSURE_RATE_UNIT
+            Decrease in pressure over time for the provided tank
+        tank : Tank
+            The tank that coresponds to this consumption rate
+
+        Returns
+        -------
+        pint config.PRESSURE_RATE_UNIT
+        """
+        return self.volume_rate * tank.max_pressure / tank.max_gas_volume
 
     def at_depth(self, depth):
         """Translate SCR to volume rate at a particular depth
@@ -96,38 +126,6 @@ class Scr:
         """
         scaling = pressure_at_depth(depth).to(UREG.atm).magnitude
         return self.volume_rate * scaling
-
-
-class Sac:
-    """
-    SAC: Surface Air Consumption
-    Consumption of surface-pressure gas from a specific tank measured in how quickly that
-    tank's pressure is reduced.
-    This is not supposed to be the primary was of computing gas use, but it is intended to be used
-    often as a way of deriving SCR, because this is what a diver is able to observe easily.
-
-    Members
-    -------
-    pressure_rate : pint config.PRESSURE_RATE_UNIT
-        Decrease in pressure over time for the provided tank
-    tank : Tank
-        The tank that coresponds to this consumption rate
-    scr : Scr
-        The rate of consumption of 1atm gas by volume.
-    """
-
-    def __init__(self, pressure_rate, tank: Tank):
-        """
-        Parameters
-        ----------
-        pressure_rate : pint config.PRESSURE_RATE_UNIT
-            Decrease in pressure over time for the provided tank
-        tank : Tank
-            The tank that coresponds to this consumption rate
-        """
-        self.pressure_rate = pressure_rate.to(config.PRESSURE_RATE_UNIT)
-        self.tank = tank
-        self.scr = Scr(self.pressure_rate / self.tank.max_pressure * self.tank.max_gas_volume)
 
 
 class ProfilePoint:

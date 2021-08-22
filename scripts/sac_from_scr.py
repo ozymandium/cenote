@@ -39,14 +39,13 @@ def main(args):
     scr = gu.Scr(volume_rate)
     tank = gu.Tank(max_gas_volume, max_pressure)
     sac = scr.sac(tank)
-    pressure_rate = sac.pressure_rate
 
     # convert if desired
     if units:
-        pressure_rate = pressure_rate.to(units)
+        sac = sac.to(units)
 
     # output
-    print("{:.2f}".format(pressure_rate))
+    print("{:.2f}".format(sac))
 
 
 if __name__ == "__main__":
