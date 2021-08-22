@@ -14,8 +14,8 @@ def parse_args():
 
 def parse_dive(data: dict):
     # SCR
-    volume_rate = UREG.parse_expression(data["scr"])
-    default_scr = gu.Scr(volume_rate)
+    default_volume_rate = UREG.parse_expression(data["scr"])
+    default_scr = gu.Scr(default_volume_rate)
 
     # Profile
     profile = []
@@ -23,7 +23,8 @@ def parse_dive(data: dict):
         time = UREG.parse_expression(point_data["time"])
         depth = UREG.parse_expression(point_data["depth"])
         if "scr" in point_data:
-            scr = UREG.parse_expression(point_data["scr"])
+            volume_rate = UREG.parse_expression(point_data["scr"])
+            scr = gu.Scr(volume_rate)
         else:
             scr = default_scr
         point = gu.ProfilePoint(time, depth, scr)
