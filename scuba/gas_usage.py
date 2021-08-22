@@ -93,8 +93,8 @@ class Scr:
 class Sac:
     """
     SAC: Surface Air Consumption
-    Consumption of surface-pressure gas from a specific tank measured in how quickly that 
-    tank's pressure is reduced. 
+    Consumption of surface-pressure gas from a specific tank measured in how quickly that
+    tank's pressure is reduced.
     This is not supposed to be the primary was of computing gas use, but it is intended to be used
     often as a way of driving SCR, because this is what a diver is able to observe easilyh.
 
@@ -126,6 +126,7 @@ class Sac:
         pressure_rate = UREG.parse_expression(data["pressure_rate"])
         tank = Tank.from_dict(data["tank"])
         return Sac(pressure_rate, tank)
+
 
 class ProfilePoint:
     """
@@ -289,4 +290,3 @@ class Dive:
             section = ProfileSection(self.profile.points[idx - 1], self.profile.points[idx])
             volume += section.gas_usage(self.scr)
         return volume
-

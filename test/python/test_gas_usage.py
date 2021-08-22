@@ -105,7 +105,9 @@ class TestProfileSection(PintTest):
         scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
         section = gu.ProfileSection(pt0, pt1)
         consumption = section.gas_usage(scr)
-        self.assertPintAlmostEqual(consumption, 3 * 3.75 * UREG.liter, self.GAS_USAGE_VOLUME_TOLERANCE)
+        self.assertPintAlmostEqual(
+            consumption, 3 * 3.75 * UREG.liter, self.GAS_USAGE_VOLUME_TOLERANCE
+        )
 
     def test_trapezoid_gas_usage(self):
         pt0 = gu.ProfilePoint(0 * UREG.minute, depth=0 * UREG.foot)
@@ -113,7 +115,9 @@ class TestProfileSection(PintTest):
         scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
         section = gu.ProfileSection(pt0, pt1)
         consumption = section.gas_usage(scr)
-        self.assertPintAlmostEqual(consumption, 2 * 3.75 * UREG.liter, self.GAS_USAGE_VOLUME_TOLERANCE)
+        self.assertPintAlmostEqual(
+            consumption, 2 * 3.75 * UREG.liter, self.GAS_USAGE_VOLUME_TOLERANCE
+        )
 
 
 class TestTank(PintTest):
@@ -259,6 +263,7 @@ class TestProfile(PintTest):
         self.assertPintEqual(profile.points[1].time, 1 * UREG.sec)
         self.assertPintEqual(profile.points[1].depth, 2 * UREG.meter)
 
+
 class TestDive(PintTest):
     def test_gas_usage(self):
         data = [
@@ -268,7 +273,7 @@ class TestDive(PintTest):
         ]
         profile = gu.Profile.from_dict(data)
         scr = gu.Scr(1.0 * UREG.liter / UREG.minute)
-        dive = gu.Dive(scr, profile)        
+        dive = gu.Dive(scr, profile)
         self.assertPintAlmostEqual(dive.gas_usage(), 3.0 * UREG.liter, 1e-12 * config.VOLUME_UNIT)
 
     def test_from_dict_scr(self):
@@ -287,10 +292,7 @@ class TestDive(PintTest):
         data = {
             "sac": {
                 "pressure_rate": "1 psi/min",
-                "tank": {
-                    "max_gas_volume": "1L",
-                    "max_pressure": "1psi"
-                }
+                "tank": {"max_gas_volume": "1L", "max_pressure": "1psi"},
             },
             "profile": [
                 {"time": "0 min", "depth": "0 feet"},
