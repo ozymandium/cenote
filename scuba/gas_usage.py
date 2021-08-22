@@ -208,6 +208,8 @@ class Profile:
     def __init__(self, points: list[ProfilePoint]):
         if len(points) < 2:
             raise Exception("Need at least 2 points")
+        if points[0].time != 0:
+            raise Exception("starting point time must be zero")
         self.points = points
         # check time increase
         for idx in range(1, len(self.points)):

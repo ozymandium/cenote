@@ -241,22 +241,29 @@ class TestProfile(PintTest):
         self.assertEqual(pt1.time, profile.points[1].time)
         self.assertEqual(pt1.depth, profile.points[1].depth)
 
-    def test_from_dict(self):
+    def test_nonzero_first_point(self):
         data = [
             {"time": "1sec", "depth": "1meter"},
             {"time": "2sec", "depth": "2meter"},
         ]
+        self.assertRaises(Exception, gu.Profile.from_dict, data)
+
+    def test_from_dict(self):
+        data = [
+            {"time": "0sec", "depth": "1meter"},
+            {"time": "1sec", "depth": "2meter"},
+        ]
         profile = gu.Profile.from_dict(data)
-        self.assertPintEqual(profile.points[0].time, 1 * UREG.sec)
+        self.assertPintEqual(profile.points[0].time, 0 * UREG.sec)
         self.assertPintEqual(profile.points[0].depth, 1 * UREG.meter)
-        self.assertPintEqual(profile.points[1].time, 2 * UREG.sec)
+        self.assertPintEqual(profile.points[1].time, 1 * UREG.sec)
         self.assertPintEqual(profile.points[1].depth, 2 * UREG.meter)
 
     def test_gas_usage(self):
         data = [
+            {"time": "0 min", "depth": "0 feet"},
             {"time": "1 min", "depth": "0 feet"},
-            {"time": "2 min", "depth": "0 feet"},
-            {"time": "3 min", "depth": "66 feet"},
+            {"time": "2 min", "depth": "66 feet"},
         ]
         profile = gu.Profile.from_dict(data)
         scr = gu.Scr(1.0 * UREG.liter / UREG.minute)
@@ -267,9 +274,9 @@ class TestProfile(PintTest):
 class TestDive(PintTest):
     def test_gas_usage(self):
         data = [
+            {"time": "0 min", "depth": "0 feet"},
             {"time": "1 min", "depth": "0 feet"},
-            {"time": "2 min", "depth": "0 feet"},
-            {"time": "3 min", "depth": "66 feet"},
+            {"time": "2 min", "depth": "66 feet"},
         ]
         profile = gu.Profile.from_dict(data)
         scr = gu.Scr(1.0 * UREG.liter / UREG.minute)
@@ -280,9 +287,9 @@ class TestDive(PintTest):
         data = {
             "scr": "1 l/min",
             "profile": [
+                {"time": "0 min", "depth": "0 feet"},
                 {"time": "1 min", "depth": "0 feet"},
-                {"time": "2 min", "depth": "0 feet"},
-                {"time": "3 min", "depth": "66 feet"},
+                {"time": "2 min", "depth": "66 feet"},
             ],
         }
         dive = gu.Dive.from_dict(data)
@@ -298,9 +305,9 @@ class TestDive(PintTest):
                 }
             },
             "profile": [
+                {"time": "0 min", "depth": "0 feet"},
                 {"time": "1 min", "depth": "0 feet"},
-                {"time": "2 min", "depth": "0 feet"},
-                {"time": "3 min", "depth": "66 feet"},
+                {"time": "2 min", "depth": "66 feet"},
             ],
         }
         dive = gu.Dive.from_dict(data)
