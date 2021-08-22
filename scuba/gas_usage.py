@@ -8,7 +8,7 @@ UREG = pint.UnitRegistry()
 
 TIME_UNIT = UREG.minute
 DEPTH_UNIT = UREG.foot
-VOLUME_UNIT = UREG.liter
+VOLUME_UNIT = UREG.foot**3
 PRESSURE_UNIT = UREG.psi
 VOLUME_RATE_UNIT = VOLUME_UNIT / TIME_UNIT
 PRESSURE_RATE_UNIT = PRESSURE_UNIT / TIME_UNIT
@@ -30,7 +30,7 @@ def pressure_at_depth(depth):
     pint pressure
     """
     SCALING = (1.0 * UREG.atm) / (33.0 * UREG.foot)
-    return 1.0 * UREG.atm + depth.to(UREG.foot) * SCALING
+    return (1.0 * UREG.atm + depth.to(UREG.foot) * SCALING).to(PRESSURE_UNIT)
 
 
 class Tank:
@@ -240,7 +240,7 @@ class Profile:
         -------
         pint volume
         """
-        volume = 0.0 * UREG.liter
+        volume = 0.0 * VOLUME_UNIT
         for idx in range(1, len(self.points)):
             section = ProfileSection(self.points[idx - 1], self.points[idx])
             volume += section.gas_usage(scr)

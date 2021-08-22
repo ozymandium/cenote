@@ -27,7 +27,7 @@ class TestPressureAtDepth(PintTest):
         }
 
         for depth, pressure in VALUES.items():
-            self.assertEqual(gu.pressure_at_depth(depth), pressure)
+            self.assertPintEqual(gu.pressure_at_depth(depth), pressure)
 
     def test_almost(self):
         VALUES = {
@@ -78,6 +78,11 @@ class TestProfilePoint(PintTest):
 
 
 class TestProfileSection(PintTest):
+
+    # we define stuff in liters and the moduel does stuff in ft^3 (maybe, who knows, it's configurable)
+    # so give it a little numerical round off wiggle room.
+    GAS_USAGE_VOLUME_TOLERANCE = 1e-12 * gu.VOLUME_UNIT
+
     def test_construction(self):
         pt0 = gu.ProfilePoint(1 * UREG.minute, depth=12 * UREG.foot)
         pt1 = gu.ProfilePoint(2 * UREG.minute, depth=15 * UREG.foot)
@@ -91,7 +96,7 @@ class TestProfileSection(PintTest):
         scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
         section = gu.ProfileSection(pt0, pt1)
         consumption = section.gas_usage(scr)
-        self.assertPintEqual(consumption, 3.75 * UREG.liter)
+        self.assertPintAlmostEqual(consumption, 3.75 * UREG.liter, self.GAS_USAGE_VOLUME_TOLERANCE)
 
     def test_depth_gas_usage_square(self):
         pt0 = gu.ProfilePoint(0 * UREG.minute, depth=66 * UREG.foot)
@@ -99,7 +104,7 @@ class TestProfileSection(PintTest):
         scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
         section = gu.ProfileSection(pt0, pt1)
         consumption = section.gas_usage(scr)
-        self.assertPintEqual(consumption, 3 * 3.75 * UREG.liter)
+        self.assertPintAlmostEqual(consumption, 3 * 3.75 * UREG.liter, self.GAS_USAGE_VOLUME_TOLERANCE)
 
     def test_trapezoid_gas_usage(self):
         pt0 = gu.ProfilePoint(0 * UREG.minute, depth=0 * UREG.foot)
@@ -107,7 +112,7 @@ class TestProfileSection(PintTest):
         scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
         section = gu.ProfileSection(pt0, pt1)
         consumption = section.gas_usage(scr)
-        self.assertPintEqual(consumption, 2 * 3.75 * UREG.liter)
+        self.assertPintAlmostEqual(consumption, 2 * 3.75 * UREG.liter, self.GAS_USAGE_VOLUME_TOLERANCE)
 
 
 class TestTank(PintTest):
@@ -206,9 +211,9 @@ class TestScr(PintTest):
         tank = gu.Tank(max_gas_volume, max_pressure)
         scr = gu.Scr(volume_rate)
         sac = scr.sac(tank)
-        self.assertEqual(sac.pressure_rate, 1 * UREG.psi / UREG.minute)
-        self.assertEqual(sac.tank.max_gas_volume, max_gas_volume)
-        self.assertEqual(sac.tank.max_pressure, max_pressure)
+        self.assertPintEqual(sac.pressure_rate, 1 * UREG.psi / UREG.minute)
+        self.assertPintEqual(sac.tank.max_gas_volume, max_gas_volume)
+        self.assertPintEqual(sac.tank.max_pressure, max_pressure)
 
 
 class TestSacScrRoundTrip(PintTest):
@@ -218,6 +223,7 @@ class TestSacScrRoundTrip(PintTest):
         max_pressure = 3000 * UREG.psi
         tank = gu.Tank(max_gas_volume, max_pressure)
         sac = gu.Sac(pressure_rate, tank)
+        # leave out the unit conversion here to ensure that units are the same.
         self.assertEqual(sac.scr.volume_rate, sac.scr.sac(tank).scr.volume_rate)
 
 
@@ -253,7 +259,8 @@ class TestProfile(PintTest):
         ]
         profile = gu.Profile.from_dict(data)
         scr = gu.Scr(1.0 * UREG.liter / UREG.minute)
-        self.assertPintEqual(profile.gas_usage(scr), 3.0 * UREG.liter)
+        # allow some wiggle since we define stuff in different units
+        self.assertPintAlmostEqual(profile.gas_usage(scr), 3.0 * UREG.liter, 1e-12 * gu.VOLUME_UNIT)
 
 
 if __name__ == "__main__":
