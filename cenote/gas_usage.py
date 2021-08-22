@@ -53,12 +53,6 @@ class Tank:
         self.max_pressure = max_pressure.to(config.PRESSURE_UNIT)
         self.volume = self.max_gas_volume / self.max_pressure.to(UREG.atm).magnitude
 
-    @staticmethod
-    def from_dict(data):
-        max_gas_volume = UREG.parse_expression(data["max_gas_volume"])
-        max_pressure = UREG.parse_expression(data["max_pressure"])
-        return Tank(max_gas_volume, max_pressure)
-
     def __str__(self):
         return "{} @ {}".format(self.gas_volume, self.max_pressure)
 
@@ -110,7 +104,7 @@ class Sac:
     Consumption of surface-pressure gas from a specific tank measured in how quickly that
     tank's pressure is reduced.
     This is not supposed to be the primary was of computing gas use, but it is intended to be used
-    often as a way of driving SCR, because this is what a diver is able to observe easilyh.
+    often as a way of deriving SCR, because this is what a diver is able to observe easily.
 
     Members
     -------
@@ -134,12 +128,6 @@ class Sac:
         self.pressure_rate = pressure_rate.to(config.PRESSURE_RATE_UNIT)
         self.tank = tank
         self.scr = Scr(self.pressure_rate / self.tank.max_pressure * self.tank.max_gas_volume)
-
-    @staticmethod
-    def from_dict(data: dict):
-        pressure_rate = UREG.parse_expression(data["pressure_rate"])
-        tank = Tank.from_dict(data["tank"])
-        return Sac(pressure_rate, tank)
 
 
 class ProfilePoint:
@@ -168,12 +156,6 @@ class ProfilePoint:
 
     def __str__(self):
         return "{:.1f}: {:.1f}".format(self.time, self.depth)
-
-    @staticmethod
-    def from_dict(data):
-        time = UREG.parse_expression(data["time"])
-        depth = UREG.parse_expression(data["depth"])
-        return ProfilePoint(time, depth)
 
 
 class ProfileSection:
@@ -230,14 +212,6 @@ class Profile:
                 raise Exception("Time into dive must increase at every point in profile.")
         self.points = points
 
-    @staticmethod
-    def from_dict(data):
-        points = []
-        for point_data in data:
-            point = ProfilePoint.from_dict(point_data)
-            points.append(point)
-        return Profile(points)
-
 
 class Dive:
     """
@@ -250,46 +224,6 @@ class Dive:
     def __init__(self, scr: Scr, profile: Profile):
         self.scr = scr
         self.profile = profile
-
-    @staticmethod
-    def from_yaml(path):
-        """
-        Parameters
-        ----------
-        path : str
-            File path to a YAML file. Specification set by example for now :/
-
-        Returns
-        -------
-        Dive
-        """
-        with open(path, "r") as f:
-            data = yaml.load(f, Loader=yaml.FullLoader)
-        return Dive.from_dict(data)
-
-    @staticmethod
-    def from_dict(data):
-        """
-        Parameters
-        ----------
-        data : dict
-            Parsed full YAML for a dive.
-
-        Returns
-        -------
-        Dive
-        """
-        # try to use SCR
-        if "scr" in data:
-            scr = Scr(volume_rate=UREG.parse_expression(data["scr"]))
-        # if no SCR, try to use SAC
-        else:
-            if "sac" not in data:
-                raise Exception("Must provid either `scr` or `sac` section.")
-            sac = Sac.from_dict(data["sac"])
-            scr = sac.scr
-        profile = Profile.from_dict(data["profile"])
-        return Dive(scr, profile)
 
     def gas_usage(self):
         """

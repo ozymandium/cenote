@@ -7,7 +7,10 @@ import argparse
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-s", "--scr", required=True, help="Rate of pressure drop in tank (eg 20psi/min)."
+        "-s",
+        "--scr",
+        required=True,
+        help="Surface Consumption Rate in volume per time (eg 15L/min).",
     )
     parser.add_argument(
         "-v",

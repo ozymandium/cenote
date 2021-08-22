@@ -50,28 +50,13 @@ class TestProfilePoint(PintTest):
         self.assertPintEqual(depth, point.depth)
         self.assertEqual(point.depth.units, config.DEPTH_UNIT)
 
-    def test_from_dict(self):
-        data = {
-            "time": "60s",
-            "depth": "12in",
-        }
-        point = gu.ProfilePoint.from_dict(data)
-        self.assertPintEqual(point.time, 1 * UREG.minute)
-        self.assertEqual(point.time.units, config.TIME_UNIT)
-        self.assertPintEqual(point.depth, 1 * UREG.foot)
-        self.assertEqual(point.depth.units, config.DEPTH_UNIT)
-
     def test_wrong_units(self):
-        bad_time = {
-            "time": "60in^3",
-            "depth": "12in",
-        }
-        bad_depth = {
-            "time": "60s",
-            "depth": "2kPa",
-        }
-        self.assertRaises(pint.errors.DimensionalityError, gu.ProfilePoint.from_dict, bad_time)
-        self.assertRaises(pint.errors.DimensionalityError, gu.ProfilePoint.from_dict, bad_depth)
+        good_time = 0.0 * UREG.second
+        bad_time = UREG.parse_expression("60in^3")
+        good_depth = UREG.parse_expression("12in")
+        bad_depth = UREG.parse_expression("2kPa")
+        self.assertRaises(pint.errors.DimensionalityError, gu.ProfilePoint, bad_time, good_depth)
+        self.assertRaises(pint.errors.DimensionalityError, gu.ProfilePoint, good_time, bad_depth)
 
     def test_negative_value(self):
         self.assertRaises(ValueError, gu.ProfilePoint, -1 * UREG.minute, 0 * UREG.meter)
@@ -146,15 +131,6 @@ class TestTank(PintTest):
         max_pressure = 3000 * UREG.foot
         self.assertRaises(pint.errors.DimensionalityError, gu.Tank, max_gas_volume, max_pressure)
 
-    def test_from_dict(self):
-        data = {
-            "max_gas_volume": "10 liter",
-            "max_pressure": "3000 psi",
-        }
-        tank = gu.Tank.from_dict(data)
-        self.assertPintEqual(tank.max_gas_volume, 10 * UREG.liter)
-        self.assertPintEqual(tank.max_pressure, 3000 * UREG.psi)
-
 
 class TestSac(PintTest):
     def test_construction(self):
@@ -173,19 +149,6 @@ class TestSac(PintTest):
         max_pressure = 100 * UREG.psi
         tank = gu.Tank(max_gas_volume, max_pressure)
         self.assertRaises(pint.errors.DimensionalityError, gu.Sac, pressure_rate, tank)
-
-    def test_from_dict_pressure_rate(self):
-        data = {
-            "pressure_rate": "30psi/min",
-            "tank": {
-                "max_gas_volume": "3000L",
-                "max_pressure": "3000psi",
-            },
-        }
-        sac = gu.Sac.from_dict(data)
-        self.assertPintEqual(sac.pressure_rate, 30 * UREG.psi / UREG.minute)
-        self.assertPintEqual(sac.tank.max_gas_volume, 3000 * UREG.liter)
-        self.assertPintEqual(sac.tank.max_pressure, 3000 * UREG.psi)
 
     def test_scr(self):
         pressure_rate = UREG.parse_expression("30psi/min")
@@ -254,61 +217,23 @@ class TestProfile(PintTest):
         self.assertEqual(pt1.depth, profile.points[1].depth)
 
     def test_nonzero_first_point(self):
-        data = [
-            {"time": "1sec", "depth": "1meter"},
-            {"time": "2sec", "depth": "2meter"},
+        points = [
+            gu.ProfilePoint(UREG.parse_expression("1sec"), UREG.parse_expression("1meter")),
+            gu.ProfilePoint(UREG.parse_expression("2sec"), UREG.parse_expression("2meter")),
         ]
-        self.assertRaises(Exception, gu.Profile.from_dict, data)
-
-    def test_from_dict(self):
-        data = [
-            {"time": "0sec", "depth": "1meter"},
-            {"time": "1sec", "depth": "2meter"},
-        ]
-        profile = gu.Profile.from_dict(data)
-        self.assertPintEqual(profile.points[0].time, 0 * UREG.sec)
-        self.assertPintEqual(profile.points[0].depth, 1 * UREG.meter)
-        self.assertPintEqual(profile.points[1].time, 1 * UREG.sec)
-        self.assertPintEqual(profile.points[1].depth, 2 * UREG.meter)
+        self.assertRaises(Exception, gu.Profile, points)
 
 
 class TestDive(PintTest):
     def test_gas_usage(self):
-        data = [
-            {"time": "0 min", "depth": "0 feet"},
-            {"time": "1 min", "depth": "0 feet"},
-            {"time": "2 min", "depth": "66 feet"},
+        points = [
+            gu.ProfilePoint(UREG.parse_expression("0 min"), UREG.parse_expression("0 feet")),
+            gu.ProfilePoint(UREG.parse_expression("1 min"), UREG.parse_expression("0 feet")),
+            gu.ProfilePoint(UREG.parse_expression("2 min"), UREG.parse_expression("66 feet")),
         ]
-        profile = gu.Profile.from_dict(data)
+        profile = gu.Profile(points)
         scr = gu.Scr(1.0 * UREG.liter / UREG.minute)
         dive = gu.Dive(scr, profile)
-        self.assertPintAlmostEqual(dive.gas_usage(), 3.0 * UREG.liter, 1e-12 * config.VOLUME_UNIT)
-
-    def test_from_dict_scr(self):
-        data = {
-            "scr": "1 l/min",
-            "profile": [
-                {"time": "0 min", "depth": "0 feet"},
-                {"time": "1 min", "depth": "0 feet"},
-                {"time": "2 min", "depth": "66 feet"},
-            ],
-        }
-        dive = gu.Dive.from_dict(data)
-        self.assertPintAlmostEqual(dive.gas_usage(), 3.0 * UREG.liter, 1e-12 * config.VOLUME_UNIT)
-
-    def test_from_dict_sac(self):
-        data = {
-            "sac": {
-                "pressure_rate": "1 psi/min",
-                "tank": {"max_gas_volume": "1L", "max_pressure": "1psi"},
-            },
-            "profile": [
-                {"time": "0 min", "depth": "0 feet"},
-                {"time": "1 min", "depth": "0 feet"},
-                {"time": "2 min", "depth": "66 feet"},
-            ],
-        }
-        dive = gu.Dive.from_dict(data)
         self.assertPintAlmostEqual(dive.gas_usage(), 3.0 * UREG.liter, 1e-12 * config.VOLUME_UNIT)
 
 
