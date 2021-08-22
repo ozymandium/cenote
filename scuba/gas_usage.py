@@ -49,8 +49,8 @@ class Tank:
         max_pressure : config.PRESSURE_UNIT
             The maximum pressure, and the pressure to which the max_gas_volume corresponds.
         """
-        self.max_pressure = max_pressure.to(config.PRESSURE_UNIT)
         self.max_gas_volume = max_gas_volume.to(config.VOLUME_UNIT)
+        self.max_pressure = max_pressure.to(config.PRESSURE_UNIT)
         self.volume = self.max_gas_volume / self.max_pressure.to(UREG.atm).magnitude
 
     @staticmethod
@@ -136,9 +136,12 @@ class ProfilePoint:
         Time elapsed since the beginning of the dive, in config.TIME_UNIT
     depth : pint distance
         Distance below surface () in config.DEPTH_UNIT
+    scr : pint VOLUME_RATE_UNIT
+        The SCR at this point, which is assumed the have been constant from the previous point until
+        this point.
     """
 
-    def __init__(self, time, depth):
+    def __init__(self, time, depth, scr):
         """
         Parameters
         ----------
@@ -151,14 +154,21 @@ class ProfilePoint:
             raise ValueError("Time and depth must be positive values")
         self.time = time.to(config.TIME_UNIT)
         self.depth = depth.to(config.DEPTH_UNIT)
+        self.scr = scr.to(config.VOLUME_RATE_UNIT)
 
     def __str__(self):
         return "{:.1f}: {:.1f}".format(self.time, self.depth)
 
     @staticmethod
-    def from_dict(data):
+    def from_dict(data, default_scr=None):
         time = UREG.parse_expression(data["time"])
         depth = UREG.parse_expression(data["depth"])
+        if "scr" not in data:
+            if default_scr is None:
+                raise Exception("default SCR must be provided if none is in the point data")
+            scr = default_scr
+        else:
+            scr = UREG.parse_expression(data["scr"])
         return ProfilePoint(time, depth)
 
 

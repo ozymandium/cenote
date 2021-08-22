@@ -20,6 +20,7 @@ load("@rules_python//python:defs.bzl", "py_library")
 py_library(
     name = "scuba",
     srcs = [
+        "scuba/__init__.py",
         "scuba/config.py",
         "scuba/gas_usage.py",
     ],
@@ -28,10 +29,22 @@ py_library(
     ],
 )
 
+# scripts
+
 py_binary(
     name = "calc_gas_usage",
     srcs = [
         "scripts/calc_gas_usage.py",
+    ],
+    deps = [
+        ":scuba",
+    ],
+)
+
+py_binary(
+    name = "calc_scr",
+    srcs = [
+        "scripts/calc_scr.py",
     ],
     deps = [
         ":scuba",
