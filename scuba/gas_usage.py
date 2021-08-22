@@ -1,17 +1,12 @@
+from scuba import config
+
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
 import pint
 
 
-UREG = pint.UnitRegistry()
-
-TIME_UNIT = UREG.minute
-DEPTH_UNIT = UREG.foot
-VOLUME_UNIT = UREG.foot**3
-PRESSURE_UNIT = UREG.psi
-VOLUME_RATE_UNIT = VOLUME_UNIT / TIME_UNIT
-PRESSURE_RATE_UNIT = PRESSURE_UNIT / TIME_UNIT
+UREG = config.UREG
 
 
 def pressure_at_depth(depth):
@@ -30,18 +25,18 @@ def pressure_at_depth(depth):
     pint pressure
     """
     SCALING = (1.0 * UREG.atm) / (33.0 * UREG.foot)
-    return (1.0 * UREG.atm + depth.to(UREG.foot) * SCALING).to(PRESSURE_UNIT)
+    return (1.0 * UREG.atm + depth.to(UREG.foot) * SCALING).to(config.PRESSURE_UNIT)
 
 
 class Tank:
     """
     Members
     -------
-    volume : in VOLUME_UNIT
+    volume : in config.VOLUME_UNIT
         The absolute volume of the tank itself
-    max_gas_volume : in VOLUME_UNIT
+    max_gas_volume : in config.VOLUME_UNIT
         The volume of gas at 1 atm that the tank holds when the tank is at max_pressure.
-    max_pressure : PRESSURE_UNIT
+    max_pressure : config.PRESSURE_UNIT
         The maximum pressure, and the pressure to which the max_gas_volume corresponds.
     """
 
@@ -49,13 +44,13 @@ class Tank:
         """
         Parameters
         ----------
-        max_gas_volume : in VOLUME_UNIT
+        max_gas_volume : in config.VOLUME_UNIT
             The volume of gas at 1 atm that the tank holds when the tank is at max_pressure.
-        max_pressure : PRESSURE_UNIT
+        max_pressure : config.PRESSURE_UNIT
             The maximum pressure, and the pressure to which the max_gas_volume corresponds.
         """
-        self.max_pressure = max_pressure.to(PRESSURE_UNIT)
-        self.max_gas_volume = max_gas_volume.to(VOLUME_UNIT)
+        self.max_pressure = max_pressure.to(config.PRESSURE_UNIT)
+        self.max_gas_volume = max_gas_volume.to(config.VOLUME_UNIT)
         self.volume = self.max_gas_volume / self.max_pressure.to(UREG.atm).magnitude
 
     @staticmethod
@@ -76,16 +71,16 @@ class Scr:
 
     Members
     -------
-    volume_rate : pint VOLUME_RATE_UNIT
+    volume_rate : pint config.VOLUME_RATE_UNIT
     """
 
     def __init__(self, volume_rate):
         """
         Parameters
         ----------
-        volume_rate : pint VOLUME_RATE_UNIT
+        volume_rate : pint config.VOLUME_RATE_UNIT
         """
-        self.volume_rate = volume_rate.to(VOLUME_RATE_UNIT)
+        self.volume_rate = volume_rate.to(config.VOLUME_RATE_UNIT)
 
     def __str__(self):
         return "{:.3f}".format(self.volume_rate)
@@ -105,7 +100,7 @@ class Sac:
 
     Members
     -------
-    pressure_rate : pint PRESSURE_RATE_UNIT
+    pressure_rate : pint config.PRESSURE_RATE_UNIT
         Decrease in pressure over time for the provided tank
     tank : Tank
         The tank that coresponds to this consumption rate
@@ -117,12 +112,12 @@ class Sac:
         """
         Parameters
         ----------
-        pressure_rate : pint PRESSURE_RATE_UNIT
+        pressure_rate : pint config.PRESSURE_RATE_UNIT
             Decrease in pressure over time for the provided tank
         tank : Tank
             The tank that coresponds to this consumption rate
         """
-        self.pressure_rate = pressure_rate.to(PRESSURE_RATE_UNIT)
+        self.pressure_rate = pressure_rate.to(config.PRESSURE_RATE_UNIT)
         self.tank = tank
         self.scr = Scr(self.pressure_rate / self.tank.max_pressure * self.tank.max_gas_volume)
 
@@ -137,9 +132,9 @@ class ProfilePoint:
     Members
     -------
     time : pint time
-        Time elapsed since the beginning of the dive, in TIME_UNIT
+        Time elapsed since the beginning of the dive, in config.TIME_UNIT
     depth : pint distance
-        Distance below surface () in DEPTH_UNIT
+        Distance below surface () in config.DEPTH_UNIT
     """
 
     def __init__(self, time, depth):
@@ -147,14 +142,14 @@ class ProfilePoint:
         Parameters
         ----------
         time : pint time
-            Time elapsed since the beginning of the dive, in TIME_UNIT
+            Time elapsed since the beginning of the dive, in config.TIME_UNIT
         depth : pint distance
-            Distance below surface () in DEPTH_UNIT
+            Distance below surface () in config.DEPTH_UNIT
         """
         if depth < 0 or time < 0:
             raise ValueError("Time and depth must be positive values")
-        self.time = time.to(TIME_UNIT)
-        self.depth = depth.to(DEPTH_UNIT)
+        self.time = time.to(config.TIME_UNIT)
+        self.depth = depth.to(config.DEPTH_UNIT)
 
     def __str__(self):
         return "{:.1f}: {:.1f}".format(self.time, self.depth)
@@ -171,9 +166,9 @@ class ProfileSection:
 
     Members
     -------
-    avg_depth : pint DEPTH_UNIT
+    avg_depth : pint config.DEPTH_UNIT
         Mean depth of the two profile points.
-    duration : pint TIME_UNIT
+    duration : pint config.TIME_UNIT
         Amount of time between the two profile points.
     """
 
@@ -240,7 +235,7 @@ class Profile:
         -------
         pint volume
         """
-        volume = 0.0 * VOLUME_UNIT
+        volume = 0.0 * config.VOLUME_UNIT
         for idx in range(1, len(self.points)):
             section = ProfileSection(self.points[idx - 1], self.points[idx])
             volume += section.gas_usage(scr)

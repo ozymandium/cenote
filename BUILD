@@ -20,6 +20,7 @@ load("@rules_python//python:defs.bzl", "py_library")
 py_library(
     name = "scuba",
     srcs = [
+        "scuba/config.py",
         "scuba/gas_usage.py",
     ],
     deps = [

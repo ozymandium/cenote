@@ -1,9 +1,10 @@
 from scuba import gas_usage as gu
+from scuba import config
 import unittest
 import pint
 
 
-UREG = gu.UREG
+UREG = config.UREG
 
 
 class PintTest(unittest.TestCase):
@@ -45,9 +46,9 @@ class TestProfilePoint(PintTest):
         depth = 0.0 * UREG.meter
         point = gu.ProfilePoint(time, depth)
         self.assertPintEqual(time, point.time)
-        self.assertEqual(point.time.units, gu.TIME_UNIT)
+        self.assertEqual(point.time.units, config.TIME_UNIT)
         self.assertPintEqual(depth, point.depth)
-        self.assertEqual(point.depth.units, gu.DEPTH_UNIT)
+        self.assertEqual(point.depth.units, config.DEPTH_UNIT)
 
     def test_from_dict(self):
         data = {
@@ -56,9 +57,9 @@ class TestProfilePoint(PintTest):
         }
         point = gu.ProfilePoint.from_dict(data)
         self.assertPintEqual(point.time, 1 * UREG.minute)
-        self.assertEqual(point.time.units, gu.TIME_UNIT)
+        self.assertEqual(point.time.units, config.TIME_UNIT)
         self.assertPintEqual(point.depth, 1 * UREG.foot)
-        self.assertEqual(point.depth.units, gu.DEPTH_UNIT)
+        self.assertEqual(point.depth.units, config.DEPTH_UNIT)
 
     def test_wrong_units(self):
         bad_time = {
@@ -81,7 +82,7 @@ class TestProfileSection(PintTest):
 
     # we define stuff in liters and the moduel does stuff in ft^3 (maybe, who knows, it's configurable)
     # so give it a little numerical round off wiggle room.
-    GAS_USAGE_VOLUME_TOLERANCE = 1e-12 * gu.VOLUME_UNIT
+    GAS_USAGE_VOLUME_TOLERANCE = 1e-12 * config.VOLUME_UNIT
 
     def test_construction(self):
         pt0 = gu.ProfilePoint(1 * UREG.minute, depth=12 * UREG.foot)
@@ -129,9 +130,9 @@ class TestTank(PintTest):
         self.assertPintEqual(tank.max_gas_volume, max_gas_volume)
         self.assertPintEqual(max_pressure, tank.max_pressure)
         self.assertPintAlmostEqual(tank.volume, volume, tolerance)
-        self.assertEqual(tank.max_gas_volume.units, gu.VOLUME_UNIT)
-        self.assertEqual(tank.volume.units, gu.VOLUME_UNIT)
-        self.assertEqual(tank.max_pressure.units, gu.PRESSURE_UNIT)
+        self.assertEqual(tank.max_gas_volume.units, config.VOLUME_UNIT)
+        self.assertEqual(tank.volume.units, config.VOLUME_UNIT)
+        self.assertEqual(tank.max_pressure.units, config.PRESSURE_UNIT)
 
     def test_wrong_units(self):
         max_gas_volume = 10 * UREG.cm ** 2
@@ -260,7 +261,7 @@ class TestProfile(PintTest):
         profile = gu.Profile.from_dict(data)
         scr = gu.Scr(1.0 * UREG.liter / UREG.minute)
         # allow some wiggle since we define stuff in different units
-        self.assertPintAlmostEqual(profile.gas_usage(scr), 3.0 * UREG.liter, 1e-12 * gu.VOLUME_UNIT)
+        self.assertPintAlmostEqual(profile.gas_usage(scr), 3.0 * UREG.liter, 1e-12 * config.VOLUME_UNIT)
 
 
 if __name__ == "__main__":
