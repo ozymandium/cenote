@@ -210,8 +210,8 @@ class Profile:
             raise Exception("Need at least 2 points")
         if points[0].time != 0:
             raise Exception("starting point time must be zero")
-        for idx in range(1, len(self.points)):
-            if self.points[idx - 1].time >= self.points[idx].time:
+        for idx in range(1, len(points)):
+            if points[idx - 1].time >= points[idx].time:
                 raise Exception("Time into dive must increase at every point in profile.")
         self.points = points
 
@@ -222,25 +222,6 @@ class Profile:
             point = ProfilePoint.from_dict(point_data)
             points.append(point)
         return Profile(points)
-
-    def gas_usage(self, scr: Scr):
-        """
-        Compute the volume of surface-pressure gas that is used for this depth profile.
-
-        Parameters
-        ----------
-        scr : Scr
-            How fast gas is used on overage for this depth.
-
-        Returns
-        -------
-        pint volume
-        """
-        volume = 0.0 * config.VOLUME_UNIT
-        for idx in range(1, len(self.points)):
-            section = ProfileSection(self.points[idx - 1], self.points[idx])
-            volume += section.gas_usage(scr)
-        return volume
 
 
 class Dive:
@@ -254,10 +235,6 @@ class Dive:
     def __init__(self, scr: Scr, profile: Profile):
         self.scr = scr
         self.profile = profile
-
-    def gas_usage(self):
-        """Compute the surface volume of gas used"""
-        return self.profile.gas_usage(self.scr)
 
     @staticmethod
     def from_yaml(path):
@@ -298,3 +275,18 @@ class Dive:
             scr = sac.scr
         profile = Profile.from_dict(data["profile"])
         return Dive(scr, profile)
+
+    def gas_usage(self):
+        """
+        Compute the volume of surface-pressure gas that is used for this depth profile.
+
+        Returns
+        -------
+        pint volume
+        """
+        volume = 0.0 * config.VOLUME_UNIT
+        for idx in range(1, len(self.profile.points)):
+            section = ProfileSection(self.profile.points[idx - 1], self.profile.points[idx])
+            volume += section.gas_usage(self.scr)
+        return volume
+

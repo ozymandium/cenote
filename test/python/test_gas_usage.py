@@ -259,18 +259,6 @@ class TestProfile(PintTest):
         self.assertPintEqual(profile.points[1].time, 1 * UREG.sec)
         self.assertPintEqual(profile.points[1].depth, 2 * UREG.meter)
 
-    def test_gas_usage(self):
-        data = [
-            {"time": "0 min", "depth": "0 feet"},
-            {"time": "1 min", "depth": "0 feet"},
-            {"time": "2 min", "depth": "66 feet"},
-        ]
-        profile = gu.Profile.from_dict(data)
-        scr = gu.Scr(1.0 * UREG.liter / UREG.minute)
-        # allow some wiggle since we define stuff in different units
-        self.assertPintAlmostEqual(profile.gas_usage(scr), 3.0 * UREG.liter, 1e-12 * config.VOLUME_UNIT)
-
-
 class TestDive(PintTest):
     def test_gas_usage(self):
         data = [
@@ -281,7 +269,7 @@ class TestDive(PintTest):
         profile = gu.Profile.from_dict(data)
         scr = gu.Scr(1.0 * UREG.liter / UREG.minute)
         dive = gu.Dive(scr, profile)        
-        self.assertPintEqual(profile.gas_usage(scr), dive.gas_usage())
+        self.assertPintAlmostEqual(dive.gas_usage(), 3.0 * UREG.liter, 1e-12 * config.VOLUME_UNIT)
 
     def test_from_dict_scr(self):
         data = {
