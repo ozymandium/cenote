@@ -23,6 +23,10 @@ py_library(
         "cenote/__init__.py",
         "cenote/config.py",
         "cenote/gas_usage.py",
+        "cenote/parse/__init__.py",
+        "cenote/parse/shearwater_xml.py",
+        "cenote/parse/yaml.py",
+
     ],
     deps = [
         # requirement("pint"),        
@@ -61,6 +65,16 @@ py_binary(
     deps = [
         ":cenote",
     ],
+)
+
+py_binary(
+    name = "shearwater_xml_to_yaml",
+    srcs = [
+        "cenote/util/shearwater_xml_to_yaml.py",
+    ],
+    deps = [
+        ":cenote",
+    ]
 )
 
 # tests... need to figure out how to write tests
