@@ -7,12 +7,14 @@ import xml.etree.ElementTree as ET
 import ipdb
 import functools
 import sys
+import enum
 
 
 UREG = config.UREG
 DIVE_TIME_UNIT = UREG.millisecond
 IMPERIAL_DEPTH_UNIT = UREG.foot
 IMPERIAL_PRESSURE_RATE_UNIT = UREG.psi / UREG.minute
+IMPERIAL_PRESSURE_UNIT = UREG.psi
 
 
 def debug(*exceptions):
@@ -33,8 +35,23 @@ def debug(*exceptions):
     return decorator
 
 
+def get_time_from_record(record):
+    time_xml = record.find("currentTime")
+    assert time_xml is not None
+    return int(time_xml.text) * DIVE_TIME_UNIT
+
+
+def get_depth_from_record(record):
+    depth_xml = record.find("currentDepth")
+    assert depth_xml is not None
+    return float(depth_xml.text) * depth_unit
+
+
+def get_pressure_rate_from_record(record):
+
+
 @debug()
-def parse_dive_from_shearwater_xml(path: str, tank: gu.Tank):
+def parse_dive_from_shearwater_xml(path: str, tank: gu.Tank, scr_source: gu.ScrSource):
     """
     Parses an XML file output from Shearwater Cloud application.
 
@@ -61,6 +78,7 @@ def parse_dive_from_shearwater_xml(path: str, tank: gu.Tank):
     if use_imperial_units:
         depth_unit = IMPERIAL_DEPTH_UNIT
         pressure_rate_unit = IMPERIAL_PRESSURE_RATE_UNIT
+        pressure_unit = IMPERIAL_PRESSURE_UNIT
     else:
         raise NotImplementedError("metric measurements not yet supported")
 
@@ -68,20 +86,45 @@ def parse_dive_from_shearwater_xml(path: str, tank: gu.Tank):
     profile = []
     records = log.find("diveLogRecords")
     for record in records.iterfind("diveLogRecord"):
-        time_xml = record.find("currentTime")
-        depth_xml = record.find("currentDepth")
-        pressure_rate_xml = record.find("sac").text
-        assert time_xml is not None
-        assert depth_xml is not None
+        # time 
+        time = get_time_from_record(record)
+        # depth
+        depth = get_depth_from_record(record)
+
+        # pressure rate if doing scr from reported sac
+        pressure_rate_xml = record.find("sac")
         assert pressure_rate_xml is not None
-        time = int(time_xml.text) * DIVE_TIME_UNIT
-        depth = float(depth_xml.text) * depth_unit
         try:
-            pressure_rate = float(pressure_rate_xml) * pressure_rate_unit
+            pressure_rate = float(pressure_rate_xml.text) * pressure_rate_unit
             scr = gu.Scr.from_sac(pressure_rate, tank)
         except:
             scr = None
+
+        # pressure if doing scr from change in pressure
+        pressure_xml = record.find("tank0pressurePSI")
+        assert pressure_xml is not None
+        pressure = float(pressure_xml.text) * pressure_unit
+        
+        # make the point
         point = gu.ProfilePoint(time, depth, scr=scr)
         profile.append(point)
 
+    # now return and back-fill default scrs for points with no scr
+    if scr_source is ScrSource.REPORTED:
+        # find first non-none scr as the default
+        for point in dive.profile:
+            if point.scr is not None:
+                print("Using first SCR as default: {}".format(point.scr))
+                scr = point.scr
+                break
+        if scr is None:
+            print("Warning: Requested using first SCR as default, but SCR was never found.")
+    elif scr_source is ScrSource.PRESSURE:
+
     return gu.Dive(profile)
+
+
+class ScrSource(enum.Enum):
+    NONE = enum.auto()
+    REPORTED = enum.auto()
+    PRESSURE = enum.auto()
