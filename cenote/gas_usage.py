@@ -4,12 +4,25 @@ import matplotlib.pyplot as plt
 import numpy as np
 import yaml
 import pint
+import enum
 
 
 UREG = config.UREG
 
 
-def pressure_at_depth(depth):
+@enum.unique
+class Water(enum.Enum):
+    FRESH = enum.auto()
+    SALT = enum.auto()
+
+
+PRESSURE_AT_DEPTH_SCALING = {
+    Water.FRESH: 0.96817119275 * UREG.atm / (10.0 * UREG.meter),
+    Water.SALT: 0.9972163366400002 * UREG.atm / (10.0 * UREG.meter),
+}
+
+
+def pressure_at_depth(depth, water=Water.FRESH):
     """
     Get the pressure [atm] (including surface atmospheric pressure) for a given depth of sea water.
     https://oceanservice.noaa.gov/facts/pressure.html
@@ -24,7 +37,7 @@ def pressure_at_depth(depth):
     -------
     pint pressure
     """
-    SCALING = (1.0 * UREG.atm) / (33.0 * UREG.foot)
+    scaling = PRESSURE_AT_DEPTH_SCALING[water]
     return (1.0 * UREG.atm + depth.to(UREG.foot) * SCALING).to(config.PRESSURE_UNIT)
 
 
