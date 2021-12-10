@@ -69,6 +69,15 @@ class Tank:
     def __str__(self):
         return "{} @ {}".format(self.gas_volume, self.max_pressure)
 
+"""
+Pre-set common tank sizes
+"""
+TANKS = {
+    "al13": Tank(13 * UREG.ft**3, 3000 * UREG.psi),
+    "al80": Tank(77.4 * UREG.ft**3, 3000 * UREG.psi),
+    "lp108": Tank(108 * UREG.ft**3, 2640 * UREG.psi),
+}
+
 
 class Scr:
     """

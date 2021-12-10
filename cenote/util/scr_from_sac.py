@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from cenote import gas_usage as gu
+from cenote.config import UREG
 import pint
 import argparse
 
@@ -12,15 +13,7 @@ def parse_args():
         required=True,
         help="Surface Air Consumption: rate of pressure drop in tank (eg 20psi/min).",
     )
-    parser.add_argument(
-        "-v",
-        "--volume",
-        required=True,
-        help="Volume of 1atm air that the tank holds (eg 80ft**3 for an AL80)",
-    )
-    parser.add_argument(
-        "-p", "--pressure", required=True, help="Maximum rated pressure of the tank (eg 3000psi)"
-    )
+    parser.add_argument("-t", "--tank", required=True, choices=gu.TANKS, help="Name of tank (from list)")
     parser.add_argument(
         "-u", "--units", help="What units to output the SAC in (eg L/min, or cm**3/s)"
     )
@@ -29,14 +22,11 @@ def parse_args():
 
 def main(args):
     # parse inputs
-    ureg = pint.UnitRegistry()
-    pressure_rate = ureg.parse_expression(args.sac)
-    max_gas_volume = ureg.parse_expression(args.volume)
-    max_pressure = ureg.parse_expression(args.pressure)
-    units = ureg.parse_expression(args.units) if args.units else None
+    pressure_rate = UREG.parse_expression(args.sac)
+    tank = gu.TANKS[args.tank]
+    units = UREG.parse_expression(args.units) if args.units else None
 
     # create objects
-    tank = gu.Tank(max_gas_volume, max_pressure)
     scr = gu.Scr.from_sac(pressure_rate, tank)
     volume_rate = scr.volume_rate
 
