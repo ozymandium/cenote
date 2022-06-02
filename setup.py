@@ -4,7 +4,7 @@ setup(
     name = "cenote",
     version = "0.0.1",
     description = "Dive planner",
-    packages = find_packages("python"),
+    packages = find_packages("cenote"),
     python_requires = ">=3.6",
     entry_points = {
         "console_scripts": [
