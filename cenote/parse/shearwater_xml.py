@@ -55,7 +55,7 @@ class ScrSource(enum.Enum):
 
 
 @debug()
-def parse_dive_from_shearwater_xml(path: str, tank: gu.Tank, scr_source: ScrSource):
+def parse_dive_from_shearwater_xml(path: str, tank: gu.Tank):
     """
     Parses an XML file output from Shearwater Cloud application.
 

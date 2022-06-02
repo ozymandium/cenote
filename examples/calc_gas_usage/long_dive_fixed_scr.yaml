@@ -1,0 +1,14 @@
+scr: 0.75 ft^3 / min
+profile:
+  - time: 0 min
+    depth: 0 ft
+  - time: 5 min
+    depth: 130 ft
+  - time: 20 min
+    depth: 85 ft
+  - time: 25 min
+    depth: 20 ft
+  - time: 30 min
+    depth: 20 ft
+  - time: 31 min
+    depth: 0 ft

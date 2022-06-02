@@ -38,7 +38,7 @@ def pressure_at_depth(depth, water=Water.FRESH):
     pint pressure
     """
     scaling = PRESSURE_AT_DEPTH_SCALING[water]
-    return (1.0 * UREG.atm + depth.to(UREG.foot) * SCALING).to(config.PRESSURE_UNIT)
+    return (1.0 * UREG.atm + depth.to(UREG.foot) * scaling).to(config.PRESSURE_UNIT)
 
 
 class Tank:
