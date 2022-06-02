@@ -12,7 +12,7 @@ import yaml
 #
 
 
-def _point_to_dict(point: gu.ProfilePoint) -> dict:
+def _point_to_dict(point: gu.PlanPoint) -> dict:
     d = {
         "time": str(point.time),
         "depth": str(point.depth),
@@ -27,7 +27,7 @@ def _point_to_dict(point: gu.ProfilePoint) -> dict:
 #
 
 
-def parse_dive_from_yaml(path: str) -> gu.Dive:
+def parse_dive_from_yaml(path: str) -> gu.Plan:
     """
     Parameters
     ----------
@@ -56,13 +56,13 @@ def parse_dive_from_yaml(path: str) -> gu.Dive:
             scr = gu.Scr(volume_rate)
         else:
             scr = default_scr
-        point = gu.ProfilePoint(time, depth, scr)
+        point = gu.PlanPoint(time, depth, scr)
         profile.append(point)
 
-    return gu.Dive(profile)
+    return gu.Plan(profile)
 
 
-def export_dive_to_yaml(dive: gu.Dive, path: str, scr=None):
+def export_dive_to_yaml(dive: gu.Plan, path: str, scr=None):
     """
     Parameters
     ----------
@@ -80,7 +80,7 @@ def export_dive_to_yaml(dive: gu.Dive, path: str, scr=None):
         data["scr"] = str(scr)
 
     # Profile
-    data["profile"] = [_point_to_dict(point) for point in dive.profile]
+    data["profile"] = [_point_to_dict(point) for point in dive.points]
 
     with open(path, "w") as f:
         yaml.dump(data, f)

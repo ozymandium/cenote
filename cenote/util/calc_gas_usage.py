@@ -17,11 +17,11 @@ def parse_args():
     return parser.parse_args()
 
 
-def print_dive(dive: gu.Dive):
+def print_dive(plan: gu.Plan):
     print("Profile:")
-    for point in dive.profile:
+    for point in plan.points:
         print("    {}".format(str(point)))
-    gas_usage = dive.gas_usage()
+    gas_usage = gu.Result.from_plan(plan).consumed_volume()
     print("Gas usage: {:.2f}".format(gas_usage))
 
 

@@ -150,7 +150,7 @@ class Scr:
         return self.volume_rate * scaling
 
 
-class ProfilePoint:
+class PlanPoint:
     """
     Members
     -------
@@ -179,8 +179,8 @@ class ProfilePoint:
         return "{:.1f}: {:.1f}".format(self.time, self.depth)
 
 
-class ProfileSection:
-    """Represents a period of elapsed time between two ProfilePoint instances.
+class PlanSection:
+    """Represents a period of elapsed time between two PlanPoint instances.
 
     Members
     -------
@@ -192,13 +192,13 @@ class ProfileSection:
         Assumed the be constant throughout the entire section.s
     """
 
-    def __init__(self, pt0: ProfilePoint, pt1: ProfilePoint):
+    def __init__(self, pt0: PlanPoint, pt1: PlanPoint):
         """
         Parameters
         ----------
-        pt0 : ProfilePoint
+        pt0 : PlanPoint
             Beginning of the section.
-        pt1 : ProfilePoint
+        pt1 : PlanPoint
             End of the section. The SCR of this point will be used as the SCR for the entireity
             of the section.
         """
@@ -223,36 +223,42 @@ class ProfileSection:
         return gas_use_rate * self.duration
 
 
-class Dive:
+class Plan:
     """
     Members
     -------
-    scr : Scr
-    profile : Profile
+    points : list[PlanPoint]
+    sections : 
     """
 
-    def __init__(self, profile: list[ProfilePoint]):
-        self.profile = profile
-        self.update_sections()
-
-    def update_sections(self):
-        """
-        Compute `sections` using the data in `points`
-        """
+    def __init__(self, points: list[PlanPoint]):
+        self.points = points
+        # Compute `sections` using the data in `points`
         self.sections = []
-        for idx in range(1, len(self.profile)):
-            section = ProfileSection(self.profile[idx - 1], self.profile[idx])
+        for idx in range(1, len(self.points)):
+            section = PlanSection(self.points[idx - 1], self.points[idx])
             self.sections.append(section)
 
-    def gas_usage(self):
-        """
-        Compute the volume of surface-pressure gas that is used for this depth profile.
 
-        Returns
-        -------
-        pint volume
-        """
-        volume = 0.0 * config.VOLUME_UNIT
-        for section in self.sections:
-            volume += section.gas_usage()
-        return volume
+class ResultPoint:
+
+    def __init__(self, consumed_volume):
+        self.consumed_volume = consumed_volume
+
+
+class Result:
+
+    def __init__(self, points: list[ResultPoint]):
+        self.points = points
+
+    def consumed_volume(self):
+        return self.points[-1].consumed_volume
+
+    @staticmethod
+    def from_plan(plan: Plan):
+        consumed_volume = 0 * config.VOLUME_UNIT
+        points = [ResultPoint(consumed_volume)]
+        for section in plan.sections:
+            consumed_volume += section.gas_usage()
+            points.append(ResultPoint(consumed_volume))
+        return Result(points)
