@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from cenote import gas_usage as gu
 from cenote.config import UREG
 import pint

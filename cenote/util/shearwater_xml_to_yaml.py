@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from cenote.parse.shearwater_xml import (
     parse_dive_from_shearwater_xml,
     ScrSource

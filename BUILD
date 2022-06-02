@@ -1,6 +1,25 @@
 load("@rules_python//python:defs.bzl", "py_binary")
 load("@rules_python//python:defs.bzl", "py_library")
 
+load("@bazel_tools//tools/python:toolchain.bzl", "py_runtime_pair")
+
+py_runtime(
+    name = "python3.6",
+    interpreter_path = "/usr/bin/python3.6",
+    python_version = "PY3",   
+)
+
+py_runtime_pair(
+    name = "py3.6",
+    py3_runtime = ":python3.6",
+)
+
+toolchain(
+    name = "py3-tc",
+    toolchain = ":py3.6",
+    toolchain_type = "@bazel_tools//tools/python:toolchain_type",
+)
+
 # # Attempting to get PIP installation to work.
 # load("@rules_python//python:pip.bzl", "pip_install")
 # load("@pip//:requirements.bzl", "requirement")
@@ -33,7 +52,7 @@ py_library(
     ],
 )
 
-py_library
+# py_library
 
 # scripts
 
