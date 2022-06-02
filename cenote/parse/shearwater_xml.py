@@ -47,11 +47,15 @@ def get_depth_from_record(record):
     return float(depth_xml.text) * depth_unit
 
 
-def get_pressure_rate_from_record(record):
+# def get_pressure_rate_from_record(record):
+class ScrSource(enum.Enum):
+    NONE = enum.auto()
+    REPORTED = enum.auto()
+    PRESSURE = enum.auto()
 
 
 @debug()
-def parse_dive_from_shearwater_xml(path: str, tank: gu.Tank, scr_source: gu.ScrSource):
+def parse_dive_from_shearwater_xml(path: str, tank: gu.Tank, scr_source: ScrSource):
     """
     Parses an XML file output from Shearwater Cloud application.
 
@@ -120,11 +124,6 @@ def parse_dive_from_shearwater_xml(path: str, tank: gu.Tank, scr_source: gu.ScrS
         if scr is None:
             print("Warning: Requested using first SCR as default, but SCR was never found.")
     elif scr_source is ScrSource.PRESSURE:
+        raise NotImplementedError
 
     return gu.Dive(profile)
-
-
-class ScrSource(enum.Enum):
-    NONE = enum.auto()
-    REPORTED = enum.auto()
-    PRESSURE = enum.auto()

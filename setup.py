@@ -8,7 +8,9 @@ setup(
     python_requires = ">=3.6",
     entry_points = {
         "console_scripts": [
-            "scr-from-sac=cenote.util.scr_from_sac:main",
+            "scr-from-sac = cenote.util.scr_from_sac:main",
+            "sac-from-scr = cenote.util.sac_from_scr:main",
+            "gas-usage = cenote.util.calc_gas_usage:main",
         ],
     }
 )
