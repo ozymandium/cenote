@@ -239,6 +239,12 @@ class Plan:
             section = PlanSection(self.points[idx - 1], self.points[idx])
             self.sections.append(section)
 
+    def times(self):
+        return np.array([point.time.magnitude for point in self.points])
+
+    def depths(self):
+        return np.array([point.depth.magnitude for point in self.points])
+
 
 class ResultPoint:
 
