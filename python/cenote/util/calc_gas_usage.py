@@ -25,7 +25,9 @@ def print_dive(dive: gu.Dive):
     print("Gas usage: {:.2f}".format(gas_usage))
 
 
-def main(args):
+def main():
+    args = parse_args()
+
     if args.yaml_path:
         dive = parse_dive_from_yaml(args.yaml_path)
     elif args.shearwater_xml_path:
@@ -37,4 +39,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    main(parse_args())
+    main()

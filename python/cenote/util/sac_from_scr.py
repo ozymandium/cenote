@@ -8,34 +8,36 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-s",
-        "--sac",
+        "--scr",
         required=True,
-        help="Surface Air Consumption: rate of pressure drop in tank (eg 20psi/min).",
+        help="Surface Consumption Rate in volume per time (eg 15L/min).",
     )
     parser.add_argument("-t", "--tank", required=True, choices=gu.TANKS, help="Name of tank (from list)")
     parser.add_argument(
-        "-u", "--units", help="What units to output the SAC in (eg L/min, or cm**3/s)"
+        "-u", "--units", help="What units to output the SAC in (eg psi/min, or bar/hr)"
     )
     return parser.parse_args()
 
 
-def main(args):
+def main():
+    args = parse_args()
+    
     # parse inputs
-    pressure_rate = UREG.parse_expression(args.sac)
+    volume_rate = UREG.parse_expression(args.scr)
     tank = gu.TANKS[args.tank]
     units = UREG.parse_expression(args.units) if args.units else None
 
     # create objects
-    scr = gu.Scr.from_sac(pressure_rate, tank)
-    volume_rate = scr.volume_rate
+    scr = gu.Scr(volume_rate)
+    sac = scr.sac(tank)
 
-    # convert to output units if requested
+    # convert if desired
     if units:
-        volume_rate = volume_rate.to(units)
+        sac = sac.to(units)
 
     # output
-    print("{:.2f}".format(volume_rate))
+    print("{:.2f}".format(sac))
 
 
 if __name__ == "__main__":
-    main(parse_args())
+    main()

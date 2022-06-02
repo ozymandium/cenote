@@ -1,3 +1,5 @@
 pyyaml
 pint
 ipdb
+ipython
+matplotlib

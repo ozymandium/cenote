@@ -21,6 +21,8 @@ def parse_args():
 
 
 def main(args):
+    args = parse_args()
+
     tank = gu.Tank(
         UREG.parse_expression(args.tank_max_gas_volume),
         UREG.parse_expression(args.tank_max_pressure),
@@ -32,4 +34,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    main(parse_args())
+    main()
