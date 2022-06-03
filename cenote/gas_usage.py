@@ -35,7 +35,7 @@ WATER_DENSITY = {
 GRAVITY = 9.80665 * UREG.meter / UREG.sec**2
 
 
-def water_pressure_at_depth(depth, water=Water.FRESH):
+def water_pressure_at_depth(depth, water: Water):
     """Pressure of water, not including atmospheric pressure.
     """
     density = WATER_DENSITY[water]
@@ -117,7 +117,7 @@ class Scr:
         """
         return self.volume_rate * tank.SERVICE_PRESSURE / tank.service_volume()
 
-    def at_depth(self, depth):
+    def at_depth(self, depth, water: Water):
         """Translate SCR to volume rate at a particular depth
 
         Parameters
@@ -128,7 +128,7 @@ class Scr:
         -------
         pint volume rate
         """
-        scaling = pressure_at_depth(depth).to(UREG.atm).magnitude
+        scaling = pressure_at_depth(depth, water).to(UREG.atm).magnitude
         return self.volume_rate * scaling
 
 

@@ -3,3 +3,4 @@ pint
 ipdb
 ipython
 matplotlib
+pytest
