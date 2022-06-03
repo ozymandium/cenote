@@ -96,7 +96,7 @@ class Scr:
             The tank that coresponds to this consumption rate.
         """
         volume_rate = (
-            pressure_rate.to(config.PRESSURE_RATE_UNIT) / tank.max_pressure * tank.max_gas_volume
+            pressure_rate.to(config.PRESSURE_RATE_UNIT) / tank.SERVICE_PRESSURE * tank.service_volume()
         )
         return Scr(volume_rate)
 
@@ -115,7 +115,7 @@ class Scr:
         -------
         pint config.PRESSURE_RATE_UNIT
         """
-        return self.volume_rate * tank.max_pressure / tank.max_gas_volume
+        return self.volume_rate * tank.SERVICE_PRESSURE / tank.service_volume()
 
     def at_depth(self, depth):
         """Translate SCR to volume rate at a particular depth
@@ -161,48 +161,13 @@ class PlanPoint:
         return "{:.1f}: {:.1f}".format(self.time, self.depth)
 
 
-class PlanSection:
-    """Represents a period of elapsed time between two PlanPoint instances.
-
-    Members
-    -------
-    avg_depth : pint config.DEPTH_UNIT
-        Mean depth of the two profile points.
-    duration : pint config.TIME_UNIT
-        Amount of time between the two profile points.
-    scr : Scr
-        Assumed the be constant throughout the entire section.s
-    """
-
-    def __init__(self, pt0: PlanPoint, pt1: PlanPoint):
-        """
-        Parameters
-        ----------
-        pt0 : PlanPoint
-            Beginning of the section.
-        pt1 : PlanPoint
-            End of the section. The SCR of this point will be used as the SCR for the entireity
-            of the section.
-        """
-        self.avg_depth = (pt0.depth + pt1.depth) * 0.5
-        self.duration = pt1.time - pt0.time
-        # assume that the SCR at the end of the section was computed as an average of the SCR
-        # throughout the section
-        self.scr = pt1.scr
-
-    def gas_usage(self):
-        """
-        Determine how much gas at surface pressure is
-        consumed in this section.
-
-        Returns
-        -------
-        pint.volume
-            Volume of gas at the surface (1 atm) that is consumed during this section.
-        """
-        # TODO more accurate formula for this
-        gas_use_rate = self.scr.at_depth(self.avg_depth)
-        return gas_use_rate * self.duration
+def _gas_consumed_between_points(pt0: PlanPoint, pt1: PlanPoint):
+    avg_depth = (pt0.depth + pt1.depth) * 0.5
+    duration = pt1.time - pt0.time
+    # assume that the SCR at the beginning of the section is the SCR for the entire section
+    scr = pt0.scr
+    volume_rate = scr.at_depth(avg_depth)
+    return volume_rate * duration
 
 
 class Plan:
@@ -244,8 +209,10 @@ class Result:
     def from_plan(plan: Plan):
         consumed_volume = 0 * config.VOLUME_UNIT
         points = [ResultPoint(consumed_volume)]
-        for section in plan.sections:
-            consumed_volume += section.gas_usage()
+        for i in range(1, len(plan.points)):
+            pt0 = plan.points[i-1]
+            pt1 = plan.points[i]
+            consumed_volume += _gas_consumed_between_points(pt0, pt1)
             points.append(ResultPoint(consumed_volume))
         return Result(points)
 

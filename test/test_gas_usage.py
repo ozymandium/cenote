@@ -84,51 +84,51 @@ class TestPlanPoint(PintTest):
         self.assertRaises(ValueError, gu.PlanPoint, 0 * UREG.minute, -1 * UREG.meter, scr)
 
 
-class PlanSection(PintTest):
+# class PlanSection(PintTest):
 
-    # we define stuff in liters and the moduel does stuff in ft^3 (maybe, who knows, it's configurable)
-    # so give it a little numerical round off wiggle room.
-    GAS_USAGE_VOLUME_TOLERANCE = 1e-12 * config.VOLUME_UNIT
+#     # we define stuff in liters and the moduel does stuff in ft^3 (maybe, who knows, it's configurable)
+#     # so give it a little numerical round off wiggle room.
+#     GAS_USAGE_VOLUME_TOLERANCE = 1e-12 * config.VOLUME_UNIT
 
-    def test_construction(self):
-        pt0 = gu.PlanPoint(
-            1 * UREG.minute, depth=12 * UREG.foot, scr=gu.Scr(1 * UREG.liter / UREG.minute)
-        )
-        pt1 = gu.PlanPoint(
-            2 * UREG.minute, depth=15 * UREG.foot, scr=gu.Scr(2 * UREG.liter / UREG.minute)
-        )
-        section = gu.PlanSection(pt0, pt1)
-        self.assertPintEqual(section.avg_depth, 13.5 * UREG.foot)
-        self.assertPintEqual(section.duration, 60 * UREG.second)
-        self.assertPintEqual(section.scr.volume_rate, pt1.scr.volume_rate)
+#     def test_construction(self):
+#         pt0 = gu.PlanPoint(
+#             1 * UREG.minute, depth=12 * UREG.foot, scr=gu.Scr(1 * UREG.liter / UREG.minute)
+#         )
+#         pt1 = gu.PlanPoint(
+#             2 * UREG.minute, depth=15 * UREG.foot, scr=gu.Scr(2 * UREG.liter / UREG.minute)
+#         )
+#         section = gu.PlanSection(pt0, pt1)
+#         self.assertPintEqual(section.avg_depth, 13.5 * UREG.foot)
+#         self.assertPintEqual(section.duration, 60 * UREG.second)
+#         self.assertPintEqual(section.scr.volume_rate, pt1.scr.volume_rate)
 
-    def test_surface_gas_usage(self):
-        scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
-        pt0 = gu.PlanPoint(0 * UREG.minute, depth=0 * UREG.foot, scr=scr)
-        pt1 = gu.PlanPoint(2.5 * UREG.minute, depth=0 * UREG.foot, scr=scr)
-        section = gu.PlanSection(pt0, pt1)
-        consumption = section.gas_usage()
-        self.assertPintAlmostEqual(consumption, 3.75 * UREG.liter, self.GAS_USAGE_VOLUME_TOLERANCE)
+#     def test_surface_gas_usage(self):
+#         scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
+#         pt0 = gu.PlanPoint(0 * UREG.minute, depth=0 * UREG.foot, scr=scr)
+#         pt1 = gu.PlanPoint(2.5 * UREG.minute, depth=0 * UREG.foot, scr=scr)
+#         section = gu.PlanSection(pt0, pt1)
+#         consumption = section.gas_usage()
+#         self.assertPintAlmostEqual(consumption, 3.75 * UREG.liter, self.GAS_USAGE_VOLUME_TOLERANCE)
 
-    # def test_depth_gas_usage_square(self):
-    #     scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
-    #     pt0 = gu.PlanPoint(0 * UREG.minute, depth=66 * UREG.foot, scr=scr)
-    #     pt1 = gu.PlanPoint(2.5 * UREG.minute, depth=66 * UREG.foot, scr=scr)
-    #     section = gu.PlanSection(pt0, pt1)
-    #     consumption = section.gas_usage()
-    #     self.assertPintAlmostEqual(
-    #         consumption, 3 * 3.75 * UREG.liter, self.GAS_USAGE_VOLUME_TOLERANCE
-    #     )
+#     # def test_depth_gas_usage_square(self):
+#     #     scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
+#     #     pt0 = gu.PlanPoint(0 * UREG.minute, depth=66 * UREG.foot, scr=scr)
+#     #     pt1 = gu.PlanPoint(2.5 * UREG.minute, depth=66 * UREG.foot, scr=scr)
+#     #     section = gu.PlanSection(pt0, pt1)
+#     #     consumption = section.gas_usage()
+#     #     self.assertPintAlmostEqual(
+#     #         consumption, 3 * 3.75 * UREG.liter, self.GAS_USAGE_VOLUME_TOLERANCE
+#     #     )
 
-    # def test_trapezoid_gas_usage(self):
-    #     scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
-    #     pt0 = gu.PlanPoint(0 * UREG.minute, depth=0 * UREG.foot, scr=scr)
-    #     pt1 = gu.PlanPoint(2.5 * UREG.minute, depth=66 * UREG.foot, scr=scr)
-    #     section = gu.PlanSection(pt0, pt1)
-    #     consumption = section.gas_usage()
-    #     self.assertPintAlmostEqual(
-    #         consumption, 2 * 3.75 * UREG.liter, self.GAS_USAGE_VOLUME_TOLERANCE
-    #     )
+#     # def test_trapezoid_gas_usage(self):
+#     #     scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
+#     #     pt0 = gu.PlanPoint(0 * UREG.minute, depth=0 * UREG.foot, scr=scr)
+#     #     pt1 = gu.PlanPoint(2.5 * UREG.minute, depth=66 * UREG.foot, scr=scr)
+#     #     section = gu.PlanSection(pt0, pt1)
+#     #     consumption = section.gas_usage()
+#     #     self.assertPintAlmostEqual(
+#     #         consumption, 2 * 3.75 * UREG.liter, self.GAS_USAGE_VOLUME_TOLERANCE
+#     #     )
 
 
 class TestScr(PintTest):
@@ -185,15 +185,13 @@ class TestScr(PintTest):
     #     self.assertRaises(pint.errors.DimensionalityError, gu.Scr.from_sac, bad_pressure_rate, tank)
 
 
-# class TestSacScrRoundTrip(PintTest):
-#     def test_round_trip(self):
-#         pressure_rate = 30 * UREG.psi / UREG.minute
-#         max_gas_volume = 80 * UREG.ft ** 3
-#         max_pressure = 3000 * UREG.psi
-#         tank = gu.Tank(max_gas_volume, max_pressure)
-#         scr_from_sac = gu.Scr.from_sac(pressure_rate, tank)
-#         sac_from_scr = scr_from_sac.sac(tank)
-#         self.assertPintEqual(sac_from_scr, pressure_rate)
+class TestSacScrRoundTrip(PintTest):
+    def test_round_trip(self):
+        pressure_rate = 30 * UREG.psi / UREG.minute
+        al80 = tank.Aluminum80.create_full()
+        scr_from_sac = gu.Scr.from_sac(pressure_rate, al80)
+        sac_from_scr = scr_from_sac.sac(al80)
+        self.assertPintEqual(sac_from_scr, pressure_rate)
 
 
 # class TestPlan(PintTest):
