@@ -97,6 +97,9 @@ class ProfilePlot:
         # text box
         minutes = int(np.floor(self.time))
         seconds = int(np.round((self.time - minutes) * 60))
+        if seconds == 60:
+            minutes += 1
+            seconds = 0
         self.text.set_text(
             "Time: {min}:{sec:02}\nDepth: {depth} ft".format(
                 min=minutes, sec=seconds, depth=int(depth)
@@ -108,6 +111,12 @@ class ProfilePlot:
         self.fig.canvas.blit(self.ax.bbox)
 
     # def key_handler(event)
+
+
+class ConsumptionPlot:
+
+    def __init__(self, plan: gu.Plan, result: gu.Result, sync: Synchronizer):
+        pass
 
 
 # def plot_gas_usage(plan: gu.Plan, result: gu.Result):
@@ -127,5 +136,5 @@ def plot(plan: gu.Plan, result: gu.Result):
 
     sync = Synchronizer()
     profile = ProfilePlot(plan, result, sync)
-    # plot_gas_usage(plan, result)
+    consumption = ConsumptionPlot(plan, result, sync)
     plt.show()

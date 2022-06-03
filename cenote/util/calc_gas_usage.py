@@ -1,6 +1,6 @@
 from cenote import gas_usage as gu
 from cenote.config import UREG
-from cenote.parse.yaml import parse_dive_from_yaml
+from cenote.parse.yaml import parse_plan_from_yaml
 from cenote.parse.shearwater_xml import parse_dive_from_shearwater_xml
 from cenote.util import plot
 import argparse
@@ -29,7 +29,7 @@ def main():
     args = parse_args()
 
     if args.yaml_path:
-        plan = parse_dive_from_yaml(args.yaml_path)
+        plan = parse_plan_from_yaml(args.yaml_path)
     elif args.shearwater_xml_path:
         plan = parse_dive_from_shearwater_xml(args.shearwater_xml_path)
     else:

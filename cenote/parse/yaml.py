@@ -1,6 +1,6 @@
 __all__ = [
-    "parse_dive_from_yaml",
-    "export_dive_to_yaml",
+    "parse_plan_from_yaml",
+    "export_plan_to_yaml",
 ]
 
 from cenote import gas_usage as gu
@@ -27,7 +27,7 @@ def _point_to_dict(point: gu.PlanPoint) -> dict:
 #
 
 
-def parse_dive_from_yaml(path: str) -> gu.Plan:
+def parse_plan_from_yaml(path: str) -> gu.Plan:
     """
     Parameters
     ----------
@@ -41,6 +41,9 @@ def parse_dive_from_yaml(path: str) -> gu.Plan:
     # Read YAML
     with open(path, "r") as f:
         data = yaml.load(f, Loader=yaml.FullLoader)
+
+    # water type
+    water = gu.Water[data["water"]]
 
     # SCR
     default_volume_rate = UREG.parse_expression(data["scr"])
@@ -59,28 +62,30 @@ def parse_dive_from_yaml(path: str) -> gu.Plan:
         point = gu.PlanPoint(time, depth, scr)
         profile.append(point)
 
-    return gu.Plan(profile)
+    return gu.Plan(profile, water)
 
 
-def export_dive_to_yaml(dive: gu.Plan, path: str, scr=None):
+def export_plan_to_yaml(plan: gu.Plan, path: str, scr=None):
     """
     Parameters
     ----------
-    dive : cenote.gas_usage.Dive
+    plan : cenote.gas_usage.Dive
     path : str
         Path to YAML file to write
     scr : cenote.gas_usage.Scr (optional)
-        Default SCR for the whole dive, to use in sections with no specific SCR. Will not be written
+        Default SCR for the whole plan, to use in sections with no specific SCR. Will not be written
         if not provided.
     """
     data = {}
 
+    # water
+    data["water"] = plan.water.name
+
     # SCR
-    if scr is not None:
-        data["scr"] = str(scr)
+    data["scr"] = str(scr)
 
     # Profile
-    data["profile"] = [_point_to_dict(point) for point in dive.points]
+    data["profile"] = [_point_to_dict(point) for point in plan.points]
 
     with open(path, "w") as f:
         yaml.dump(data, f)

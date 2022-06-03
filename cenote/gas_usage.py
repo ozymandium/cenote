@@ -213,5 +213,5 @@ class Result:
             points.append(ResultPoint(consumed_volume))
         return Result(points)
 
-    # def consumed_volumes(self):
-    #     return np.array([point.consumed_volume.magnitude for point in self.points])
+    def consumed_volumes(self):
+        return np.array([point.consumed_volume.magnitude for point in self.points])
