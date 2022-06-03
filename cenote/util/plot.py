@@ -90,17 +90,14 @@ class ProfilePlot:
 
         # x_cursor
         self.x_cursor.set_xdata([self.time, self.time])
-        self.ax.draw_artist(self.x_cursor)
 
         # y_cursor
         self.y_cursor.set_ydata([depth, depth])
-        self.ax.draw_artist(self.y_cursor)
 
         # text box
         minutes = int(np.floor(self.time))
         seconds = int(np.round((self.time - minutes) * 60))
         self.text.set_text("Time: {min}:{sec:02}\nDepth: {depth} ft".format(min=minutes, sec=seconds, depth=int(depth)))
-        # self.ax.draw_artist(self.text)
 
         # update
         self.fig.canvas.draw()
