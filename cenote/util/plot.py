@@ -113,7 +113,6 @@ class ProfilePlot:
 
 
 class ConsumptionPlot:
-
     def __init__(self, plan: gu.Plan, result: gu.Result, sync: Synchronizer):
         # internal state
         self.times = plan.times()
@@ -202,6 +201,7 @@ class ConsumptionPlot:
         # update
         self.fig.canvas.draw()
         self.fig.canvas.blit(self.ax.bbox)
+
 
 def plot(plan: gu.Plan, result: gu.Result):
     plt.style.use("dark_background")
