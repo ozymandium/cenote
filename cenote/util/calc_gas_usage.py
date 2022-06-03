@@ -37,7 +37,7 @@ def main():
         sys.exit(0)
 
     result = gu.Result.from_plan(plan)
-    
+
     print_plan(plan, result)
     plot.plot(plan, result)
 

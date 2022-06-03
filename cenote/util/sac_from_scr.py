@@ -12,7 +12,9 @@ def parse_args():
         required=True,
         help="Surface Consumption Rate in volume per time (eg 15L/min).",
     )
-    parser.add_argument("-t", "--tank", required=True, choices=gu.TANKS, help="Name of tank (from list)")
+    parser.add_argument(
+        "-t", "--tank", required=True, choices=gu.TANKS, help="Name of tank (from list)"
+    )
     parser.add_argument(
         "-u", "--units", help="What units to output the SAC in (eg psi/min, or bar/hr)"
     )
@@ -21,7 +23,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    
+
     # parse inputs
     volume_rate = UREG.parse_expression(args.scr)
     tank = gu.TANKS[args.tank]

@@ -12,7 +12,9 @@ def parse_args():
         required=True,
         help="Surface Air Consumption: rate of pressure drop in tank (eg 20psi/min).",
     )
-    parser.add_argument("-t", "--tank", required=True, choices=gu.TANKS, help="Name of tank (from list)")
+    parser.add_argument(
+        "-t", "--tank", required=True, choices=gu.TANKS, help="Name of tank (from list)"
+    )
     parser.add_argument(
         "-u", "--units", help="What units to output the SAC in (eg L/min, or cm**3/s)"
     )

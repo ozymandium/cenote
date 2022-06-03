@@ -69,13 +69,14 @@ class Tank:
     def __str__(self):
         return "{} @ {}".format(self.gas_volume, self.max_pressure)
 
+
 """
 Pre-set common tank sizes
 """
 TANKS = {
-    "al13": Tank(13 * UREG.ft**3, 3000 * UREG.psi),
-    "al80": Tank(77.4 * UREG.ft**3, 3000 * UREG.psi),
-    "lp108": Tank(108 * UREG.ft**3, 2640 * UREG.psi),
+    "al13": Tank(13 * UREG.ft ** 3, 3000 * UREG.psi),
+    "al80": Tank(77.4 * UREG.ft ** 3, 3000 * UREG.psi),
+    "lp108": Tank(108 * UREG.ft ** 3, 2640 * UREG.psi),
 }
 
 
@@ -228,7 +229,7 @@ class Plan:
     Members
     -------
     points : list[PlanPoint]
-    sections : 
+    sections :
     """
 
     def __init__(self, points: list[PlanPoint]):
@@ -247,13 +248,11 @@ class Plan:
 
 
 class ResultPoint:
-
     def __init__(self, consumed_volume):
         self.consumed_volume = consumed_volume
 
 
 class Result:
-
     def __init__(self, points: list[ResultPoint]):
         self.points = points
 

@@ -90,7 +90,7 @@ def parse_dive_from_shearwater_xml(path: str, tank: gu.Tank):
     profile = []
     records = log.find("diveLogRecords")
     for record in records.iterfind("diveLogRecord"):
-        # time 
+        # time
         time = get_time_from_record(record)
         # depth
         depth = get_depth_from_record(record)
@@ -108,7 +108,7 @@ def parse_dive_from_shearwater_xml(path: str, tank: gu.Tank):
         pressure_xml = record.find("tank0pressurePSI")
         assert pressure_xml is not None
         pressure = float(pressure_xml.text) * pressure_unit
-        
+
         # make the point
         point = gu.ProfilePoint(time, depth, scr=scr)
         profile.append(point)
