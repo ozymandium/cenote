@@ -4,13 +4,13 @@ from cenote import config
 
 import unittest
 import pint
-from pint.testsuite import QuantityTestCase, helpers
+from pint.testsuite import helpers
 
 
 UREG = config.UREG
 
 
-class TestPressureAtDepth(unittest.TestCase, QuantityTestCase):
+class TestPressureAtDepth(unittest.TestCase):
     """https://bluerobotics.com/learn/pressure-depth-calculator/
     """
     def test_almost(self):
@@ -42,7 +42,7 @@ class TestPressureAtDepth(unittest.TestCase, QuantityTestCase):
                     PRESSURE_TOLERANCE)
 
 
-class TestPlanPoint(unittest.TestCase, QuantityTestCase):
+class TestPlanPoint(unittest.TestCase):
     def test_construction(self):
         time = 0.0 * UREG.second
         depth = 0.0 * UREG.meter
@@ -74,54 +74,37 @@ class TestPlanPoint(unittest.TestCase, QuantityTestCase):
         self.assertRaises(ValueError, gu.PlanPoint, 0 * UREG.minute, -1 * UREG.meter, scr)
 
 
-# class PlanSection(PintTest):
+class Test_gas_consumed_between_points(unittest.TestCase):
 
-#     # we define stuff in liters and the moduel does stuff in ft^3 (maybe, who knows, it's configurable)
-#     # so give it a little numerical round off wiggle room.
-#     GAS_USAGE_VOLUME_TOLERANCE = 1e-12 * config.VOLUME_UNIT
+    GAS_USAGE_VOLUME_TOLERANCE = 1e-3
 
-#     def test_construction(self):
-#         pt0 = gu.PlanPoint(
-#             1 * UREG.minute, depth=12 * UREG.foot, scr=gu.Scr(1 * UREG.liter / UREG.minute)
-#         )
-#         pt1 = gu.PlanPoint(
-#             2 * UREG.minute, depth=15 * UREG.foot, scr=gu.Scr(2 * UREG.liter / UREG.minute)
-#         )
-#         section = gu.PlanSection(pt0, pt1)
-#         self.assertEqual(section.avg_depth, 13.5 * UREG.foot)
-#         self.assertEqual(section.duration, 60 * UREG.second)
-#         self.assertEqual(section.scr.volume_rate, pt1.scr.volume_rate)
+    def test_surface_gas_usage(self):
+        scr = gu.Scr(UREG.parse_expression("1 ft^3/min"))
+        pt0 = gu.PlanPoint(0 * UREG.minute, depth=0 * UREG.foot, scr=scr)
+        pt1 = gu.PlanPoint(1 * UREG.minute, depth=0 * UREG.foot, scr=scr)
+        consumption = gu._gas_consumed_between_points(pt0, pt1, gu.Water.FRESH)
+        helpers.assert_quantity_almost_equal(consumption, 1 * UREG.ft**3, self.GAS_USAGE_VOLUME_TOLERANCE)
 
-#     def test_surface_gas_usage(self):
-#         scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
-#         pt0 = gu.PlanPoint(0 * UREG.minute, depth=0 * UREG.foot, scr=scr)
-#         pt1 = gu.PlanPoint(2.5 * UREG.minute, depth=0 * UREG.foot, scr=scr)
-#         section = gu.PlanSection(pt0, pt1)
-#         consumption = section.gas_usage()
-#         helpers.assert_quantity_almost_equal(consumption, 3.75 * UREG.liter, self.GAS_USAGE_VOLUME_TOLERANCE)
+    def test_depth_gas_usage_square(self):
+        scr = gu.Scr(UREG.parse_expression("1 ft^3/min"))
+        pt0 = gu.PlanPoint(0 * UREG.minute, depth=33.96 * UREG.foot, scr=scr)
+        pt1 = gu.PlanPoint(1 * UREG.minute, depth=33.96 * UREG.foot, scr=scr)
+        consumption = gu._gas_consumed_between_points(pt0, pt1, gu.Water.FRESH)
+        helpers.assert_quantity_almost_equal(
+            consumption, 2 * UREG.ft**3, self.GAS_USAGE_VOLUME_TOLERANCE
+        )
 
-#     # def test_depth_gas_usage_square(self):
-#     #     scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
-#     #     pt0 = gu.PlanPoint(0 * UREG.minute, depth=66 * UREG.foot, scr=scr)
-#     #     pt1 = gu.PlanPoint(2.5 * UREG.minute, depth=66 * UREG.foot, scr=scr)
-#     #     section = gu.PlanSection(pt0, pt1)
-#     #     consumption = section.gas_usage()
-#     #     helpers.assert_quantity_almost_equal(
-#     #         consumption, 3 * 3.75 * UREG.liter, self.GAS_USAGE_VOLUME_TOLERANCE
-#     #     )
-
-#     # def test_trapezoid_gas_usage(self):
-#     #     scr = gu.Scr(UREG.parse_expression("1.5 l/min"))
-#     #     pt0 = gu.PlanPoint(0 * UREG.minute, depth=0 * UREG.foot, scr=scr)
-#     #     pt1 = gu.PlanPoint(2.5 * UREG.minute, depth=66 * UREG.foot, scr=scr)
-#     #     section = gu.PlanSection(pt0, pt1)
-#     #     consumption = section.gas_usage()
-#     #     helpers.assert_quantity_almost_equal(
-#     #         consumption, 2 * 3.75 * UREG.liter, self.GAS_USAGE_VOLUME_TOLERANCE
-#     #     )
+    # def test_trapezoid_gas_usage(self):
+        scr = gu.Scr(UREG.parse_expression("1 ft^3/min"))
+        pt0 = gu.PlanPoint(0 * UREG.minute, depth=0 * UREG.foot, scr=scr)
+        pt1 = gu.PlanPoint(1 * UREG.minute, depth=67.91 * UREG.foot, scr=scr)
+        consumption = gu._gas_consumed_between_points(pt0, pt1, gu.Water.FRESH)
+        helpers.assert_quantity_almost_equal(
+            consumption, 2 * UREG.ft**3, self.GAS_USAGE_VOLUME_TOLERANCE
+        )
 
 
-class TestScr(unittest.TestCase, QuantityTestCase):
+class TestScr(unittest.TestCase):
     def test_construction(self):
         volume_rate = 0.1 * UREG.parse_expression("ft^3/min")
         scr = gu.Scr(volume_rate)
@@ -154,35 +137,17 @@ class TestScr(unittest.TestCase, QuantityTestCase):
         helpers.assert_quantity_almost_equal(scr.at_depth(0 * UREG.ft, gu.Water.FRESH), volume_rate, tolerance)
         helpers.assert_quantity_almost_equal(scr.at_depth(10.4 * UREG.meter, gu.Water.FRESH), 2 * volume_rate, tolerance)
         helpers.assert_quantity_almost_equal(scr.at_depth(10.1 * UREG.meter, gu.Water.SALT), 2 * volume_rate, tolerance)
-        # helpers.assert_quantity_almost_equal(scr.at_depth(20 * UREG.meter), 3 * volume_rate, tolerance)
+        helpers.assert_quantity_almost_equal(scr.at_depth(20.8 * UREG.meter, gu.Water.FRESH), 3 * volume_rate, tolerance)
+        helpers.assert_quantity_almost_equal(scr.at_depth(20.2 * UREG.meter, gu.Water.SALT), 3 * volume_rate, tolerance)
 
-    # def test_from_sac(self):
-    #     pressure_rate = UREG.parse_expression("30psi/min")
-    #     max_gas_volume = 3000 * UREG.liter
-    #     max_pressure = max_pressure = 3000 * UREG.psi
-    #     tank = gu.Tank(max_gas_volume, max_pressure)
-    #     scr = gu.Scr.from_sac(pressure_rate, tank)
-    #     self.assertEqual(scr.volume_rate, 30 * UREG.liter / UREG.minute)
-
-    # def test_from_sac_wrong_units(self):
-    #     bad_pressure_rate = UREG.parse_expression("30inch/min")
-    #     max_gas_volume = 3000 * UREG.liter
-    #     max_pressure = max_pressure = 3000 * UREG.psi
-    #     tank = gu.Tank(max_gas_volume, max_pressure)
-    #     self.assertRaises(pint.errors.DimensionalityError, gu.Scr.from_sac, bad_pressure_rate, tank)
-
-
-# class TestPlan(PintTest):
-#     def test_gas_usage(self):
-#         scr = gu.Scr(1.0 * UREG.liter / UREG.minute)
-#         profile = [
-#             gu.PlanPoint(UREG.parse_expression("0 min"), UREG.parse_expression("0 feet"), scr),
-#             gu.PlanPoint(UREG.parse_expression("1 min"), UREG.parse_expression("0 feet"), scr),
-#             gu.PlanPoint(UREG.parse_expression("2 min"), UREG.parse_expression("66 feet"), scr),
-#         ]
-#         plan = gu.Plan(profile)
-#         helpers.assert_quantity_almost_equal(plan.gas_usage(), 3.0 * UREG.liter, 1e-12 * config.VOLUME_UNIT)
-
-
-# if __name__ == "__main__":
-#     unittest.main()
+class TestResult(unittest.TestCase):
+    def test_gas_usage(self):
+        scr = gu.Scr(1.0 * UREG.ft**3 / UREG.minute)
+        profile = [
+            gu.PlanPoint(UREG.parse_expression("0 min"), UREG.parse_expression("0 feet"), scr),
+            gu.PlanPoint(UREG.parse_expression("1 min"), UREG.parse_expression("67.91 ft"), scr),
+            gu.PlanPoint(UREG.parse_expression("2 min"), UREG.parse_expression("0 feet"), scr),
+        ]
+        plan = gu.Plan(profile, gu.Water.FRESH)
+        result = gu.Result.from_plan(plan)
+        helpers.assert_quantity_almost_equal(result.consumed_volume(), 4 * UREG.foot**3, 1e-3)

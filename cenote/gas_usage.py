@@ -161,12 +161,12 @@ class PlanPoint:
         return "{:.1f}: {:.1f}".format(self.time, self.depth)
 
 
-def _gas_consumed_between_points(pt0: PlanPoint, pt1: PlanPoint):
+def _gas_consumed_between_points(pt0: PlanPoint, pt1: PlanPoint, water: Water):
     avg_depth = (pt0.depth + pt1.depth) * 0.5
     duration = pt1.time - pt0.time
     # assume that the SCR at the beginning of the section is the SCR for the entire section
     scr = pt0.scr
-    volume_rate = scr.at_depth(avg_depth)
+    volume_rate = scr.at_depth(avg_depth, water)
     return volume_rate * duration
 
 
@@ -178,13 +178,9 @@ class Plan:
     sections :
     """
 
-    def __init__(self, points: list[PlanPoint]):
+    def __init__(self, points: list[PlanPoint], water: Water):
         self.points = points
-        # Compute `sections` using the data in `points`
-        self.sections = []
-        for idx in range(1, len(self.points)):
-            section = PlanSection(self.points[idx - 1], self.points[idx])
-            self.sections.append(section)
+        self.water = water
 
     def times(self):
         return np.array([point.time.magnitude for point in self.points])
@@ -212,7 +208,7 @@ class Result:
         for i in range(1, len(plan.points)):
             pt0 = plan.points[i-1]
             pt1 = plan.points[i]
-            consumed_volume += _gas_consumed_between_points(pt0, pt1)
+            consumed_volume += _gas_consumed_between_points(pt0, pt1, plan.water)
             points.append(ResultPoint(consumed_volume))
         return Result(points)
 
