@@ -144,22 +144,22 @@ class TestScr(PintTest):
             50 * UREG.parse_expression("psi / min"),
         )
 
-    # def test_sac(self):
+    def test_sac(self):
         
-    #     class UnitTank(tank.Tank):
-    #         SERVICE_PRESSURE = (100 * UREG.atm).to(config.PRESSURE_UNIT)
-    #         VOLUME = 1 * config.VOLUME_UNIT
+        class UnitTank(tank.Tank):
+            SERVICE_PRESSURE = (100 * UREG.atm).to(config.PRESSURE_UNIT)
+            VOLUME = 1 * config.VOLUME_UNIT
         
-    #     volume_rate = 1 * config.VOLUME_RATE_UNIT
+        volume_rate = 1 * config.VOLUME_RATE_UNIT
         
-    #     max_gas_volume = 100 * config.VOLUME_UNIT
+        max_gas_volume = 100 * config.VOLUME_UNIT
         
-    #     tank = UnitTank.create_full()
+        tnk = UnitTank.create_full()
 
-    #     scr = gu.Scr(volume_rate)
-    #     sac = scr.sac(tank)
+        scr = gu.Scr(volume_rate)
+        sac = scr.sac(tnk)
 
-    #     self.assertPintEqual(sac, 1 * UREG.psi / UREG.minute)
+        self.assertPintEqual(sac, 1 * UREG.psi / UREG.minute)
 
     # def test_at_depth(self):
     #     volume_rate = 1 * UREG.L / UREG.min
