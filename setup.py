@@ -12,5 +12,6 @@ setup(
             "sac-from-scr = cenote.util.sac_from_scr:main",
             "gas-usage = cenote.util.calc_gas_usage:main",
         ],
-    }
+    },
+    test_suite = "test",
 )

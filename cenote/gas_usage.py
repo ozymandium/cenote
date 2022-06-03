@@ -1,4 +1,5 @@
 from cenote import config
+from cenote.tank import Tank
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,18 +17,36 @@ class Water(enum.Enum):
     SALT = enum.auto()
 
 
-PRESSURE_AT_DEPTH_SCALING = {
-    Water.FRESH: 0.96817119275 * UREG.atm / (10.0 * UREG.meter),
-    Water.SALT: 0.9972163366400002 * UREG.atm / (10.0 * UREG.meter),
+# https://bluerobotics.com/learn/pressure-depth-calculator/#hydrostatic-water-pressure-formula
+WATER_DENSITY = {
+    # water density varies with temperature, being more dense at lower temperatures.
+    # pure water at 0C is 1000 kg/m3.
+    # pick a value of pure water at 25C, since contaminnts generally decrease the density, and this
+    # will offset changes due to colder water.
+    # https://en.wikipedia.org/wiki/Properties_of_water
+    Water.FRESH: 997.0474 * UREG.kg / UREG.meter**3,
+    # Deep salt water has higher density (1050 kg/m3) than surface water, which varies from 
+    # 1020-1029 kg/m3. Pick a median value of surface seawater at 25C.
+    # https://en.wikipedia.org/wiki/Seawater
+    Water.SALT: 1023.6 * UREG.kg / UREG.meter**3,
 }
+# take a value close to the mean for gravity.
+# https://en.wikipedia.org/wiki/Gravity_of_Earth
+GRAVITY = 9.80665 * UREG.meter / UREG.sec**2
+
+
+def water_pressure_at_depth(depth, water=Water.FRESH):
+    """Pressure of water, not including atmospheric pressure.
+    """
+    density = WATER_DENSITY[water]
+    pressure = density * GRAVITY * depth
+    return pressure.to(config.PRESSURE_UNIT)
 
 
 def pressure_at_depth(depth, water=Water.FRESH):
     """
-    Get the pressure [atm] (including surface atmospheric pressure) for a given depth of sea water.
-    https://oceanservice.noaa.gov/facts/pressure.html
-
-    TODO: make this apply to fresh water
+    Get the pressure (including surface atmospheric pressure) for a given depth of sea water assuming
+    that the surface is at sea level.
 
     Parameters
     ----------
@@ -37,47 +56,9 @@ def pressure_at_depth(depth, water=Water.FRESH):
     -------
     pint pressure
     """
-    scaling = PRESSURE_AT_DEPTH_SCALING[water]
-    return (1.0 * UREG.atm + depth.to(UREG.foot) * scaling).to(config.PRESSURE_UNIT)
-
-
-class Tank:
-    """
-    Members
-    -------
-    volume : in config.VOLUME_UNIT
-        The absolute volume of the tank itself
-    max_gas_volume : in config.VOLUME_UNIT
-        The volume of gas at 1 atm that the tank holds when the tank is at max_pressure.
-    max_pressure : config.PRESSURE_UNIT
-        The maximum pressure, and the pressure to which the max_gas_volume corresponds.
-    """
-
-    def __init__(self, max_gas_volume, max_pressure):
-        """
-        Parameters
-        ----------
-        max_gas_volume : in config.VOLUME_UNIT
-            The volume of gas at 1 atm that the tank holds when the tank is at max_pressure.
-        max_pressure : config.PRESSURE_UNIT
-            The maximum pressure, and the pressure to which the max_gas_volume corresponds.
-        """
-        self.max_gas_volume = max_gas_volume.to(config.VOLUME_UNIT)
-        self.max_pressure = max_pressure.to(config.PRESSURE_UNIT)
-        self.volume = self.max_gas_volume / self.max_pressure.to(UREG.atm).magnitude
-
-    def __str__(self):
-        return "{} @ {}".format(self.gas_volume, self.max_pressure)
-
-
-"""
-Pre-set common tank sizes
-"""
-TANKS = {
-    "al13": Tank(13 * UREG.ft ** 3, 3000 * UREG.psi),
-    "al80": Tank(77.4 * UREG.ft ** 3, 3000 * UREG.psi),
-    "lp108": Tank(108 * UREG.ft ** 3, 2640 * UREG.psi),
-}
+    water_pressure = water_pressure_at_depth(depth, water=water)
+    pressure = 1.0 * UREG.atm + water_pressure
+    return pressure.to(config.PRESSURE_UNIT)
 
 
 class Scr:
