@@ -1,6 +1,6 @@
 #!/bin/sh
 black \
     ./cenote \
-    ./test/python \
+    ./test \
     --line-length 100 \
     -t py39

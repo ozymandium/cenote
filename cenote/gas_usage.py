@@ -24,20 +24,19 @@ WATER_DENSITY = {
     # pick a value of pure water at 25C, since contaminnts generally decrease the density, and this
     # will offset changes due to colder water.
     # https://en.wikipedia.org/wiki/Properties_of_water
-    Water.FRESH: 997.0474 * UREG.kg / UREG.meter**3,
-    # Deep salt water has higher density (1050 kg/m3) than surface water, which varies from 
+    Water.FRESH: 997.0474 * UREG.kg / UREG.meter ** 3,
+    # Deep salt water has higher density (1050 kg/m3) than surface water, which varies from
     # 1020-1029 kg/m3. Pick a median value of surface seawater at 25C.
     # https://en.wikipedia.org/wiki/Seawater
-    Water.SALT: 1023.6 * UREG.kg / UREG.meter**3,
+    Water.SALT: 1023.6 * UREG.kg / UREG.meter ** 3,
 }
 # take a value close to the mean for gravity.
 # https://en.wikipedia.org/wiki/Gravity_of_Earth
-GRAVITY = 9.80665 * UREG.meter / UREG.sec**2
+GRAVITY = 9.80665 * UREG.meter / UREG.sec ** 2
 
 
 def water_pressure_at_depth(depth, water: Water):
-    """Pressure of water, not including atmospheric pressure.
-    """
+    """Pressure of water, not including atmospheric pressure."""
     density = WATER_DENSITY[water]
     pressure = density * GRAVITY * depth
     return pressure.to(config.PRESSURE_UNIT)
@@ -96,7 +95,9 @@ class Scr:
             The tank that coresponds to this consumption rate.
         """
         volume_rate = (
-            pressure_rate.to(config.PRESSURE_RATE_UNIT) / tank.SERVICE_PRESSURE * tank.service_volume()
+            pressure_rate.to(config.PRESSURE_RATE_UNIT)
+            / tank.SERVICE_PRESSURE
+            * tank.service_volume()
         )
         return Scr(volume_rate)
 
@@ -206,7 +207,7 @@ class Result:
         consumed_volume = 0 * config.VOLUME_UNIT
         points = [ResultPoint(consumed_volume)]
         for i in range(1, len(plan.points)):
-            pt0 = plan.points[i-1]
+            pt0 = plan.points[i - 1]
             pt1 = plan.points[i]
             consumed_volume += _gas_consumed_between_points(pt0, pt1, plan.water)
             points.append(ResultPoint(consumed_volume))

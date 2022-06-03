@@ -11,8 +11,8 @@ UREG = config.UREG
 
 
 class TestPressureAtDepth(unittest.TestCase):
-    """https://bluerobotics.com/learn/pressure-depth-calculator/
-    """
+    """https://bluerobotics.com/learn/pressure-depth-calculator/"""
+
     def test_almost(self):
         VALUES = {
             gu.Water.FRESH: {
@@ -33,13 +33,11 @@ class TestPressureAtDepth(unittest.TestCase):
                 water_pressure = gu.water_pressure_at_depth(depth, water)
                 pressure = gu.pressure_at_depth(depth, water)
                 helpers.assert_quantity_almost_equal(
-                    water_pressure, 
-                    expected_water_pressure, 
-                    PRESSURE_TOLERANCE)
+                    water_pressure, expected_water_pressure, PRESSURE_TOLERANCE
+                )
                 helpers.assert_quantity_almost_equal(
-                    pressure, 
-                    expected_pressure, 
-                    PRESSURE_TOLERANCE)
+                    pressure, expected_pressure, PRESSURE_TOLERANCE
+                )
 
 
 class TestPlanPoint(unittest.TestCase):
@@ -61,12 +59,8 @@ class TestPlanPoint(unittest.TestCase):
         good_depth = UREG.parse_expression("12in")
         bad_depth = UREG.parse_expression("2kPa")
         scr = gu.Scr(0.0 * UREG.liter / UREG.minute)
-        self.assertRaises(
-            pint.errors.DimensionalityError, gu.PlanPoint, bad_time, good_depth, scr
-        )
-        self.assertRaises(
-            pint.errors.DimensionalityError, gu.PlanPoint, good_time, bad_depth, scr
-        )
+        self.assertRaises(pint.errors.DimensionalityError, gu.PlanPoint, bad_time, good_depth, scr)
+        self.assertRaises(pint.errors.DimensionalityError, gu.PlanPoint, good_time, bad_depth, scr)
 
     def test_negative_value(self):
         scr = gu.Scr(0.0 * UREG.liter / UREG.minute)
@@ -83,7 +77,9 @@ class Test_gas_consumed_between_points(unittest.TestCase):
         pt0 = gu.PlanPoint(0 * UREG.minute, depth=0 * UREG.foot, scr=scr)
         pt1 = gu.PlanPoint(1 * UREG.minute, depth=0 * UREG.foot, scr=scr)
         consumption = gu._gas_consumed_between_points(pt0, pt1, gu.Water.FRESH)
-        helpers.assert_quantity_almost_equal(consumption, 1 * UREG.ft**3, self.GAS_USAGE_VOLUME_TOLERANCE)
+        helpers.assert_quantity_almost_equal(
+            consumption, 1 * UREG.ft ** 3, self.GAS_USAGE_VOLUME_TOLERANCE
+        )
 
     def test_depth_gas_usage_square(self):
         scr = gu.Scr(UREG.parse_expression("1 ft^3/min"))
@@ -91,16 +87,16 @@ class Test_gas_consumed_between_points(unittest.TestCase):
         pt1 = gu.PlanPoint(1 * UREG.minute, depth=33.96 * UREG.foot, scr=scr)
         consumption = gu._gas_consumed_between_points(pt0, pt1, gu.Water.FRESH)
         helpers.assert_quantity_almost_equal(
-            consumption, 2 * UREG.ft**3, self.GAS_USAGE_VOLUME_TOLERANCE
+            consumption, 2 * UREG.ft ** 3, self.GAS_USAGE_VOLUME_TOLERANCE
         )
 
-    # def test_trapezoid_gas_usage(self):
+        # def test_trapezoid_gas_usage(self):
         scr = gu.Scr(UREG.parse_expression("1 ft^3/min"))
         pt0 = gu.PlanPoint(0 * UREG.minute, depth=0 * UREG.foot, scr=scr)
         pt1 = gu.PlanPoint(1 * UREG.minute, depth=67.91 * UREG.foot, scr=scr)
         consumption = gu._gas_consumed_between_points(pt0, pt1, gu.Water.FRESH)
         helpers.assert_quantity_almost_equal(
-            consumption, 2 * UREG.ft**3, self.GAS_USAGE_VOLUME_TOLERANCE
+            consumption, 2 * UREG.ft ** 3, self.GAS_USAGE_VOLUME_TOLERANCE
         )
 
 
@@ -131,18 +127,31 @@ class TestScr(unittest.TestCase):
         self.assertEqual(sac_from_scr, pressure_rate)
 
     def test_at_depth(self):
-        volume_rate = 0.75 * UREG.ft**3 / UREG.min
-        tolerance = volume_rate.magnitude * 1e-2 # 1% error (due to depth/pressure approximation below, not in the code)
+        volume_rate = 0.75 * UREG.ft ** 3 / UREG.min
+        tolerance = (
+            volume_rate.magnitude * 1e-2
+        )  # 1% error (due to depth/pressure approximation below, not in the code)
         scr = gu.Scr(volume_rate)
-        helpers.assert_quantity_almost_equal(scr.at_depth(0 * UREG.ft, gu.Water.FRESH), volume_rate, tolerance)
-        helpers.assert_quantity_almost_equal(scr.at_depth(10.4 * UREG.meter, gu.Water.FRESH), 2 * volume_rate, tolerance)
-        helpers.assert_quantity_almost_equal(scr.at_depth(10.1 * UREG.meter, gu.Water.SALT), 2 * volume_rate, tolerance)
-        helpers.assert_quantity_almost_equal(scr.at_depth(20.8 * UREG.meter, gu.Water.FRESH), 3 * volume_rate, tolerance)
-        helpers.assert_quantity_almost_equal(scr.at_depth(20.2 * UREG.meter, gu.Water.SALT), 3 * volume_rate, tolerance)
+        helpers.assert_quantity_almost_equal(
+            scr.at_depth(0 * UREG.ft, gu.Water.FRESH), volume_rate, tolerance
+        )
+        helpers.assert_quantity_almost_equal(
+            scr.at_depth(10.4 * UREG.meter, gu.Water.FRESH), 2 * volume_rate, tolerance
+        )
+        helpers.assert_quantity_almost_equal(
+            scr.at_depth(10.1 * UREG.meter, gu.Water.SALT), 2 * volume_rate, tolerance
+        )
+        helpers.assert_quantity_almost_equal(
+            scr.at_depth(20.8 * UREG.meter, gu.Water.FRESH), 3 * volume_rate, tolerance
+        )
+        helpers.assert_quantity_almost_equal(
+            scr.at_depth(20.2 * UREG.meter, gu.Water.SALT), 3 * volume_rate, tolerance
+        )
+
 
 class TestResult(unittest.TestCase):
     def test_gas_usage(self):
-        scr = gu.Scr(1.0 * UREG.ft**3 / UREG.minute)
+        scr = gu.Scr(1.0 * UREG.ft ** 3 / UREG.minute)
         profile = [
             gu.PlanPoint(UREG.parse_expression("0 min"), UREG.parse_expression("0 feet"), scr),
             gu.PlanPoint(UREG.parse_expression("1 min"), UREG.parse_expression("67.91 ft"), scr),
@@ -150,4 +159,4 @@ class TestResult(unittest.TestCase):
         ]
         plan = gu.Plan(profile, gu.Water.FRESH)
         result = gu.Result.from_plan(plan)
-        helpers.assert_quantity_almost_equal(result.consumed_volume(), 4 * UREG.foot**3, 1e-3)
+        helpers.assert_quantity_almost_equal(result.consumed_volume(), 4 * UREG.foot ** 3, 1e-3)

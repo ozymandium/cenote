@@ -4,7 +4,6 @@ from cenote import config
 UREG = config.UREG
 
 
-
 class Tank:
     """
     Members
@@ -47,18 +46,16 @@ class Tank:
 
     @classmethod
     def service_volume(cls):
-        """Gas volume at service pressure at sea level
-        """
+        """Gas volume at service pressure at sea level"""
         return cls._gas_volume_at_pressure(cls.VOLUME, cls.SERVICE_PRESSURE, cls.Z_FACTOR)
 
     def volume(self):
-        """Volume of 1 atm gas currently stored inside the cylinder
-        """
+        """Volume of 1 atm gas currently stored inside the cylinder"""
         return self._gas_volume_at_pressure(self.VOLUME, self.pressure, self.Z_FACTOR)
 
     @staticmethod
     def _gas_volume_at_pressure(volume, pressure, z):
-        """For a given fixed tank volume and pressure relative to 1 atm, find the volume of 
+        """For a given fixed tank volume and pressure relative to 1 atm, find the volume of
         1 atm gas stored inside.
 
         https://www.divegearexpress.com/library/articles/calculating-scuba-cylinder-capacities
@@ -78,29 +75,32 @@ class Tank:
 
 
 class Aluminum13(Tank):
-    """https://www.catalinacylinders.com/product/s13/
-    """
+    """https://www.catalinacylinders.com/product/s13/"""
+
     VOLUME = 1.9 * UREG.liter
     SERVICE_PRESSURE = 3000 * UREG.psi
     Z_FACTOR = 1.054
 
+
 class Aluminum40(Tank):
-    """https://www.catalinacylinders.com/product/s40/
-    """
+    """https://www.catalinacylinders.com/product/s40/"""
+
     VOLUME = 5.8 * UREG.liter
     SERVICE_PRESSURE = 3000 * UREG.psi
     Z_FACTOR = 1.045
 
+
 class Aluminum80(Tank):
-    """https://www.catalinacylinders.com/product/s80/
-    """
+    """https://www.catalinacylinders.com/product/s80/"""
+
     VOLUME = (11.1 * UREG.liter).to(config.VOLUME_UNIT)
     SERVICE_PRESSURE = 3000 * UREG.psi
     Z_FACTOR = 1.0337
 
+
 class LowPressureSteel108(Tank):
-    """Can't find specs for this. z factor of 1 gives under 108.
-    """
+    """Can't find specs for this. z factor of 1 gives under 108."""
+
     VOLUME = 17 * UREG.liter
     SERVICE_PRESSURE = 2640 * UREG.psi
 

@@ -97,7 +97,11 @@ class ProfilePlot:
         # text box
         minutes = int(np.floor(self.time))
         seconds = int(np.round((self.time - minutes) * 60))
-        self.text.set_text("Time: {min}:{sec:02}\nDepth: {depth} ft".format(min=minutes, sec=seconds, depth=int(depth)))
+        self.text.set_text(
+            "Time: {min}:{sec:02}\nDepth: {depth} ft".format(
+                min=minutes, sec=seconds, depth=int(depth)
+            )
+        )
 
         # update
         self.fig.canvas.draw()
