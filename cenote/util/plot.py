@@ -60,7 +60,14 @@ class ProfilePlot:
         self.sync.time_update(time)
 
     def key_handler(self, event):
-        pass
+        TIME_INCREMENT = 0.1 # minute
+
+        if event.key == "right":
+            increment = TIME_INCREMENT
+        elif event.key == "left":
+            increment = -1 * TIME_INCREMENT
+        next_time = np.clip(self.time + increment, np.min(self.times), np.max(self.times))
+        self.sync.time_update(next_time)
 
     def time_update_callback(self, time):
         self.time = time
