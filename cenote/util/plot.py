@@ -299,6 +299,97 @@ class PressurePlot:
         self.fig.canvas.blit(self.ax.bbox)
 
 
+class PO2Plot:
+    def __init__(self, plan: gu.Plan, result: gu.Result, sync: Synchronizer):
+        # internal state
+        self.times = result.times()
+        self.po2s = result.po2s()
+        self.time = 0
+
+        # generate plot entities
+        self.fig, self.ax = plt.subplots()
+        self.x_cursor = self.ax.plot(
+            [np.min(self.times), np.min(self.times)],
+            [np.min(self.po2s), np.max(self.po2s)],
+            "m",
+            alpha=0.5,
+        )[0]
+        self.y_cursor = self.ax.plot(
+            [np.min(self.times), np.max(self.times)],
+            [np.min(self.po2s), np.min(self.po2s)],
+            "m",
+            alpha=0.5,
+        )[0]
+        self.ax.plot(self.times, self.po2s, "g")
+        self.text = self.ax.text(
+            0.95,
+            0.05,
+            "Time: 00:00\nPO2: {:.2f} ata".format(self.po2s[0]),
+            transform=self.ax.transAxes,
+            fontsize=10,
+            verticalalignment="bottom",
+            horizontalalignment="right",
+            fontname="monospace",
+        )
+
+        # plot accoutrements
+        self.fig.canvas.set_window_title("PO2")
+        self.ax.set_title("PO2", fontname="monospace")
+        self.ax.grid(alpha=0.2)
+        self.ax.set_xlabel("Time ({})".format(str(config.TIME_UNIT)), fontname="monospace")
+        self.ax.set_ylabel("PO2 (ata)", fontname="monospace")
+
+        # callback setup
+        self.fig.canvas.mpl_connect("button_press_event", self.mouse_handler)
+        self.fig.canvas.mpl_connect("key_press_event", self.key_handler)
+
+        # synchronizer setup
+        self.sync = sync
+        self.sync.register(self.time_update_callback)
+
+    def mouse_handler(self, event):
+        if event.xdata is None:
+            return
+        time = np.round(event.xdata, 1)  # 6 second increments
+        self.sync.time_update(time)
+
+    def key_handler(self, event):
+        if event.key == "right":
+            increment = config.TIME_INCREMENT.magnitude
+        elif event.key == "left":
+            increment = -1 * config.TIME_INCREMENT.magnitude
+        else:
+            return
+        next_time = np.clip(self.time + increment, np.min(self.times), np.max(self.times))
+        self.sync.time_update(next_time)
+
+    def time_update_callback(self, time):
+        self.time = time
+        po2 = np.interp(time, self.times, self.po2s)
+
+        # x_cursor
+        self.x_cursor.set_xdata([self.time, self.time])
+
+        # y_cursor
+        self.y_cursor.set_ydata([po2, po2])
+
+        # text box
+        minutes = int(np.floor(self.time))
+        seconds = int(np.round((self.time - minutes) * 60))
+        if seconds == 60:
+            minutes += 1
+            seconds = 0
+        self.text.set_text(
+            "Time: {min}:{sec:02}\nPO2: {po2:.2f} ata".format(
+                min=minutes, sec=seconds, po2=po2
+            )
+        )
+
+        # update
+        self.fig.canvas.draw()
+        self.fig.canvas.blit(self.ax.bbox)
+
+
 def plot(plan: gu.Plan, result: gu.Result):
     plt.style.use("dark_background")
 
@@ -306,4 +397,5 @@ def plot(plan: gu.Plan, result: gu.Result):
     profile = ProfilePlot(plan, result, sync)
     usage = UsagePlot(plan, result, sync)
     pressure = PressurePlot(plan, result, sync)
+    po2 = PO2Plot(plan, result, sync)
     plt.show()

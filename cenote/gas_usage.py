@@ -273,4 +273,4 @@ class Result:
         }
 
     def po2s(self):
-        return np.array([point.po2 for point in self.point])
+        return np.array([point.po2.magnitude for point in self.points])
