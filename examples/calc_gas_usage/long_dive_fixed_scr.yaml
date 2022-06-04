@@ -3,9 +3,13 @@ tanks:
   - name: water heater
     type: LP108
     pressure: 2640 psi
+    mix: 
+      po2: 0.21
   - name: deco
     type: AL40
     pressure: 2200 psi
+    mix: 
+      po2: 0.75
 scr: 0.75 ft^3 / min
 profile:
   - duration: 5 min

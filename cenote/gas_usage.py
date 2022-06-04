@@ -84,7 +84,7 @@ class Scr:
         -------
         pint volume rate
         """
-        scaling = pressure_at_depth(depth, water).to(UREG.atm).magnitude
+        scaling = pressure_from_depth(depth, water).to(UREG.atm).magnitude
         return self.volume_rate * scaling
 
 
@@ -129,7 +129,7 @@ def _usage_between_points(pt0: PlanPoint, pt1: PlanPoint, water: Water):
     return volume_rate * duration
 
 
-TankInfo = collections.namedtuple("TankInfo", ["enum", "pressure"])
+TankInfo = collections.namedtuple("TankInfo", ["enum", "pressure", "mix"])
 
 
 class Plan:
@@ -181,10 +181,11 @@ class Plan:
 
 
 class ResultPoint:
-    def __init__(self, time, usage, pressure):
-        self.time = time
+    def __init__(self, time, usage, pressure, po2):
+        self.time = deepcopy(time)
         self.usage = deepcopy(usage)
         self.pressure = deepcopy(pressure)
+        self.po2 = deepcopy(po2)
 
 
 class Result:
@@ -192,51 +193,66 @@ class Result:
         self.tank_names = plan.tank_info.keys()
         # initialize tank objects
         tanks = {
-            name: TANK_TYPES[plan.tank_info[name].enum](plan.tank_info[name].pressure)
+            name: TANK_TYPES[plan.tank_info[name].enum](
+                plan.tank_info[name].mix, plan.tank_info[name].pressure
+            )
             for name in self.tank_names
         }
         # keep track of usage for each tank over time, will copy this to each result point
         usage = {name: 0.0 * config.VOLUME_UNIT for name in self.tank_names}
         pressure = {name: tanks[name].pressure for name in self.tank_names}
         # compute usage for each section between points
-        self.points = [ResultPoint(0 * config.TIME_UNIT, usage, pressure)]
-        for i in range(1, len(plan.points)):
-            first_pt = plan.points[i - 1]
-            last_pt = plan.points[i]
+        self.points = []
+        for plan_idx in range(1, len(plan.points)):
+            first_pt = plan.points[plan_idx - 1]
+            last_pt = plan.points[plan_idx]
+            
             tank_name = first_pt.tank_name
+
             # compute at small time increments so that not just the two user specified points are
             # correct, but also some values in between
             first_time = first_pt.time.magnitude
             last_time = last_pt.time.magnitude
-            time_span = last_time - first_time
+            duration = last_time - first_time
             times = np.linspace(
-                first_time, last_time, round(time_span / config.TIME_INCREMENT.magnitude)
+                first_time, last_time, round(duration / config.TIME_INCREMENT.magnitude)
             )
             depths = np.interp(
                 times,
                 [first_pt.time.magnitude, last_pt.time.magnitude],
                 [first_pt.depth.magnitude, last_pt.depth.magnitude],
             )
+
+            # add the very first point
+            if plan_idx == 1:
+                po2 = tanks[tank_name].mix.po2_at_depth(first_pt.depth, plan.water)
+                self.points.append(
+                    ResultPoint(time=0 * config.TIME_UNIT, usage=usage, pressure=pressure, po2=po2)
+                )
+            # FIXME using same index in nested loops
             for i in range(1, len(times)):
                 pt0 = PlanPoint(
                     times[i - 1] * config.TIME_UNIT,
                     depths[i - 1] * config.DEPTH_UNIT,
                     first_pt.scr,
-                    first_pt.tank_name,
+                    tank_name,
                 )
                 pt1 = PlanPoint(
                     times[i] * config.TIME_UNIT,
                     depths[i] * config.DEPTH_UNIT,
                     first_pt.scr,
-                    first_pt.tank_name,
+                    tank_name,
                 )
                 this_usage = _usage_between_points(pt0, pt1, plan.water)
                 # updates
                 tanks[tank_name].decrease_volume(this_usage)
                 usage[tank_name] += this_usage
                 pressure[tank_name] = tanks[tank_name].pressure
+                po2 = tanks[tank_name].mix.po2_at_depth(depths[i] * config.DEPTH_UNIT, plan.water)
                 # store new point
-                self.points.append(ResultPoint(pt1.time, usage, pressure))
+                self.points.append(
+                    ResultPoint(time=pt1.time, usage=usage, pressure=pressure, po2=po2)
+                )
 
     def back(self):
         return self.points[-1]
@@ -255,3 +271,6 @@ class Result:
             name: np.array([point.pressure[name].magnitude for point in self.points])
             for name in self.tank_names
         }
+
+    def po2s(self):
+        return np.array([point.po2 for point in self.point])

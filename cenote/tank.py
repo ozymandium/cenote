@@ -8,7 +8,7 @@ UREG = config.UREG
 
 
 class Mix:
-    def __init__(self, po2: float, phe: float):
+    def __init__(self, po2: float, phe: float = 0.0):
         """
         Parameters
         ----------
@@ -42,6 +42,10 @@ class Mix:
         if self.pn2 < 0:
             raise ValueError("Remaining pN2 < 0: {}".format(self.pn2))
 
+    def po2_at_depth(self, depth, w: water.Water):
+        pressure = water.pressure_from_depth(depth, w)
+        return self.po2 * pressure.to(UREG.atm)
+
     def mod(self, max_po2: float, w: water.Water):
         multiplier = max_po2 / self.po2
         max_pressure = (multiplier * UREG.atm).to(config.PRESSURE_UNIT)
@@ -65,7 +69,8 @@ class TankBase:
     # Pick a value with perfect capacity and let implementations handle non-ideal conditions.
     Z_FACTOR = 1.0
 
-    def __init__(self, pressure):
+    def __init__(self, mix: Mix, pressure):
+        self.mix = mix
         self.pressure = pressure.to(config.PRESSURE_UNIT)
 
     def increase_pressure(self, inc):
