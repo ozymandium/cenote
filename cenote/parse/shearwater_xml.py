@@ -2,6 +2,7 @@
 Parse a Shearwater XML dive log as output from the Shearwater
 """
 from cenote import gas_usage as gu
+from cenote.tank import TankBase
 from cenote import config
 import xml.etree.ElementTree as ET
 import ipdb
@@ -55,7 +56,7 @@ class ScrSource(enum.Enum):
 
 
 @debug()
-def parse_dive_from_shearwater_xml(path: str, tank: gu.Tank):
+def parse_dive_from_shearwater_xml(path: str, tank: TankBase):
     """
     Parses an XML file output from Shearwater Cloud application.
 

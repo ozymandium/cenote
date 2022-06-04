@@ -1,11 +1,13 @@
 from cenote import config
-from cenote.tank import Tank
+from cenote.tank import TankBase
+from cenote.tank import TYPES as TANK_TYPES
 
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
 import pint
 import enum
+from copy import deepcopy
 
 
 UREG = config.UREG
@@ -83,7 +85,7 @@ class Scr:
         return "{:.3f}".format(self.volume_rate)
 
     @staticmethod
-    def from_sac(pressure_rate, tank: Tank):
+    def from_sac(pressure_rate, tank: TankBase):
         """
         Compute SCR from Surface Air Consumption (SAC).
 
@@ -91,7 +93,7 @@ class Scr:
         ----------
         pressure_rate : pint config.PRESSURE_RATE_UNIT
             Decrease in pressure over time for the provided tank
-        tank : Tank
+        tank : TankBase
             The tank that coresponds to this consumption rate.
         """
         volume_rate = (
@@ -101,7 +103,7 @@ class Scr:
         )
         return Scr(volume_rate)
 
-    def sac(self, tank: Tank):
+    def sac(self, tank: TankBase):
         """SAC: Surface Air Consumption
         Consumption of gas from a specific tank measured in how quickly that tank's pressure is reduced.
 
@@ -109,7 +111,7 @@ class Scr:
         ----------
         pressure_rate : pint config.PRESSURE_RATE_UNIT
             Decrease in pressure over time for the provided tank
-        tank : Tank
+        tank : TankBase
             The tank that coresponds to this consumption rate
 
         Returns
@@ -165,7 +167,7 @@ class PlanPoint:
         )
 
 
-def _gas_consumed_between_points(pt0: PlanPoint, pt1: PlanPoint, water: Water):
+def _usage_between_points(pt0: PlanPoint, pt1: PlanPoint, water: Water):
     avg_depth = (pt0.depth + pt1.depth) * 0.5
     duration = pt1.time - pt0.time
     # assume that the SCR at the beginning of the section is the SCR for the entire section
@@ -190,7 +192,7 @@ class Plan:
     def __init__(self, water: Water, scr: Scr, tank_info: dict[str, TankInfo]):
         self.water = water
         self.scr = scr
-        self.tanks = tank_info
+        self.tank_info = tank_info
         self.points = []
 
         # check that time is strictly increasing
@@ -206,10 +208,10 @@ class Plan:
 
         if tank_name is None:
             tank_name = self.back().tank_name
-        if tank_name not in self.tanks:
+        if tank_name not in self.tank_info:
             raise ValueError(
-                "Tank name `{}` not found in tank info. Available name: {}".format(
-                    tank_name, self.tanks.keys()
+                "Tank name `{}` not found. Available names: {}".format(
+                    tank_name, self.tank_info.keys()
                 )
             )
 
@@ -229,22 +231,45 @@ class Plan:
 
 
 class ResultPoint:
-    def __init__(self, consumed_volume):
-        self.consumed_volume = consumed_volume
+    def __init__(self, usage, pressure):
+        self.usage = deepcopy(usage)
+        self.pressure = pressure
 
 
 class Result:
     def __init__(self, plan: Plan):
-        consumed_volume = 0 * config.VOLUME_UNIT
-        self.points = [ResultPoint(consumed_volume)]
+        self.tank_names = plan.tank_info.keys()
+        # initialize tank objects
+        tanks = {
+            name: TANK_TYPES[plan.tank_info[name].enum](plan.tank_info[name].pressure)
+            for name in self.tank_names
+        }
+        # keep track of usage for each tank over time, will copy this to each result point
+        usage = {name: 0.0 * config.VOLUME_UNIT for name in self.tank_names}
+        # compute usage for each section between points
+        self.points = [ResultPoint(usage, {name: tanks[name].pressure for name in self.tank_names})]
         for i in range(1, len(plan.points)):
             pt0 = plan.points[i - 1]
             pt1 = plan.points[i]
-            consumed_volume += _gas_consumed_between_points(pt0, pt1, plan.water)
-            self.points.append(ResultPoint(consumed_volume))
+            tank_name = pt0.tank_name
+            this_usage = _usage_between_points(pt0, pt1, plan.water)
+            tanks[tank_name].decrease_volume(this_usage)
+            usage[tank_name] += this_usage
+            # generate a pressure dict
+            pressure = {name: tanks[name].pressure for name in self.tank_names}
+            self.points.append(ResultPoint(usage, pressure))
 
-    def consumed_volume(self):
-        return self.points[-1].consumed_volume
+    def back(self):
+        return self.points[-1]
 
-    def consumed_volumes(self):
-        return np.array([point.consumed_volume.magnitude for point in self.points])
+    def usages(self):
+        return {
+            name: np.array([point.usage[name].magnitude for point in self.points])
+            for name in self.tank_names
+        }
+
+    def pressures(self):
+        return {
+            name: np.array([point.pressure.magnitude for point in self.points])
+            for name in self.tank_names
+        }

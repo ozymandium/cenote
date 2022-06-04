@@ -115,7 +115,7 @@ class Tank(enum.Enum):
 
 
 # Directory to look up Tank classes using short string.
-LOOKUP = {
+TYPES = {
     Tank.AL13: Aluminum13,
     Tank.AL40: Aluminum40,
     Tank.AL80: Aluminum80,

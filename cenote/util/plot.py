@@ -112,47 +112,48 @@ class ProfilePlot:
         self.fig.canvas.blit(self.ax.bbox)
 
 
-class ConsumptionPlot:
+class UsagePlot:
     def __init__(self, plan: gu.Plan, result: gu.Result, sync: Synchronizer):
         # internal state
         self.times = plan.times()
-        self.consumptions = result.consumed_volumes()
+        self.usages = result.usages()
         self.time = 0
 
         # generate plot entities
         self.fig, self.ax = plt.subplots()
         self.x_cursor = self.ax.plot(
             [np.min(self.times), np.min(self.times)],
-            [np.min(self.consumptions), np.max(self.consumptions)],
+            [0, np.max([np.max(u) for u in self.usages.values()])],
             "m",
             alpha=0.5,
         )[0]
-        self.y_cursor = self.ax.plot(
-            [np.min(self.times), np.max(self.times)],
-            [np.min(self.consumptions), np.min(self.consumptions)],
-            "m",
-            alpha=0.5,
-        )[0]
-        self.ax.plot(self.times, self.consumptions, "g")
+        for name in self.usages:
+            self.ax.plot(self.times, self.usages[name], label=name)
         self.text = self.ax.text(
-            0.95,
             0.05,
-            "Time: 00:00\nUsed: {} cuft".format(self.consumptions[0]),
+            0.95,
+            "Time: 00:00\n" + "\n".join(
+                [
+                    "{name}: {usage} cuft".format(name=name, usage=self.usages[name][0])
+                    for name in self.usages
+                    ])
+
+            ,
             transform=self.ax.transAxes,
             fontsize=10,
-            verticalalignment="bottom",
-            horizontalalignment="right",
+            verticalalignment="top",
+            horizontalalignment="left",
             fontname="monospace",
         )
 
         # plot accoutrements
-        self.fig.canvas.set_window_title("Gas Consumption")
+        self.fig.canvas.set_window_title("Gas Usage")
         self.ax.set_title(
-            "Gas Consumption\n({})".format(str(config.VOLUME_UNIT)), fontname="monospace"
+            "Gas Usage", fontname="monospace"
         )
         self.ax.grid(alpha=0.2)
         self.ax.set_xlabel("Time ({})".format(str(config.TIME_UNIT)), fontname="monospace")
-        self.ax.set_ylabel("Tank ___", fontname="monospace")
+        self.ax.set_ylabel("Gas Usage (cuft)", fontname="monospace")
 
         # callback setup
         self.fig.canvas.mpl_connect("button_press_event", self.mouse_handler)
@@ -180,13 +181,13 @@ class ConsumptionPlot:
 
     def time_update_callback(self, time):
         self.time = time
-        consumption = np.interp(time, self.times, self.consumptions)
+        usage = {
+            name: np.interp(time, self.times, self.usages[name])
+            for name in self.usages
+        }
 
         # x_cursor
         self.x_cursor.set_xdata([self.time, self.time])
-
-        # y_cursor
-        self.y_cursor.set_ydata([consumption, consumption])
 
         # text box
         minutes = int(np.floor(self.time))
@@ -195,9 +196,9 @@ class ConsumptionPlot:
             minutes += 1
             seconds = 0
         self.text.set_text(
-            "Time: {min}:{sec:02}\nUsed: {consumption} cuft".format(
-                min=minutes, sec=seconds, consumption=int(consumption)
-            )
+            "Time: {min}:{sec:02}\n".format(min=minutes, sec=seconds) +
+                "\n".join(["{name}: {usage} cuft".format(
+                name=name, usage=int(usage[name])) for name in self.usages])
         )
 
         # update
@@ -210,5 +211,5 @@ def plot(plan: gu.Plan, result: gu.Result):
 
     sync = Synchronizer()
     profile = ProfilePlot(plan, result, sync)
-    consumption = ConsumptionPlot(plan, result, sync)
+    consumption = UsagePlot(plan, result, sync)
     plt.show()

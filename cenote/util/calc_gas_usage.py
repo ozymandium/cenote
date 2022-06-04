@@ -22,7 +22,9 @@ def print_plan(plan: gu.Plan, result: gu.Result):
     print("Profile:")
     for point in plan.points:
         print("    {}".format(str(point)))
-    print("Gas usage: {:.2f}".format(result.consumed_volume()))
+    print("Gas usage:")
+    for tank_name in result.tank_names:
+        print("    {}: {:.2f}".format(tank_name, result.back().usage[tank_name]))
 
 
 def main():
