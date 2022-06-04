@@ -1,4 +1,4 @@
-from cenote import water
+from cenote.water import Water, depth_from_pressure, pressure_from_depth
 from cenote import config
 
 
@@ -6,7 +6,7 @@ UREG = config.UREG
 
 
 class Mix:
-    def __init__(self, po2: float, phe: float = 0.0):
+    def __init__(self, po2: float):
         """
         Parameters
         ----------
@@ -20,37 +20,27 @@ class Mix:
         ValueError
             If the values are WRONG!
         """
-        self.po2 = po2
-        self.phe = phe
-        self.pn2 = 1.0 - po2 - phe
-
         # check oxygen
-        if self.po2 <= 0:
-            raise ValueError("pO2 must be greater than zero: {}".format(self.po2))
-        if self.po2 > 1:
-            raise ValueError("pO2 must be les than 1: {}".formt(self.po2))
+        if po2 <= 0:
+            raise ValueError("pO2 must be greater than zero: {}".format(po2))
+        if po2 > 1:
+            raise ValueError("pO2 must be les than 1: {}".format(po2))
 
-        # check helium
-        if self.phe < 0:
-            raise ValueError("pHe must be greater than zero: {}".format(self.phe))
-        if self.phe >= 1:
-            raise ValueError("pHe must be less than 1: {}".formt(self.phe))
+        self.po2 = po2
+        self.pn2 = 1.0 - po2
 
-        # check nitrogegn
-        if self.pn2 < 0:
-            raise ValueError("Remaining pN2 < 0: {}".format(self.pn2))
 
-    def po2_at_depth(self, depth, w: water.Water):
-        pressure = water.pressure_from_depth(depth, w)
+    def po2_at_depth(self, depth, water: Water):
+        pressure = pressure_from_depth(depth, water)
         return self.po2 * pressure.to(UREG.atm)
 
-    def mod(self, max_po2: float, w: water.Water):
+    def mod(self, max_po2: float, water: Water):
         multiplier = max_po2 / self.po2
         max_pressure = (multiplier * UREG.atm).to(config.PRESSURE_UNIT)
-        return water.depth_from_pressure(max_pressure, w)
+        return depth_from_pressure(max_pressure, water)
 
 
-AIR = Mix(0.21)
+AIR = Mix(0.209460)
 EAN32 = Mix(0.32)
 EAN36 = Mix(0.36)
 EAN50 = Mix(0.5)
