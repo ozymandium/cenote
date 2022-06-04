@@ -8,6 +8,7 @@ from cenote import tank
 from cenote import config
 
 import yaml
+import numpy as np
 
 
 UREG = config.UREG
@@ -65,31 +66,28 @@ def parse_plan_from_yaml(path: str) -> gu.Plan:
 
     plan = gu.Plan(water, default_scr, tank_info)
 
-    # Profile
-    for point_data in data["profile"]:
-        kwargs = {}
-        # optional SCR
-        if "scr" in point_data:
-            volume_rate = UREG.parse_expression(point_data["scr"])
-            kwargs["scr"] = gu.Scr(volume_rate)
-        # optional tank name
-        if "tank" in point_data:
-            kwargs["tank_name"] = point_data["tank"]
+    # get a list of times in minutes
+    durations = [UREG.parse_expression(p["duration"]).to(config.TIME_UNIT).magnitude for p in data["profile"]]
+    times = [float(d) * config.TIME_UNIT for d in np.cumsum([0.] + durations)]
 
-        if len(plan.points) == 0:
-            # this is the first point. set depth and time to zero
-            time = 0 * config.TIME_UNIT
-            depth = 0 * config.DEPTH_UNIT
-            if "tank_name" not in kwargs:
-                raise Exception("First entry in profile must contain tank")
-            plan.add_point(time, depth, **kwargs)
+    # get a list of depths
+    depths = [0 * config.DEPTH_UNIT] + [UREG.parse_expression(p["depth"]) for p in data["profile"]]
 
-        duration = UREG.parse_expression(point_data["duration"])
-        time = plan.back().time + duration
+    # scr points
+    scrs = [gu.Scr(UREG.parse_expression(p["scr"])) if "scr" in p else None for p in data["profile"]] + [None]
 
-        depth = UREG.parse_expression(point_data["depth"])
+    # tank points
+    tanks = [p["tank"] if "tank" in p else None for p in data["profile"]]
+    tanks += [tanks[-1]]
+    if tanks[0] is None:
+        raise Exception("First entry in profile must contain tank")
 
-        plan.add_point(time, depth, **kwargs)
+    N = len(times)
+    assert len(depths) == N
+    assert len(scrs) == N
+    assert len(tanks) == N
+    for i in range(N):
+        plan.add_point(time=times[i], depth=depths[i], scr=scrs[i], tank_name=tanks[i])
 
     return plan
 

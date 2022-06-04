@@ -112,7 +112,7 @@ class ProfilePlot:
 class UsagePlot:
     def __init__(self, plan: gu.Plan, result: gu.Result, sync: Synchronizer):
         # internal state
-        self.times = plan.times()
+        self.times = result.times()
         self.usages = result.usages()
         self.time = 0
 
@@ -206,7 +206,7 @@ class UsagePlot:
 class PressurePlot:
     def __init__(self, plan: gu.Plan, result: gu.Result, sync: Synchronizer):
         # internal state
-        self.times = plan.times()
+        self.times = result.times()
         self.pressures = result.pressures()
         self.time = 0
 

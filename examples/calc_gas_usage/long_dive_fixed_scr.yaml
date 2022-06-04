@@ -11,12 +11,14 @@ profile:
   - duration: 5 min
     depth: 130 ft
     tank: water heater
+    scr: 1.0 ft^3 / min
   - duration: 15 min
     depth: 85 ft
   - duration: 5 min
     depth: 20 ft
-    tank: deco
+    scr: 0.5 ft^3 / min
   - duration: 5 min
+    tank: deco
     depth: 20 ft
   - duration: 1 min
     depth: 0 ft

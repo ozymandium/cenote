@@ -231,9 +231,10 @@ class Plan:
 
 
 class ResultPoint:
-    def __init__(self, usage, pressure):
+    def __init__(self, time, usage, pressure):
+        self.time = time
         self.usage = deepcopy(usage)
-        self.pressure = pressure
+        self.pressure = deepcopy(pressure)
 
 
 class Result:
@@ -246,21 +247,40 @@ class Result:
         }
         # keep track of usage for each tank over time, will copy this to each result point
         usage = {name: 0.0 * config.VOLUME_UNIT for name in self.tank_names}
+        pressure = {name: tanks[name].pressure for name in self.tank_names}
         # compute usage for each section between points
-        self.points = [ResultPoint(usage, {name: tanks[name].pressure for name in self.tank_names})]
+        self.points = [ResultPoint(0 * config.TIME_UNIT, usage, pressure)]
         for i in range(1, len(plan.points)):
-            pt0 = plan.points[i - 1]
-            pt1 = plan.points[i]
-            tank_name = pt0.tank_name
-            this_usage = _usage_between_points(pt0, pt1, plan.water)
-            tanks[tank_name].decrease_volume(this_usage)
-            usage[tank_name] += this_usage
-            # generate a pressure dict
-            pressure = {name: tanks[name].pressure for name in self.tank_names}
-            self.points.append(ResultPoint(usage, pressure))
+            first_pt = plan.points[i - 1]
+            last_pt = plan.points[i]
+            tank_name = first_pt.tank_name
+            # compute at small time increments so that not just the two user specified points are
+            # correct, but also some values in between
+            first_time = first_pt.time.magnitude
+            last_time = last_pt.time.magnitude
+            time_span = last_time - first_time
+            times = np.linspace(
+                first_time, 
+                last_time, 
+                round(time_span / config.TIME_INCREMENT.magnitude)
+                )    
+            depths = np.interp(times, [first_pt.time.magnitude, last_pt.time.magnitude], [first_pt.depth.magnitude, last_pt.depth.magnitude])
+            for i in range(1, len(times)):
+                pt0 = PlanPoint(times[i - 1] * config.TIME_UNIT, depths[i - 1] * config.DEPTH_UNIT, first_pt.scr, first_pt.tank_name)
+                pt1 = PlanPoint(times[i] * config.TIME_UNIT, depths[i] * config.DEPTH_UNIT, first_pt.scr, first_pt.tank_name)
+                this_usage = _usage_between_points(pt0, pt1, plan.water)
+                # updates
+                tanks[tank_name].decrease_volume(this_usage)
+                usage[tank_name] += this_usage
+                pressure[tank_name] = tanks[tank_name].pressure
+                # store new point
+                self.points.append(ResultPoint(pt1.time, usage, pressure))
 
     def back(self):
         return self.points[-1]
+
+    def times(self):
+        return np.array([point.time.magnitude for point in self.points])
 
     def usages(self):
         return {
