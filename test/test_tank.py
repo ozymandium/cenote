@@ -1,5 +1,6 @@
 from cenote import tank
 from cenote import config
+from cenote.mix import AIR, EAN50
 
 import unittest
 import pint
@@ -25,6 +26,22 @@ class TestTank(unittest.TestCase, QuantityTestCase):
             tank.LowPressureSteel108.service_volume(), 107.8 * UREG.ft ** 3, TOLERANCE
         )
 
+    def test_create_full(self):
+        self.assertEqual(tank.Aluminum80.create_full(AIR).pressure, tank.Aluminum80.SERVICE_PRESSURE)
 
-if __name__ == "__main__":
-    unittest.main()
+    def test_create_empty(self):
+        self.assertEqual(tank.Aluminum80.create_empty(AIR).pressure, 0 * config.PRESSURE_UNIT)
+
+    def test_volume(self):
+        self.assertEqual(tank.Aluminum80.create_full(AIR).volume(), tank.Aluminum80.service_volume())
+        self.assertEqual(tank.Aluminum80.create_empty(AIR).volume(), 0 * config.VOLUME_UNIT)
+
+    def test_pressure_change(self):
+        al80 = tank.Aluminum80.create_full(AIR)
+        al80.decrease_pressure(al80.SERVICE_PRESSURE / 3.)
+        helpers.assert_quantity_almost_equal(al80.pressure, al80.SERVICE_PRESSURE * 2. / 3., 1e-12)
+
+    def test_volume_change(self):
+        lp108 = tank.LowPressureSteel108.create_full(EAN50)
+        lp108.decrease_volume(lp108.service_volume() / 3.)
+        helpers.assert_quantity_almost_equal(lp108.volume(), lp108.service_volume() * 2. / 3., 1e-12)

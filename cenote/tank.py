@@ -29,25 +29,19 @@ class TankBase:
         self.mix = mix
         self.pressure = pressure.to(config.PRESSURE_UNIT)
 
-    def increase_pressure(self, inc):
-        self.pressure_change(inc)
-
     def decrease_pressure(self, inc):
-        self.pressure_change(-1.0 * inc)
-
-    def increase_volume(self, inc):
-        self.volume_change(inc)
+        self._pressure_change(-1.0 * inc)
 
     def decrease_volume(self, inc):
-        self.volume_change(-1.0 * inc)
+        self._volume_change(-1.0 * inc)
 
-    def pressure_change(self, inc):
+    def _pressure_change(self, inc):
         self.pressure += inc
 
-    def volume_change(self, inc):
+    def _volume_change(self, inc):
         pressure_atm_magnitude = inc / self.VOLUME
         pressure_inc = (pressure_atm_magnitude * UREG.atm).to(config.PRESSURE_UNIT)
-        self.pressure_change(pressure_inc)
+        self._pressure_change(pressure_inc)
 
     @classmethod
     def service_volume(cls):
