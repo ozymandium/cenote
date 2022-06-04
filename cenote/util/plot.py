@@ -3,6 +3,8 @@ from cenote import config
 from cenote import parse
 
 import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
+from matplotlib.colors import ListedColormap, BoundaryNorm
 import numpy as np
 import argparse
 import os
@@ -136,7 +138,7 @@ class UsagePlot:
             self.ax.plot(self.times, self.usages[name], label=name)
         self.text = self.ax.text(
             0.05,
-            0.95,
+            0.7,
             "Time: 00:00\n"
             + "\n".join(
                 [
@@ -150,6 +152,7 @@ class UsagePlot:
             horizontalalignment="left",
             fontname="monospace",
         )
+        self.ax.legend(loc="best")
 
         # plot accoutrements
         self.fig.canvas.set_window_title("Gas Usage")
@@ -245,6 +248,7 @@ class PressurePlot:
             horizontalalignment="left",
             fontname="monospace",
         )
+        self.ax.legend(loc="best")
 
         # plot accoutrements
         self.fig.canvas.set_window_title("Pressure")
@@ -328,7 +332,7 @@ class PO2Plot:
             "m",
             alpha=0.5,
         )[0]
-        self.ax.plot(self.times, self.po2s, "g")
+        # self.ax.plot(self.times, self.po2s, "g")
         self.text = self.ax.text(
             0.95,
             0.05,
@@ -340,9 +344,27 @@ class PO2Plot:
             fontname="monospace",
         )
 
+        # stuff to make a colormap for the value of po2
+        # https://matplotlib.org/3.1.1/gallery/lines_bars_and_markers/multicolored_line.html
+        # Create a set of line segments so that we can color them individually
+        # This creates the points as a N x 1 x 2 array so that we can stack points
+        # together easily to get the segments. The segments array for line collection
+        # needs to be (numlines) x (points per line) x 2 (for x and y)
+        points = np.array([self.times, self.po2s]).T.reshape(-1, 1, 2)
+        segments = np.concatenate([points[:-1], points[1:]], axis=1)
+        mean_po2s = (self.po2s[1:] + self.po2s[:-1]) * 0.5
+        # Create a continuous norm to map from data points to colors
+        norm = plt.Normalize(0.18, 1.6)
+        lc = LineCollection(segments, cmap="RdYlGn_r", norm=norm)
+        # Set the values used for colormapping
+        lc.set_array(mean_po2s)
+        lc.set_linewidth(2)
+        line = self.ax.add_collection(lc)
+        self.fig.colorbar(line, ax=self.ax)
+
         # plot accoutrements
-        self.fig.canvas.set_window_title("PO2")
-        self.ax.set_title("PO2", fontname="monospace")
+        self.fig.canvas.set_window_title("Partial Pressure")
+        self.ax.set_title("Partial Pressure", fontname="monospace")
         self.ax.grid(alpha=0.2)
         self.ax.set_xlabel("Time ({})".format(str(config.TIME_UNIT)), fontname="monospace")
         self.ax.set_ylabel("PO2 (ata)", fontname="monospace")
