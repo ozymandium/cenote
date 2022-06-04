@@ -10,7 +10,6 @@ UREG = config.UREG
 
 
 class TestMix(unittest.TestCase):
-
     def test_construction(self):
         mix = Mix(0.8, 0.1)
         self.assertEqual(mix.po2, 0.8)

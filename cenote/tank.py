@@ -7,7 +7,6 @@ import enum
 UREG = config.UREG
 
 
-
 class TankBase:
     """
     Members
@@ -72,9 +71,11 @@ class TankBase:
     def create_empty(cls, mix: Mix):
         return cls(mix=mix, pressure=0 * config.PRESSURE_UNIT)
 
+
 #
 # Tank Implementations
 #
+
 
 class Aluminum13(TankBase):
     """https://www.catalinacylinders.com/product/s13/"""

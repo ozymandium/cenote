@@ -126,16 +126,24 @@ class TestResult(unittest.TestCase):
     def test_gas_usage(self):
         TANK_NAME = ""
         scr = Scr(1.0 * UREG.ft ** 3 / UREG.minute)
-        tank_info = {TANK_NAME: TankInfo(enum=tank.Tank.AL80, pressure=tank.Aluminum80.SERVICE_PRESSURE, mix=mix.AIR)}
+        tank_info = {
+            TANK_NAME: TankInfo(
+                enum=tank.Tank.AL80, pressure=tank.Aluminum80.SERVICE_PRESSURE, mix=mix.AIR
+            )
+        }
         plan = Plan(water=Water.FRESH, scr=scr, tank_info=tank_info)
         plan.add_point(
             UREG.parse_expression("0 min"), UREG.parse_expression("0 feet"), tank_name=TANK_NAME
         )
         plan.add_point(
-            UREG.parse_expression("1 min"), UREG.parse_expression("67.91 ft"),
+            UREG.parse_expression("1 min"),
+            UREG.parse_expression("67.91 ft"),
         )
         plan.add_point(
-            UREG.parse_expression("2 min"), UREG.parse_expression("0 feet"),
+            UREG.parse_expression("2 min"),
+            UREG.parse_expression("0 feet"),
         )
         result = Result(plan)
-        helpers.assert_quantity_almost_equal(result.back().usage[TANK_NAME], 4 * UREG.foot ** 3, 1e-3)
+        helpers.assert_quantity_almost_equal(
+            result.back().usage[TANK_NAME], 4 * UREG.foot ** 3, 1e-3
+        )
