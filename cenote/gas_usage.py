@@ -143,7 +143,7 @@ class PlanPoint:
         Distance below surface () in config.DEPTH_UNIT
     """
 
-    def __init__(self, time, depth, scr: Scr):
+    def __init__(self, time, depth, scr: Scr, tank_name: str):
         """
         Parameters
         ----------
@@ -157,9 +157,10 @@ class PlanPoint:
         self.time = time.to(config.TIME_UNIT)
         self.depth = depth.to(config.DEPTH_UNIT)
         self.scr = scr
+        self.tank_name = tank_name
 
     def __str__(self):
-        return "{:.1f}: {:.1f}".format(self.time, self.depth)
+        return "{time:.1f} {depth:.1f} {scr} {tank}".format(time=self.time, depth=self.depth, scr=self.scr, tank=self.tank_name)
 
 
 def _gas_consumed_between_points(pt0: PlanPoint, pt1: PlanPoint, water: Water):
@@ -171,23 +172,54 @@ def _gas_consumed_between_points(pt0: PlanPoint, pt1: PlanPoint, water: Water):
     return volume_rate * duration
 
 
+class TankInfo:
+    def __init__(self, enum, pressure):
+        self.enum = enum
+        self.pressure = pressure
+
+
 class Plan:
     """
     Members
     -------
     points : list[PlanPoint]
-    sections :
     """
 
-    def __init__(self, points: list[PlanPoint], water: Water):
-        self.points = points
+    def __init__(self, water: Water, scr: Scr, tank_info: dict[str,TankInfo]):
         self.water = water
+        self.scr = scr
+        self.tanks = tank_info
+        self.points = []
+
+        # check that time is strictly increasing
+        assert np.all(np.diff(self.times()) > 0)
+
+    def add_point(self, time, depth, scr=None, tank_name=None):
+        """
+        if scr is not provided, it is copied from the dive plan default.
+        tank name is either specified or copied over from the last point.
+        """
+        if scr is None:
+            scr = self.scr
+        
+        if tank_name is None:
+            tank_name = self.back().tank_name
+        if tank_name not in self.tanks:
+            raise ValueError("Tank name `{}` not found in tank info. Available name: {}".format(tank_name, self.tanks.keys()))
+        
+        point = PlanPoint(time, depth, scr, tank_name)
+        self.points.append(point)
 
     def times(self):
         return np.array([point.time.magnitude for point in self.points])
 
     def depths(self):
         return np.array([point.depth.magnitude for point in self.points])
+
+    def back(self):
+        if not len(self.points):
+            raise RuntimeError("No points have been added.")
+        return self.points[-1]
 
 
 class ResultPoint:
@@ -196,22 +228,17 @@ class ResultPoint:
 
 
 class Result:
-    def __init__(self, points: list[ResultPoint]):
-        self.points = points
-
-    def consumed_volume(self):
-        return self.points[-1].consumed_volume
-
-    @staticmethod
-    def from_plan(plan: Plan):
+    def __init__(self, plan: Plan):
         consumed_volume = 0 * config.VOLUME_UNIT
-        points = [ResultPoint(consumed_volume)]
+        self.points = [ResultPoint(consumed_volume)]
         for i in range(1, len(plan.points)):
             pt0 = plan.points[i - 1]
             pt1 = plan.points[i]
             consumed_volume += _gas_consumed_between_points(pt0, pt1, plan.water)
-            points.append(ResultPoint(consumed_volume))
-        return Result(points)
+            self.points.append(ResultPoint(consumed_volume))
+
+    def consumed_volume(self):
+        return self.points[-1].consumed_volume
 
     def consumed_volumes(self):
         return np.array([point.consumed_volume.magnitude for point in self.points])

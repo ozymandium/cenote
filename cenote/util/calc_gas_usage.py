@@ -36,7 +36,7 @@ def main():
         print("No input file provided.")
         sys.exit(0)
 
-    result = gu.Result.from_plan(plan)
+    result = gu.Result(plan)
 
     print_plan(plan, result)
     plot.plot(plan, result)

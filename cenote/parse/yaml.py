@@ -4,6 +4,7 @@ __all__ = [
 ]
 
 from cenote import gas_usage as gu
+from cenote import tank
 from cenote.config import UREG
 import yaml
 
@@ -49,20 +50,31 @@ def parse_plan_from_yaml(path: str) -> gu.Plan:
     default_volume_rate = UREG.parse_expression(data["scr"])
     default_scr = gu.Scr(default_volume_rate)
 
+    # tank info
+    tank_info = {}
+    for entry in data["tanks"]:
+        name = entry["name"]
+        enum = tank.Tank[entry["type"]]
+        pressure = UREG.parse_expression(entry["pressure"])
+        tank_info[name] = gu.TankInfo(enum, pressure)
+
+    plan = gu.Plan(water, default_scr, tank_info)
+
     # Profile
-    profile = []
     for point_data in data["profile"]:
         time = UREG.parse_expression(point_data["time"])
         depth = UREG.parse_expression(point_data["depth"])
+        kwargs = {}
+        # optional SCR
         if "scr" in point_data:
             volume_rate = UREG.parse_expression(point_data["scr"])
-            scr = gu.Scr(volume_rate)
-        else:
-            scr = default_scr
-        point = gu.PlanPoint(time, depth, scr)
-        profile.append(point)
+            kwargs["scr"] = gu.Scr(volume_rate)
+        # optional tank name
+        if "tank" in point_data:
+            kwargs["tank_name"] = point_data["tank"]
+        plan.add_point(time, depth, **kwargs)
 
-    return gu.Plan(profile, water)
+    return plan
 
 
 def export_plan_to_yaml(plan: gu.Plan, path: str, scr=None):

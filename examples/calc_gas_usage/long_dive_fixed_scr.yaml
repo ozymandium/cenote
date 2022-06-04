@@ -2,10 +2,10 @@ water: SALT
 tanks:
   - name: water heater
     type: LP108
-    pressure: 3200
+    pressure: 3200 psi
   - name: deco
     type: AL40
-    pressure: 2200
+    pressure: 2200 psi
 scr: 0.75 ft^3 / min
 profile:
   - time: 0 min

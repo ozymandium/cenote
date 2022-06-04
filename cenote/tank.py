@@ -1,10 +1,12 @@
 from cenote import config
 
+import enum
+
 
 UREG = config.UREG
 
 
-class Tank:
+class TankBase:
     """
     Members
     -------
@@ -74,7 +76,7 @@ class Tank:
         return cls(0 * config.PRESSURE_UNIT)
 
 
-class Aluminum13(Tank):
+class Aluminum13(TankBase):
     """https://www.catalinacylinders.com/product/s13/"""
 
     VOLUME = 1.9 * UREG.liter
@@ -82,7 +84,7 @@ class Aluminum13(Tank):
     Z_FACTOR = 1.054
 
 
-class Aluminum40(Tank):
+class Aluminum40(TankBase):
     """https://www.catalinacylinders.com/product/s40/"""
 
     VOLUME = 5.8 * UREG.liter
@@ -90,7 +92,7 @@ class Aluminum40(Tank):
     Z_FACTOR = 1.045
 
 
-class Aluminum80(Tank):
+class Aluminum80(TankBase):
     """https://www.catalinacylinders.com/product/s80/"""
 
     VOLUME = (11.1 * UREG.liter).to(config.VOLUME_UNIT)
@@ -98,17 +100,23 @@ class Aluminum80(Tank):
     Z_FACTOR = 1.0337
 
 
-class LowPressureSteel108(Tank):
+class LowPressureSteel108(TankBase):
     """Can't find specs for this. z factor of 1 gives under 108."""
 
     VOLUME = 17 * UREG.liter
     SERVICE_PRESSURE = 2640 * UREG.psi
 
 
+class Tank(enum.Enum):
+    AL13 = enum.auto()
+    AL40 = enum.auto()
+    AL80 = enum.auto()
+    LP108 = enum.auto()
+
 # Directory to look up Tank classes using short string.
-TANKS = {
-    "AL13": Aluminum13,
-    "AL40": Aluminum40,
-    "AL80": Aluminum80,
-    "LP108": LowPressureSteel108,
+LOOKUP = {
+    Tank.AL13: Aluminum13,
+    Tank.AL40: Aluminum40,
+    Tank.AL80: Aluminum80,
+    Tank.LP108: LowPressureSteel108,
 }

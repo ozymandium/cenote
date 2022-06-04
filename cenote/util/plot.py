@@ -137,7 +137,7 @@ class ConsumptionPlot:
         self.text = self.ax.text(
             0.95,
             0.05,
-            "Time: 00:00\nConsumption: {} cuft".format(self.consumptions[0]),
+            "Time: 00:00\nUsed: {} cuft".format(self.consumptions[0]),
             transform=self.ax.transAxes,
             fontsize=10,
             verticalalignment="bottom",
@@ -147,10 +147,10 @@ class ConsumptionPlot:
 
         # plot accoutrements
         self.fig.canvas.set_window_title("Gas Consumption")
-        self.ax.set_title("Gas Consumption", fontname="monospace")
+        self.ax.set_title("Gas Consumption\n({})".format(str(config.VOLUME_UNIT)), fontname="monospace")
         self.ax.grid(alpha=0.2)
         self.ax.set_xlabel("Time ({})".format(str(config.TIME_UNIT)), fontname="monospace")
-        self.ax.set_ylabel("Consumption ({})".format(str(config.VOLUME_UNIT)), fontname="monospace")
+        self.ax.set_ylabel("Tank ___", fontname="monospace")
 
         # callback setup
         self.fig.canvas.mpl_connect("button_press_event", self.mouse_handler)
@@ -193,7 +193,7 @@ class ConsumptionPlot:
             minutes += 1
             seconds = 0
         self.text.set_text(
-            "Time: {min}:{sec:02}\nConsumption: {consumption} cuft".format(
+            "Time: {min}:{sec:02}\nUsed: {consumption} cuft".format(
                 min=minutes, sec=seconds, consumption=int(consumption)
             )
         )
