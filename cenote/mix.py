@@ -29,7 +29,6 @@ class Mix:
         self.po2 = po2
         self.pn2 = 1.0 - po2
 
-
     def po2_at_depth(self, depth, water: Water):
         pressure = pressure_from_depth(depth, water)
         return self.po2 * pressure.to(UREG.atm)
