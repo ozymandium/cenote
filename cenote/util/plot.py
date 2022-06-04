@@ -380,9 +380,7 @@ class PO2Plot:
             minutes += 1
             seconds = 0
         self.text.set_text(
-            "Time: {min}:{sec:02}\nPO2: {po2:.2f} ata".format(
-                min=minutes, sec=seconds, po2=po2
-            )
+            "Time: {min}:{sec:02}\nPO2: {po2:.2f} ata".format(min=minutes, sec=seconds, po2=po2)
         )
 
         # update

@@ -206,7 +206,7 @@ class Result:
         for plan_idx in range(1, len(plan.points)):
             first_pt = plan.points[plan_idx - 1]
             last_pt = plan.points[plan_idx]
-            
+
             tank_name = first_pt.tank_name
 
             # compute at small time increments so that not just the two user specified points are
