@@ -6,6 +6,7 @@ __all__ = [
 from cenote import gas_usage as gu
 from cenote import tank
 from cenote import config
+from cenote import mix
 
 import yaml
 import numpy as np
@@ -62,7 +63,7 @@ def parse_plan_from_yaml(path: str) -> gu.Plan:
         name = entry["name"]
         enum = tank.Tank[entry["type"]]
         pressure = UREG.parse_expression(entry["pressure"])
-        mix = tank.Mix(po2=entry["mix"]["po2"])
+        mix = mix.Mix(po2=entry["mix"]["po2"])
         tank_info[name] = gu.TankInfo(enum, pressure, mix)
 
     plan = gu.Plan(water, default_scr, tank_info)

@@ -194,7 +194,7 @@ class Result:
         # initialize tank objects
         tanks = {
             name: TANK_TYPES[plan.tank_info[name].enum](
-                plan.tank_info[name].mix, plan.tank_info[name].pressure
+                mix=plan.tank_info[name].mix, pressure=plan.tank_info[name].pressure
             )
             for name in self.tank_names
         }

@@ -1,55 +1,11 @@
 from cenote import config
-from cenote import water
+from cenote.mix import Mix
 
 import enum
 
 
 UREG = config.UREG
 
-
-class Mix:
-    def __init__(self, po2: float, phe: float = 0.0):
-        """
-        Parameters
-        ----------
-        po2 : float
-            partial pressure of oxygen at sea level
-        phe : float
-            partial presure of helium at sea level
-
-        Raises
-        ------
-        ValueError
-            If the values are WRONG!
-        """
-        self.po2 = po2
-        self.phe = phe
-        self.pn2 = 1.0 - po2 - phe
-
-        # check oxygen
-        if self.po2 <= 0:
-            raise ValueError("pO2 must be greater than zero: {}".format(self.po2))
-        if self.po2 > 1:
-            raise ValueError("pO2 must be les than 1: {}".formt(self.po2))
-
-        # check helium
-        if self.phe < 0:
-            raise ValueError("pHe must be greater than zero: {}".format(self.phe))
-        if self.phe >= 1:
-            raise ValueError("pHe must be less than 1: {}".formt(self.phe))
-
-        # check nitrogegn
-        if self.pn2 < 0:
-            raise ValueError("Remaining pN2 < 0: {}".format(self.pn2))
-
-    def po2_at_depth(self, depth, w: water.Water):
-        pressure = water.pressure_from_depth(depth, w)
-        return self.po2 * pressure.to(UREG.atm)
-
-    def mod(self, max_po2: float, w: water.Water):
-        multiplier = max_po2 / self.po2
-        max_pressure = (multiplier * UREG.atm).to(config.PRESSURE_UNIT)
-        return water.depth_from_pressure(max_pressure, w)
 
 
 class TankBase:
@@ -115,13 +71,16 @@ class TankBase:
         return capacity.to(config.VOLUME_UNIT)
 
     @classmethod
-    def create_full(cls):
-        return cls(cls.SERVICE_PRESSURE)
+    def create_full(cls, mix: Mix):
+        return cls(mix=mix, pressure=cls.SERVICE_PRESSURE)
 
     @classmethod
-    def create_empty(cls):
-        return cls(0 * config.PRESSURE_UNIT)
+    def create_empty(cls, mix: Mix):
+        return cls(mix=mix, pressure=0 * config.PRESSURE_UNIT)
 
+#
+# Tank Implementations
+#
 
 class Aluminum13(TankBase):
     """https://www.catalinacylinders.com/product/s13/"""

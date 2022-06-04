@@ -1,6 +1,7 @@
 from cenote import gas_usage as gu
 from cenote import tank
 from cenote import config
+from cenote import mix
 
 import unittest
 import pint
@@ -15,7 +16,7 @@ class TestPlanPoint(unittest.TestCase):
         time = 0.0 * UREG.second
         depth = 0.0 * UREG.meter
         scr = gu.Scr(0.0 * UREG.liter / UREG.minute)
-        point = gu.PlanPoint(time, depth, scr)
+        point = gu.PlanPoint(time, depth, scr, "")
         self.assertEqual(time, point.time)
         self.assertEqual(point.time.units, config.TIME_UNIT)
         self.assertEqual(depth, point.depth)
@@ -29,42 +30,42 @@ class TestPlanPoint(unittest.TestCase):
         good_depth = UREG.parse_expression("12in")
         bad_depth = UREG.parse_expression("2kPa")
         scr = gu.Scr(0.0 * UREG.liter / UREG.minute)
-        self.assertRaises(pint.errors.DimensionalityError, gu.PlanPoint, bad_time, good_depth, scr)
-        self.assertRaises(pint.errors.DimensionalityError, gu.PlanPoint, good_time, bad_depth, scr)
+        self.assertRaises(pint.errors.DimensionalityError, gu.PlanPoint, bad_time, good_depth, scr, "")
+        self.assertRaises(pint.errors.DimensionalityError, gu.PlanPoint, good_time, bad_depth, scr, "")
 
     def test_negative_value(self):
         scr = gu.Scr(0.0 * UREG.liter / UREG.minute)
-        self.assertRaises(ValueError, gu.PlanPoint, -1 * UREG.minute, 0 * UREG.meter, scr)
-        self.assertRaises(ValueError, gu.PlanPoint, 0 * UREG.minute, -1 * UREG.meter, scr)
+        self.assertRaises(ValueError, gu.PlanPoint, -1 * UREG.minute, 0 * UREG.meter, scr, "")
+        self.assertRaises(ValueError, gu.PlanPoint, 0 * UREG.minute, -1 * UREG.meter, scr, "")
 
 
-class Test_gas_consumed_between_points(unittest.TestCase):
+class Test_usage_between_points(unittest.TestCase):
 
     GAS_USAGE_VOLUME_TOLERANCE = 1e-3
 
     def test_surface_gas_usage(self):
         scr = gu.Scr(UREG.parse_expression("1 ft^3/min"))
-        pt0 = gu.PlanPoint(0 * UREG.minute, depth=0 * UREG.foot, scr=scr)
-        pt1 = gu.PlanPoint(1 * UREG.minute, depth=0 * UREG.foot, scr=scr)
-        consumption = gu._gas_consumed_between_points(pt0, pt1, gu.Water.FRESH)
+        pt0 = gu.PlanPoint(0 * UREG.minute, depth=0 * UREG.foot, scr=scr, tank_name="")
+        pt1 = gu.PlanPoint(1 * UREG.minute, depth=0 * UREG.foot, scr=scr, tank_name="")
+        consumption = gu._usage_between_points(pt0, pt1, gu.Water.FRESH)
         helpers.assert_quantity_almost_equal(
             consumption, 1 * UREG.ft ** 3, self.GAS_USAGE_VOLUME_TOLERANCE
         )
 
     def test_depth_gas_usage_square(self):
         scr = gu.Scr(UREG.parse_expression("1 ft^3/min"))
-        pt0 = gu.PlanPoint(0 * UREG.minute, depth=33.96 * UREG.foot, scr=scr)
-        pt1 = gu.PlanPoint(1 * UREG.minute, depth=33.96 * UREG.foot, scr=scr)
-        consumption = gu._gas_consumed_between_points(pt0, pt1, gu.Water.FRESH)
+        pt0 = gu.PlanPoint(0 * UREG.minute, depth=33.96 * UREG.foot, scr=scr, tank_name="")
+        pt1 = gu.PlanPoint(1 * UREG.minute, depth=33.96 * UREG.foot, scr=scr, tank_name="")
+        consumption = gu._usage_between_points(pt0, pt1, gu.Water.FRESH)
         helpers.assert_quantity_almost_equal(
             consumption, 2 * UREG.ft ** 3, self.GAS_USAGE_VOLUME_TOLERANCE
         )
 
         # def test_trapezoid_gas_usage(self):
         scr = gu.Scr(UREG.parse_expression("1 ft^3/min"))
-        pt0 = gu.PlanPoint(0 * UREG.minute, depth=0 * UREG.foot, scr=scr)
-        pt1 = gu.PlanPoint(1 * UREG.minute, depth=67.91 * UREG.foot, scr=scr)
-        consumption = gu._gas_consumed_between_points(pt0, pt1, gu.Water.FRESH)
+        pt0 = gu.PlanPoint(0 * UREG.minute, depth=0 * UREG.foot, scr=scr, tank_name="")
+        pt1 = gu.PlanPoint(1 * UREG.minute, depth=67.91 * UREG.foot, scr=scr, tank_name="")
+        consumption = gu._usage_between_points(pt0, pt1, gu.Water.FRESH)
         helpers.assert_quantity_almost_equal(
             consumption, 2 * UREG.ft ** 3, self.GAS_USAGE_VOLUME_TOLERANCE
         )
@@ -84,14 +85,14 @@ class TestScr(unittest.TestCase):
         )
 
     def test_sac(self):
-        al80 = tank.Aluminum80.create_full()
+        al80 = tank.Aluminum80.create_full(mix.AIR)
         sac = al80.SERVICE_PRESSURE / UREG.minute
         scr = gu.Scr.from_sac(sac, al80)
         self.assertEqual(scr.volume_rate, al80.service_volume() / UREG.minute)
 
     def test_round_trip(self):
         pressure_rate = 30 * UREG.psi / UREG.minute
-        al80 = tank.Aluminum80.create_full()
+        al80 = tank.Aluminum80.create_full(mix.AIR)
         scr_from_sac = gu.Scr.from_sac(pressure_rate, al80)
         sac_from_scr = scr_from_sac.sac(al80)
         self.assertEqual(sac_from_scr, pressure_rate)
@@ -121,12 +122,18 @@ class TestScr(unittest.TestCase):
 
 class TestResult(unittest.TestCase):
     def test_gas_usage(self):
+        TANK_NAME = ""
         scr = gu.Scr(1.0 * UREG.ft ** 3 / UREG.minute)
-        profile = [
-            gu.PlanPoint(UREG.parse_expression("0 min"), UREG.parse_expression("0 feet"), scr),
-            gu.PlanPoint(UREG.parse_expression("1 min"), UREG.parse_expression("67.91 ft"), scr),
-            gu.PlanPoint(UREG.parse_expression("2 min"), UREG.parse_expression("0 feet"), scr),
-        ]
-        plan = gu.Plan(profile, gu.Water.FRESH)
-        result = gu.Result.from_plan(plan)
-        helpers.assert_quantity_almost_equal(result.consumed_volume(), 4 * UREG.foot ** 3, 1e-3)
+        tank_info = {TANK_NAME: gu.TankInfo(enum=tank.Tank.AL80, pressure=tank.Aluminum80.SERVICE_PRESSURE, mix=mix.AIR)}
+        plan = gu.Plan(water=gu.Water.FRESH, scr=scr, tank_info=tank_info)
+        plan.add_point(
+            UREG.parse_expression("0 min"), UREG.parse_expression("0 feet"), tank_name=TANK_NAME
+        )
+        plan.add_point(
+            UREG.parse_expression("1 min"), UREG.parse_expression("67.91 ft"),
+        )
+        plan.add_point(
+            UREG.parse_expression("2 min"), UREG.parse_expression("0 feet"),
+        )
+        result = gu.Result(plan)
+        helpers.assert_quantity_almost_equal(result.back().usage[TANK_NAME], 4 * UREG.foot ** 3, 1e-3)
