@@ -129,13 +129,13 @@ class UsagePlot:
         self.text = self.ax.text(
             0.05,
             0.95,
-            "Time: 00:00\n" + "\n".join(
+            "Time: 00:00\n"
+            + "\n".join(
                 [
                     "{name}: {usage} cuft".format(name=name, usage=self.usages[name][0])
                     for name in self.usages
-                    ])
-
-            ,
+                ]
+            ),
             transform=self.ax.transAxes,
             fontsize=10,
             verticalalignment="top",
@@ -145,9 +145,7 @@ class UsagePlot:
 
         # plot accoutrements
         self.fig.canvas.set_window_title("Gas Usage")
-        self.ax.set_title(
-            "Gas Usage", fontname="monospace"
-        )
+        self.ax.set_title("Gas Usage", fontname="monospace")
         self.ax.grid(alpha=0.2)
         self.ax.set_xlabel("Time ({})".format(str(config.TIME_UNIT)), fontname="monospace")
         self.ax.set_ylabel("Gas Usage (cuft)", fontname="monospace")
@@ -178,10 +176,7 @@ class UsagePlot:
 
     def time_update_callback(self, time):
         self.time = time
-        usage = {
-            name: np.interp(time, self.times, self.usages[name])
-            for name in self.usages
-        }
+        usage = {name: np.interp(time, self.times, self.usages[name]) for name in self.usages}
 
         # x_cursor
         self.x_cursor.set_xdata([self.time, self.time])
@@ -193,9 +188,13 @@ class UsagePlot:
             minutes += 1
             seconds = 0
         self.text.set_text(
-            "Time: {min}:{sec:02}\n".format(min=minutes, sec=seconds) +
-                "\n".join(["{name}: {usage} cuft".format(
-                name=name, usage=int(usage[name])) for name in self.usages])
+            "Time: {min}:{sec:02}\n".format(min=minutes, sec=seconds)
+            + "\n".join(
+                [
+                    "{name}: {usage} cuft".format(name=name, usage=int(usage[name]))
+                    for name in self.usages
+                ]
+            )
         )
 
         # update
@@ -223,13 +222,15 @@ class PressurePlot:
         self.text = self.ax.text(
             0.05,
             0.05,
-            "Time: 00:00\n" + "\n".join(
+            "Time: 00:00\n"
+            + "\n".join(
                 [
-                    "{name}: {pressure} psi".format(name=name, pressure=int(self.pressures[name][0]))
+                    "{name}: {pressure} psi".format(
+                        name=name, pressure=int(self.pressures[name][0])
+                    )
                     for name in self.pressures
-                    ])
-
-            ,
+                ]
+            ),
             transform=self.ax.transAxes,
             fontsize=10,
             verticalalignment="bottom",
@@ -239,9 +240,7 @@ class PressurePlot:
 
         # plot accoutrements
         self.fig.canvas.set_window_title("Pressure")
-        self.ax.set_title(
-            "Pressure", fontname="monospace"
-        )
+        self.ax.set_title("Pressure", fontname="monospace")
         self.ax.grid(alpha=0.2)
         self.ax.set_xlabel("Time ({})".format(str(config.TIME_UNIT)), fontname="monospace")
         self.ax.set_ylabel("Pressure (psi)", fontname="monospace")
@@ -273,8 +272,7 @@ class PressurePlot:
     def time_update_callback(self, time):
         self.time = time
         pressure = {
-            name: np.interp(time, self.times, self.pressures[name])
-            for name in self.pressures
+            name: np.interp(time, self.times, self.pressures[name]) for name in self.pressures
         }
 
         # x_cursor
@@ -287,9 +285,13 @@ class PressurePlot:
             minutes += 1
             seconds = 0
         self.text.set_text(
-            "Time: {min}:{sec:02}\n".format(min=minutes, sec=seconds) +
-                "\n".join(["{name}: {pressure} psi".format(
-                name=name, pressure=int(pressure[name])) for name in self.pressures])
+            "Time: {min}:{sec:02}\n".format(min=minutes, sec=seconds)
+            + "\n".join(
+                [
+                    "{name}: {pressure} psi".format(name=name, pressure=int(pressure[name]))
+                    for name in self.pressures
+                ]
+            )
         )
 
         # update

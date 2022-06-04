@@ -260,14 +260,26 @@ class Result:
             last_time = last_pt.time.magnitude
             time_span = last_time - first_time
             times = np.linspace(
-                first_time, 
-                last_time, 
-                round(time_span / config.TIME_INCREMENT.magnitude)
-                )    
-            depths = np.interp(times, [first_pt.time.magnitude, last_pt.time.magnitude], [first_pt.depth.magnitude, last_pt.depth.magnitude])
+                first_time, last_time, round(time_span / config.TIME_INCREMENT.magnitude)
+            )
+            depths = np.interp(
+                times,
+                [first_pt.time.magnitude, last_pt.time.magnitude],
+                [first_pt.depth.magnitude, last_pt.depth.magnitude],
+            )
             for i in range(1, len(times)):
-                pt0 = PlanPoint(times[i - 1] * config.TIME_UNIT, depths[i - 1] * config.DEPTH_UNIT, first_pt.scr, first_pt.tank_name)
-                pt1 = PlanPoint(times[i] * config.TIME_UNIT, depths[i] * config.DEPTH_UNIT, first_pt.scr, first_pt.tank_name)
+                pt0 = PlanPoint(
+                    times[i - 1] * config.TIME_UNIT,
+                    depths[i - 1] * config.DEPTH_UNIT,
+                    first_pt.scr,
+                    first_pt.tank_name,
+                )
+                pt1 = PlanPoint(
+                    times[i] * config.TIME_UNIT,
+                    depths[i] * config.DEPTH_UNIT,
+                    first_pt.scr,
+                    first_pt.tank_name,
+                )
                 this_usage = _usage_between_points(pt0, pt1, plan.water)
                 # updates
                 tanks[tank_name].decrease_volume(this_usage)

@@ -67,14 +67,18 @@ def parse_plan_from_yaml(path: str) -> gu.Plan:
     plan = gu.Plan(water, default_scr, tank_info)
 
     # get a list of times in minutes
-    durations = [UREG.parse_expression(p["duration"]).to(config.TIME_UNIT).magnitude for p in data["profile"]]
-    times = [float(d) * config.TIME_UNIT for d in np.cumsum([0.] + durations)]
+    durations = [
+        UREG.parse_expression(p["duration"]).to(config.TIME_UNIT).magnitude for p in data["profile"]
+    ]
+    times = [float(d) * config.TIME_UNIT for d in np.cumsum([0.0] + durations)]
 
     # get a list of depths
     depths = [0 * config.DEPTH_UNIT] + [UREG.parse_expression(p["depth"]) for p in data["profile"]]
 
     # scr points
-    scrs = [gu.Scr(UREG.parse_expression(p["scr"])) if "scr" in p else None for p in data["profile"]] + [None]
+    scrs = [
+        gu.Scr(UREG.parse_expression(p["scr"])) if "scr" in p else None for p in data["profile"]
+    ] + [None]
 
     # tank points
     tanks = [p["tank"] if "tank" in p else None for p in data["profile"]]
