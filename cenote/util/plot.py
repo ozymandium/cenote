@@ -1,8 +1,16 @@
+from cenote.usage import Plan, Result
+from cenote import config
+from cenote import parse
+
 import matplotlib.pyplot as plt
 import numpy as np
+import argparse
+import os
+import yaml
+import sys
 
-from cenote import gas_usage as gu
-from cenote import config
+
+UREG = config.UREG
 
 
 class Synchronizer:
@@ -18,7 +26,7 @@ class Synchronizer:
 
 
 class ProfilePlot:
-    def __init__(self, plan: gu.Plan, result: gu.Result, sync: Synchronizer):
+    def __init__(self, plan: Plan, result: Result, sync: Synchronizer):
         # internal state
         self.times = plan.times()
         self.depths = plan.depths()
@@ -110,7 +118,7 @@ class ProfilePlot:
 
 
 class UsagePlot:
-    def __init__(self, plan: gu.Plan, result: gu.Result, sync: Synchronizer):
+    def __init__(self, plan: Plan, result: Result, sync: Synchronizer):
         # internal state
         self.times = result.times()
         self.usages = result.usages()
@@ -203,7 +211,7 @@ class UsagePlot:
 
 
 class PressurePlot:
-    def __init__(self, plan: gu.Plan, result: gu.Result, sync: Synchronizer):
+    def __init__(self, plan: Plan, result: Result, sync: Synchronizer):
         # internal state
         self.times = result.times()
         self.pressures = result.pressures()
@@ -300,7 +308,7 @@ class PressurePlot:
 
 
 class PO2Plot:
-    def __init__(self, plan: gu.Plan, result: gu.Result, sync: Synchronizer):
+    def __init__(self, plan: Plan, result: Result, sync: Synchronizer):
         # internal state
         self.times = result.times()
         self.po2s = result.po2s()
@@ -380,7 +388,9 @@ class PO2Plot:
             minutes += 1
             seconds = 0
         self.text.set_text(
-            "Time: {min}:{sec:02}\nPO2: {po2:.2f} ata".format(min=minutes, sec=seconds, po2=po2)
+            "Time: {min}:{sec:02}\nPO2: {po2:.2f} ata".format(
+                min=minutes, sec=seconds, po2=po2
+            )
         )
 
         # update
@@ -388,7 +398,7 @@ class PO2Plot:
         self.fig.canvas.blit(self.ax.bbox)
 
 
-def plot(plan: gu.Plan, result: gu.Result):
+def plot(plan: Plan, result: Result):
     plt.style.use("dark_background")
 
     sync = Synchronizer()
@@ -397,3 +407,18 @@ def plot(plan: gu.Plan, result: gu.Result):
     pressure = PressurePlot(plan, result, sync)
     po2 = PO2Plot(plan, result, sync)
     plt.show()
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("yaml_path", help="Path to YAML file containing dive plan.")
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+
+    plan = parse.plan_from_yaml(args.yaml_path)
+    result = Result(plan)
+
+    plot(plan, result)

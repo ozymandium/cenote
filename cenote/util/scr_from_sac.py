@@ -39,7 +39,3 @@ def main():
 
     # output
     print("{:.2f}".format(volume_rate))
-
-
-if __name__ == "__main__":
-    main()

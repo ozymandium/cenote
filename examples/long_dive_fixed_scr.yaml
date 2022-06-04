@@ -1,6 +1,6 @@
 water: SALT
 tanks:
-  - name: water heater
+  - name: back
     type: LP108
     pressure: 2640 psi
     mix: 
@@ -14,7 +14,7 @@ scr: 0.75 ft^3 / min
 profile:
   - duration: 5 min
     depth: 130 ft
-    tank: water heater
+    tank: back
     scr: 1.0 ft^3 / min
   - duration: 15 min
     depth: 85 ft

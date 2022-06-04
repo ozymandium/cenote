@@ -10,8 +10,8 @@ setup(
         "console_scripts": [
             "scr-from-sac = cenote.util.scr_from_sac:main",
             "sac-from-scr = cenote.util.sac_from_scr:main",
-            "gas-usage = cenote.util.calc_gas_usage:main",
-            "mod = cenote.util.calc_mod:main",
+            "plot = cenote.util.plot:main",
+            "mod = cenote.util.mod:main",
         ],
     },
     test_suite = "test",

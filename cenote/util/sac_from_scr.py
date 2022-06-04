@@ -39,7 +39,3 @@ def main():
 
     # output
     print("{:.2f}".format(sac))
-
-
-if __name__ == "__main__":
-    main()
