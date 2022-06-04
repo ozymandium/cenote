@@ -147,7 +147,9 @@ class ConsumptionPlot:
 
         # plot accoutrements
         self.fig.canvas.set_window_title("Gas Consumption")
-        self.ax.set_title("Gas Consumption\n({})".format(str(config.VOLUME_UNIT)), fontname="monospace")
+        self.ax.set_title(
+            "Gas Consumption\n({})".format(str(config.VOLUME_UNIT)), fontname="monospace"
+        )
         self.ax.grid(alpha=0.2)
         self.ax.set_xlabel("Time ({})".format(str(config.TIME_UNIT)), fontname="monospace")
         self.ax.set_ylabel("Tank ___", fontname="monospace")

@@ -160,7 +160,9 @@ class PlanPoint:
         self.tank_name = tank_name
 
     def __str__(self):
-        return "{time:.1f} {depth:.1f} {scr} {tank}".format(time=self.time, depth=self.depth, scr=self.scr, tank=self.tank_name)
+        return "{time:.1f} {depth:.1f} {scr} {tank}".format(
+            time=self.time, depth=self.depth, scr=self.scr, tank=self.tank_name
+        )
 
 
 def _gas_consumed_between_points(pt0: PlanPoint, pt1: PlanPoint, water: Water):
@@ -185,7 +187,7 @@ class Plan:
     points : list[PlanPoint]
     """
 
-    def __init__(self, water: Water, scr: Scr, tank_info: dict[str,TankInfo]):
+    def __init__(self, water: Water, scr: Scr, tank_info: dict[str, TankInfo]):
         self.water = water
         self.scr = scr
         self.tanks = tank_info
@@ -201,12 +203,16 @@ class Plan:
         """
         if scr is None:
             scr = self.scr
-        
+
         if tank_name is None:
             tank_name = self.back().tank_name
         if tank_name not in self.tanks:
-            raise ValueError("Tank name `{}` not found in tank info. Available name: {}".format(tank_name, self.tanks.keys()))
-        
+            raise ValueError(
+                "Tank name `{}` not found in tank info. Available name: {}".format(
+                    tank_name, self.tanks.keys()
+                )
+            )
+
         point = PlanPoint(time, depth, scr, tank_name)
         self.points.append(point)
 

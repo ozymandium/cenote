@@ -113,6 +113,7 @@ class Tank(enum.Enum):
     AL80 = enum.auto()
     LP108 = enum.auto()
 
+
 # Directory to look up Tank classes using short string.
 LOOKUP = {
     Tank.AL13: Aluminum13,

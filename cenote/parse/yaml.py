@@ -88,7 +88,7 @@ def parse_plan_from_yaml(path: str) -> gu.Plan:
         time = plan.back().time + duration
 
         depth = UREG.parse_expression(point_data["depth"])
-        
+
         plan.add_point(time, depth, **kwargs)
 
     return plan
