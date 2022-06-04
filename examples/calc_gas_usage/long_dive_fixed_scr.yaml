@@ -8,17 +8,15 @@ tanks:
     pressure: 2200 psi
 scr: 0.75 ft^3 / min
 profile:
-  - time: 0 min
-    depth: 0 ft
-    tank: water heater
-  - time: 5 min
+  - duration: 5 min
     depth: 130 ft
-  - time: 20 min
+    tank: water heater
+  - duration: 15 min
     depth: 85 ft
-  - time: 25 min
+  - duration: 5 min
     depth: 20 ft
     tank: deco
-  - time: 30 min
+  - duration: 5 min
     depth: 20 ft
-  - time: 31 min
+  - duration: 1 min
     depth: 0 ft

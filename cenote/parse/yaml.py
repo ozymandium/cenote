@@ -5,8 +5,13 @@ __all__ = [
 
 from cenote import gas_usage as gu
 from cenote import tank
-from cenote.config import UREG
+from cenote import config
+
 import yaml
+
+
+UREG = config.UREG
+
 
 #
 # Private Utility Functions
@@ -62,8 +67,6 @@ def parse_plan_from_yaml(path: str) -> gu.Plan:
 
     # Profile
     for point_data in data["profile"]:
-        time = UREG.parse_expression(point_data["time"])
-        depth = UREG.parse_expression(point_data["depth"])
         kwargs = {}
         # optional SCR
         if "scr" in point_data:
@@ -72,6 +75,20 @@ def parse_plan_from_yaml(path: str) -> gu.Plan:
         # optional tank name
         if "tank" in point_data:
             kwargs["tank_name"] = point_data["tank"]
+
+        if len(plan.points) == 0:
+            # this is the first point. set depth and time to zero
+            time = 0 * config.TIME_UNIT
+            depth = 0 * config.DEPTH_UNIT
+            if "tank_name" not in kwargs:
+                raise Exception("First entry in profile must contain tank")
+            plan.add_point(time, depth, **kwargs)
+
+        duration = UREG.parse_expression(point_data["duration"])
+        time = plan.back().time + duration
+
+        depth = UREG.parse_expression(point_data["depth"])
+        
         plan.add_point(time, depth, **kwargs)
 
     return plan
