@@ -270,6 +270,6 @@ class Result:
 
     def pressures(self):
         return {
-            name: np.array([point.pressure.magnitude for point in self.points])
+            name: np.array([point.pressure[name].magnitude for point in self.points])
             for name in self.tank_names
         }
