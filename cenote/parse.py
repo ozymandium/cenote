@@ -3,6 +3,7 @@ from cenote.tank import Tank
 from cenote import config
 from cenote.mix import Mix
 from cenote.water import Water
+from cenote.deco import BuhlmannParams
 
 import yaml
 import numpy as np
@@ -42,28 +43,30 @@ def plan_from_yaml(path: str) -> Plan:
         mix = Mix(po2=entry["mix"]["po2"])
         tank_info[name] = TankInfo(enum, pressure, mix)
 
-    plan = Plan(water, default_scr, tank_info)
+    # decompression 
+    deco = BuhlmannParams(gf_low = data["deco"]["gf_low"], gf_high = data["deco"]["gf_high"])
 
+    # create the plan object
+    plan = Plan(water, default_scr, tank_info, deco)
+
+    ## profile
     # get a list of times in minutes
     durations = [
         UREG.parse_expression(p["duration"]).to(config.TIME_UNIT).magnitude for p in data["profile"]
     ]
     times = [float(d) * config.TIME_UNIT for d in np.cumsum([0.0] + durations)]
-
     # get a list of depths
     depths = [0 * config.DEPTH_UNIT] + [UREG.parse_expression(p["depth"]) for p in data["profile"]]
-
     # scr points
     scrs = [
         Scr(UREG.parse_expression(p["scr"])) if "scr" in p else None for p in data["profile"]
     ] + [None]
-
     # tank points
     tanks = [p["tank"] if "tank" in p else None for p in data["profile"]]
     tanks += [tanks[-1]]
     if tanks[0] is None:
         raise Exception("First entry in profile must contain tank")
-
+    # checks
     N = len(times)
     assert len(depths) == N
     assert len(scrs) == N

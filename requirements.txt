@@ -5,3 +5,4 @@ ipython
 matplotlib
 pytest
 coverage
+decotengu

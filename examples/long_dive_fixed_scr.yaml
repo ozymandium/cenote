@@ -11,6 +11,9 @@ tanks:
     mix: 
       po2: 0.75
 scr: 0.75 ft^3 / min
+deco:
+  gf_low: 0.5
+  gf_high: 0.85
 profile:
   - duration: 5 min
     depth: 130 ft

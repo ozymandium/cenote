@@ -2,6 +2,7 @@ from cenote import config
 from cenote.tank import TankBase
 from cenote.tank import TYPES as TANK_TYPES
 from cenote.water import *
+from cenote.deco import DecotenguModel, BuhlmannParams
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -139,10 +140,11 @@ class Plan:
     points : list[PlanPoint]
     """
 
-    def __init__(self, water: Water, scr: Scr, tank_info: dict[str, TankInfo]):
+    def __init__(self, water: Water, scr: Scr, tank_info: dict[str, TankInfo], deco: BuhlmannParams):
         self.water = water
         self.scr = scr
         self.tank_info = tank_info
+        self.deco = deco
         self.points = []
 
         # check that time is strictly increasing
@@ -181,11 +183,12 @@ class Plan:
 
 
 class ResultPoint:
-    def __init__(self, time, usage, pressure, po2):
+    def __init__(self, time, usage, pressure, po2, ceiling):
         self.time = deepcopy(time)
         self.usage = deepcopy(usage)
         self.pressure = deepcopy(pressure)
         self.po2 = deepcopy(po2)
+        self.ceiling = deepcopy(ceiling)
 
 
 class Result:
@@ -201,7 +204,10 @@ class Result:
         # keep track of usage for each tank over time, will copy this to each result point
         usage = {name: 0.0 * config.VOLUME_UNIT for name in self.tank_names}
         pressure = {name: tanks[name].pressure for name in self.tank_names}
-        # compute usage for each section between points
+
+        deco = DecotenguModel(plan.deco, plan.water)
+        
+        # compute usage for each section between user supplied points
         self.points = []
         for plan_idx in range(1, len(plan.points)):
             first_pt = plan.points[plan_idx - 1]
@@ -223,13 +229,7 @@ class Result:
                 [first_pt.depth.magnitude, last_pt.depth.magnitude],
             )
 
-            # add the very first point
-            if plan_idx == 1:
-                po2 = tanks[tank_name].mix.po2_at_depth(first_pt.depth, plan.water)
-                self.points.append(
-                    ResultPoint(time=0 * config.TIME_UNIT, usage=usage, pressure=pressure, po2=po2)
-                )
-            # FIXME using same index in nested loops
+            # iterate at high resolution over many points in the section
             for i in range(1, len(times)):
                 pt0 = PlanPoint(
                     times[i - 1] * config.TIME_UNIT,
@@ -249,9 +249,14 @@ class Result:
                 usage[tank_name] += this_usage
                 pressure[tank_name] = tanks[tank_name].pressure
                 po2 = tanks[tank_name].mix.po2_at_depth(depths[i] * config.DEPTH_UNIT, plan.water)
+
+                # deco
+                deco.log(pt0, pt1, tanks[tank_name].mix)
+                ceiling = deco.ceiling()
+
                 # store new point
                 self.points.append(
-                    ResultPoint(time=pt1.time, usage=usage, pressure=pressure, po2=po2)
+                    ResultPoint(time=pt1.time, usage=usage, pressure=pressure, po2=po2, ceiling=ceiling)
                 )
 
     def back(self):
@@ -274,3 +279,6 @@ class Result:
 
     def po2s(self):
         return np.array([point.po2.magnitude for point in self.points])
+
+    def ceilings(self):
+        return np.array([point.ceiling.magnitude for point in self.points])

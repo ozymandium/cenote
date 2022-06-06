@@ -32,6 +32,8 @@ class ProfilePlot:
         # internal state
         self.times = plan.times()
         self.depths = plan.depths()
+        self.c_times = result.times()
+        self.ceilings = result.ceilings()
         self.time = 0
 
         # generate plot entities
@@ -48,6 +50,7 @@ class ProfilePlot:
             "m",
             alpha=0.5,
         )[0]
+        self.ax.plot(self.c_times, self.ceilings, "r")
         self.ax.plot(self.times, self.depths, "g")
         self.text = self.ax.text(
             0.95,
@@ -79,7 +82,7 @@ class ProfilePlot:
     def mouse_handler(self, event):
         if event.xdata is None:
             return
-        time = np.round(event.xdata, 1)  # 6 second increments
+        time = np.clip(np.round(event.xdata, 1), np.min(self.times), np.max(self.times))  # 6 second increments
         self.sync.time_update(time)
 
     def key_handler(self, event):
@@ -172,7 +175,7 @@ class UsagePlot:
     def mouse_handler(self, event):
         if event.xdata is None:
             return
-        time = np.round(event.xdata, 1)  # 6 second increments
+        time = np.clip(np.round(event.xdata, 1), np.min(self.times), np.max(self.times))  # 6 second increments
         self.sync.time_update(time)
 
     def key_handler(self, event):
@@ -232,7 +235,7 @@ class PressurePlot:
             self.ax.plot(self.times, self.pressures[name], label=name)
         self.text = self.ax.text(
             0.05,
-            0.05,
+            0.25,
             "Time: 00:00\n"
             + "\n".join(
                 [
@@ -268,7 +271,7 @@ class PressurePlot:
     def mouse_handler(self, event):
         if event.xdata is None:
             return
-        time = np.round(event.xdata, 1)  # 6 second increments
+        time = np.clip(np.round(event.xdata, 1), np.min(self.times), np.max(self.times))  # 6 second increments
         self.sync.time_update(time)
 
     def key_handler(self, event):
@@ -380,7 +383,7 @@ class PO2Plot:
     def mouse_handler(self, event):
         if event.xdata is None:
             return
-        time = np.round(event.xdata, 1)  # 6 second increments
+        time = np.clip(np.round(event.xdata, 1), np.min(self.times), np.max(self.times))  # 6 second increments
         self.sync.time_update(time)
 
     def key_handler(self, event):
