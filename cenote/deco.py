@@ -2,8 +2,11 @@ from cenote import config
 from cenote.water import Water, pressure_from_depth, depth_from_pressure
 from cenote.mix import Mix
 
-from decotengu.model import ZH_L16C_GF
-from decotengu.engine import GasMix
+import decotengu.model
+import decotengu.engine
+
+import dipplanner.settings
+import dipplanner.model.buhlmann.model
 
 
 UREG = config.UREG
@@ -24,7 +27,7 @@ class DecotenguModel(DecoModelBase):
     def __init__(self, params:BuhlmannParams, water: Water):
         self.water = water
 
-        self.model = ZH_L16C_GF()
+        self.model = decotengu.model.ZH_L16C_GF()
 
         # set gradient factors
         self.model.gf_low = params.gf_low
@@ -38,7 +41,7 @@ class DecotenguModel(DecoModelBase):
         # time is time spent at depth
         d_time = (pt1.time - pt0.time).to(UREG.minute)
         
-        gas = GasMix(
+        gas = decotengu.engine.GasMix(
             # switch depth [m]?
             # it appears this is when the gas is started during the decompression stage. not sure.
             # putting mod here but it is probably wrong. doesn't seem to be used.
@@ -68,3 +71,52 @@ class DecotenguModel(DecoModelBase):
         return depth_from_pressure(pressure, self.water)
 
     # def compartment_ceilings(self):
+
+class DipplannerModel(DecoModelBase):
+
+    def __init__(self, params:BuhlmannParams, water: Water):
+        self.water = water
+
+        # change some global settings in dipplanner
+        dipplanner.settings.GF_LOW = params.gf_low
+        dipplanner.settings.GF_HIGH = params.gf_high
+        dipplanner.settings.DECO_MODEL = "ZHL16c"
+        self.model = dipplanner.model.buhlmann.model.Model()
+        self.model.init_gradient()
+        # don't pass deco model argument. set the default value above and let the default be
+        # used in case the default is referenced elsewhere.
+        self.model.set_time_constants() 
+        self.model.validate_model()
+
+    def log(self, pt0, pt1, mix:Mix):
+        
+        d_time = pt1.time - pt0.time
+
+        if pt0.depth == pt1.depth:
+            pressure = pressure_from_depth(pt0.depth, self.water)
+            self.model.const_depth(
+                pressure=pressure.to(UREG.bar).magnitude,
+                seg_time=d_time.to(UREG.second).magnitude,
+                f_he=0.0,
+                f_n2=mix.pn2,
+                pp_o2=0.0 # use this for open circuit mode
+            )
+        else:
+            pressure_pt0 = pressure_from_depth(pt0.depth, self.water)
+            pressure_pt1 = pressure_from_depth(pt1.depth, self.water)
+            d_depth = pt1.depth - pt0.depth
+            depth_rate = d_depth / d_time
+            self.model.asc_desc(
+                start=pressure_pt0.to(UREG.bar).magnitude,
+                finish=pressure_pt1.to(UREG.bar).magnitude,
+                rate=depth_rate.to(UREG.meter / UREG.second).magnitude,
+                f_he=0.0,
+                f_n2=mix.pn2,
+                pp_o2=0.0 # use this for open circuit mode
+            )
+
+
+    def ceiling(self):
+        pressure_bar = self.model.ceiling_in_pabs()
+        pressure = pressure_bar * UREG.bar
+        return depth_from_pressure(pressure, self.water)

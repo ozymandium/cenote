@@ -2,7 +2,7 @@ from cenote import config
 from cenote.tank import TankBase
 from cenote.tank import TYPES as TANK_TYPES
 from cenote.water import *
-from cenote.deco import DecotenguModel, BuhlmannParams
+from cenote.deco import DecotenguModel, BuhlmannParams, DipplannerModel
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -205,7 +205,8 @@ class Result:
         usage = {name: 0.0 * config.VOLUME_UNIT for name in self.tank_names}
         pressure = {name: tanks[name].pressure for name in self.tank_names}
 
-        deco = DecotenguModel(plan.deco, plan.water)
+        # deco = DecotenguModel(plan.deco, plan.water)
+        deco = DipplannerModel(plan.deco, plan.water)
         
         # compute usage for each section between user supplied points
         self.points = []
