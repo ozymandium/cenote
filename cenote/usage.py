@@ -181,6 +181,18 @@ class Plan:
             raise RuntimeError("No points have been added.")
         return self.points[-1]
 
+    def validate(self):
+        # must have points
+        assert len(self.points)
+
+    def deepest_point(self):
+        if not len(self.points):
+            raise RuntimeError("No points have been added.")
+        return self.points[np.argmax(self.depths())]
+
+    def max_depth(self):
+        return self.deepest_point().depth
+
 
 class ResultPoint:
     def __init__(self, time, usage, pressure, po2, ceiling):
@@ -207,6 +219,8 @@ class Result:
 
         # deco = DecotenguModel(plan.deco, plan.water)
         deco = DipplannerModel(plan.deco, plan.water)
+        # set gradient factor slope using the max depth
+        deco.set_gf_from_max_depth(plan.max_depth())
         
         # compute usage for each section between user supplied points
         self.points = []

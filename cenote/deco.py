@@ -5,8 +5,8 @@ from cenote.mix import Mix
 import decotengu.model
 import decotengu.engine
 
-import dipplanner.settings
 import dipplanner.model.buhlmann.model
+import dipplanner.model.buhlmann.gradient
 
 
 UREG = config.UREG
@@ -78,19 +78,20 @@ class DipplannerModel(DecoModelBase):
         self.water = water
 
         # change some global settings in dipplanner
-        dipplanner.settings.GF_LOW = params.gf_low
-        dipplanner.settings.GF_HIGH = params.gf_high
-        dipplanner.settings.DECO_MODEL = "ZHL16c"
         self.model = dipplanner.model.buhlmann.model.Model()
-        self.model.init_gradient()
+        self.model.gradient = dipplanner.model.buhlmann.gradient.Gradient(gf_low=params.gf_low, gf_high=params.gf_high)
         # don't pass deco model argument. set the default value above and let the default be
         # used in case the default is referenced elsewhere.
-        self.model.set_time_constants() 
+        self.model.set_time_constants(deco_model="ZHL16c") 
         self.model.validate_model()
 
     def log(self, pt0, pt1, mix:Mix):
         
         d_time = pt1.time - pt0.time
+
+        # update the gf for the average depth of this section
+        avg_depth = (pt0.depth + pt1.depth) * 0.5
+        self.model.gradient.set_gf_at_depth(avg_depth.to(UREG.meter).magnitude)
 
         if pt0.depth == pt1.depth:
             pressure = pressure_from_depth(pt0.depth, self.water)
@@ -115,6 +116,8 @@ class DipplannerModel(DecoModelBase):
                 pp_o2=0.0 # use this for open circuit mode
             )
 
+    def set_gf_from_max_depth(self, depth):
+        self.model.gradient.set_gf_slope_at_depth(depth.to(UREG.meter).magnitude)
 
     def ceiling(self):
         pressure_bar = self.model.ceiling_in_pabs()

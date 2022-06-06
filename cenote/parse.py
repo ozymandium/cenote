@@ -66,12 +66,18 @@ def plan_from_yaml(path: str) -> Plan:
     tanks += [tanks[-1]]
     if tanks[0] is None:
         raise Exception("First entry in profile must contain tank")
-    # checks
+    
     N = len(times)
+    
+    # other checks
     assert len(depths) == N
     assert len(scrs) == N
     assert len(tanks) == N
+    
+    # populate the profile points
     for i in range(N):
         plan.add_point(time=times[i], depth=depths[i], scr=scrs[i], tank_name=tanks[i])
+
+    plan.validate()
 
     return plan

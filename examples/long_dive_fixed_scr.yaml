@@ -5,14 +5,14 @@ tanks:
     pressure: 2640 psi
     mix: 
       po2: 0.21
-  - name: deco
-    type: AL40
-    pressure: 2200 psi
-    mix: 
-      po2: 0.75
+  # - name: deco
+  #   type: AL40
+  #   pressure: 2200 psi
+  #   mix: 
+  #     po2: 0.75
 scr: 0.75 ft^3 / min
 deco:
-  gf_low: 0.5
+  gf_low: 0.4
   gf_high: 0.85
 profile:
   - duration: 5 min
@@ -25,7 +25,7 @@ profile:
     depth: 20 ft
     scr: 0.5 ft^3 / min
   - duration: 5 min
-    tank: deco
+    # tank: deco
     depth: 20 ft
   - duration: 1 min
     depth: 0 ft
