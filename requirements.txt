@@ -5,4 +5,8 @@ ipython
 matplotlib
 pytest
 coverage
-decotengu
+
+dipplanner @ git+https://github.com/ThomasChiroux/dipplanner.git
+
+kivy[full]
+KivyMD @ https://github.com/kivymd/KivyMD/archive/master.zip

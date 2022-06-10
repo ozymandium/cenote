@@ -1,0 +1,91 @@
+
+<ContentNavigationDrawer>:
+    ScrollView:
+        MDList:
+            OneLineListItem:
+                text: "SAC From SCR"
+                on_press:
+                    root.nav_drawer.set_state("close")
+                    root.screen_manager.current = "sac_from_scr_screen"
+                    app.root.ids.toolbar.title = "SAC From SCR"
+            OneLineListItem:
+                text: "SCR From SAC"
+                on_press:
+                    root.nav_drawer.set_state("close")
+                    root.screen_manager.current = "scr_from_sac_screen"
+                    app.root.ids.toolbar.title = "SCR From SAC"
+            OneLineListItem:
+                text: "MOD"
+                on_press:
+                    root.nav_drawer.set_state("close")
+                    root.screen_manager.current = "mod_screen"
+                    app.root.ids.toolbar.title = "MOD"
+
+MDScreen:
+    MDToolbar:
+        id: toolbar
+        pos_hint: {"top": 1}
+        elevation: 10
+        title: "Cenote"
+        left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
+    MDNavigationLayout:
+        x: toolbar.height
+        ScreenManager:
+            id: screen_manager
+            # create a first screen that loads when the app opens and doesn't actually correspond to
+            # a utility.
+            MDScreen:
+                name: "intro_screen"
+                MDLabel:
+                    text: "Pick a tool from the menu."
+                    halign: "center"
+            MDScreen:
+                name: "sac_from_scr_screen"
+                MDRectangleFlatButton:
+                    text: 'Calculate SAC'
+                    pos_hint: {'center_x':0.5,'center_y':0.1}
+            MDScreen:
+                name: "scr_from_sac_screen"
+                MDTextField:
+                    id: scr_from_sac_sac_box
+                    width: "10dp"
+                    pos_hint: {"center_x": 0.5, "center_y": 0.7}
+                    hint_text: "SAC rate"
+                MDRectangleFlatButton:
+                    id: scr_from_sac_sac_unit_button
+                    size_hint: None, None
+                    text: "Select SAC Units.."
+                    pos_hint: {"center_x": 0.5, "center_y": 0.6}
+                    on_release: app.scr_from_sac.sac_unit_menu.open()
+                MDRectangleFlatButton:
+                    id: scr_from_sac_tank_button
+                    size_hint: None, None
+                    text: "Select Tank.."
+                    pos_hint: {"center_x": 0.5, "center_y": 0.5}
+                    on_release: app.scr_from_sac.tank_menu.open()
+                MDRectangleFlatButton:
+                    id: scr_from_sac_scr_unit_button
+                    size_hint: None, None
+                    text: "Select SCR Units.."
+                    pos_hint: {"center_x": 0.5, "center_y": 0.4}
+                    on_release: app.scr_from_sac.scr_unit_menu.open()
+                MDRectangleFlatButton:
+                    id: scr_from_sac_calc_button
+                    text: 'Calculate SCR'
+                    pos_hint: {'center_x':0.5,'center_y':0.3}
+                    on_release: app.scr_from_sac.calc_callback()
+                MDTextField:
+                    id: scr_from_sac_scr_box
+                    width: "10dp"
+                    pos_hint: {"center_x": 0.5, "center_y": 0.2}
+                    # hint_text: ""
+            MDScreen:
+                name: "mod_screen"
+                MDRectangleFlatButton:
+                    text: 'Calculate MOD'
+                    pos_hint: {'center_x':0.5,'center_y':0.1}
+        MDNavigationDrawer:
+            id: nav_drawer
+            ContentNavigationDrawer:
+                screen_manager: screen_manager
+                nav_drawer: nav_drawer
