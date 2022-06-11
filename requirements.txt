@@ -1,3 +1,4 @@
+# library
 pyyaml
 pint
 ipdb
@@ -5,8 +6,11 @@ ipython
 matplotlib
 pytest
 coverage
-
 dipplanner @ git+https://github.com/ThomasChiroux/dipplanner.git
 
+# app
 kivy[full]
 KivyMD @ https://github.com/kivymd/KivyMD/archive/master.zip
+
+# to build the app
+buildozer

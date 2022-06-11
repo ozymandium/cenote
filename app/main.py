@@ -97,9 +97,9 @@ class ScrFromSacTool:
 
 class CenoteApp(MDApp):
 
-    def __init__(self, kv_path, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        with open(kv_path, "r") as f:
+        with open("cenote.kv", "r") as f:
             self.screen = Builder.load_string(f.read())
 
         self.scr_from_sac = ScrFromSacTool(self)
@@ -114,4 +114,4 @@ class CenoteApp(MDApp):
 
 
 if __name__ == "__main__":
-    CenoteApp(sys.argv[1]).run()
+    CenoteApp().run()

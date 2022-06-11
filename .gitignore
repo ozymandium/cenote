@@ -47,6 +47,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+.buildozer
 
 # IntelliJ Idea family of suites
 .idea
