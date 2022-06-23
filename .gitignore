@@ -65,3 +65,6 @@ windows/
 android/
 linux/
 django/
+
+# buildozer output
+app/bin

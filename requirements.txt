@@ -8,9 +8,14 @@ pytest
 coverage
 dipplanner @ git+https://github.com/ThomasChiroux/dipplanner.git
 
-# app
-kivy[full]
-KivyMD @ https://github.com/kivymd/KivyMD/archive/master.zip
+kivy[full]==2.1.0
+# KivyMD @ https://github.com/kivymd/KivyMD/archive/master.zip  
+KivyMD @ https://github.com/kivymd/KivyMD/archive/refs/tags/0.104.2.zip
+# KivyMD @ git+https://github.com/kivymd/KivyMD@0.104.2
 
-# to build the app
-buildozer
+buildozer @ git+https://github.com/kivy/buildozer
+Cython==0.29.19 
+wheel 
+pip 
+virtualenv 
+python-for-android
