@@ -60,7 +60,8 @@ RUN apt update -qq > /dev/null \
     zlib1g-dev \
     zsh \
     ranger \
-    python3.8-venv
+    python3.8-venv \
+    curl
 
 # prepares non root env
 RUN useradd --create-home --shell /bin/bash ${USER}
@@ -71,9 +72,17 @@ RUN echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 USER ${USER}
 WORKDIR ${WORK_DIR}
 
+# install oh my zsh
+RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
 # install app dependencies
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --user --upgrade -r /tmp/requirements.txt
 
-# # run buildozer
+#### these below could be run by a script ####
+
+# run buildozer
 # RUN buildozer android debug
+
+# in order to deploy, have to mark this repo as safe
+# RUN git config --global --add safe.directory /home/user/src/app/.buildozer/android/platform/python-for-android
