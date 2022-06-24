@@ -76,7 +76,7 @@ WORKDIR ${WORK_DIR}
 RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 # install app dependencies
-COPY requirements.txt /tmp/requirements.txt
+COPY lib/requirements.txt /tmp/requirements.txt
 RUN pip3 install --user --upgrade -r /tmp/requirements.txt
 
 #### these below could be run by a script ####

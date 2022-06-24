@@ -1,1 +1,9 @@
-- schema validator for dive profile YAMLs
+# To Do List
+
+## Library
+- [ ] schema validator for dive profile YAMLs
+- [ ] fix ceilings above zero
+- [ ] add unit tests to cross check profiles
+
+## App
+- [ ] make it work
