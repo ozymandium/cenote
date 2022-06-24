@@ -85,4 +85,4 @@ RUN pip3 install --user --upgrade -r /tmp/requirements.txt
 # RUN buildozer android debug
 
 # in order to deploy, have to mark this repo as safe
-# RUN git config --global --add safe.directory /home/user/src/app/.buildozer/android/platform/python-for-android
+RUN git config --global --add safe.directory /home/user/src/app/.buildozer/android/platform/python-for-android
