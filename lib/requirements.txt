@@ -14,8 +14,8 @@ KivyMD @ https://github.com/kivymd/KivyMD/archive/refs/tags/0.104.2.zip
 
 # packaging dependencies
 buildozer @ git+https://github.com/kivy/buildozer
-Cython==0.29.19 
-wheel 
-pip 
-virtualenv 
-python-for-android
+# Cython==0.29.19 
+# wheel 
+# pip 
+# virtualenv 
+# python-for-android

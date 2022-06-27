@@ -108,11 +108,16 @@ class LowPressureSteel108(TankBase):
     SERVICE_PRESSURE = 2640 * UREG.psi
 
 
+class SidemountedLowPressureSteel108(LowPressureSteel108):
+    VOLUME = 2 * LowPressureSteel108.VOLUME
+
+
 class Tank(enum.Enum):
     AL13 = enum.auto()
     AL40 = enum.auto()
     AL80 = enum.auto()
     LP108 = enum.auto()
+    SMLP108 = enum.auto()
 
 
 # Directory to look up Tank classes using short string.
@@ -121,4 +126,5 @@ TYPES = {
     Tank.AL40: Aluminum40,
     Tank.AL80: Aluminum80,
     Tank.LP108: LowPressureSteel108,
+    Tank.SMLP108: SidemountedLowPressureSteel108
 }

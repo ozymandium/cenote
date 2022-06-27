@@ -8,9 +8,6 @@ class CenoteRecipe(IncludedFilesBehaviour, PythonRecipe):
         "pint",
         # "ipdb",
         # "ipython",
-        # "matplotlib",
-        # "pytest",
-        # "coverage",
         "dipplanner",
         "setuptools",
     ]

@@ -1,0 +1,47 @@
+water: FRESH
+tanks:
+  - name: Sidemount
+    type: SMLP108
+    pressure: 3600 psi
+    mix: 
+      po2: 0.21
+  - name: Deco
+    type: AL40
+    pressure: 2200 psi
+    mix: 
+      po2: 0.97
+scr: 0.75 ft^3 / min
+deco:
+  gf_low: 0.3
+  gf_high: 0.7
+profile:
+  - duration: 4 min
+    depth: 115 ft
+    tank: Sidemount
+  - duration: 26 min
+    depth: 115 ft
+  - duration: 3 min
+    depth: 50 ft
+    scr: 0.55 ft^3 / min
+  - duration: 2 min
+    depth: 50 ft
+    scr: 0.55 ft^3 / min
+  - duration: 1 min
+    depth: 40 ft
+    scr: 0.55 ft^3 / min
+  - duration: 4 min
+    depth: 40 ft
+    scr: 0.55 ft^3 / min
+  - duration: 1 min
+    depth: 30 ft
+    scr: 0.55 ft^3 / min
+  - duration: 6 min
+    depth: 30 ft
+    scr: 0.55 ft^3 / min
+  - duration: 1 min
+    depth: 20 ft
+    scr: 0.55 ft^3 / min
+  - duration: 11 min
+    depth: 20 ft
+    tank: Deco 
+    scr: 0.55 ft^3 / min

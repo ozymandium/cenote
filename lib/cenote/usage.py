@@ -2,7 +2,7 @@ from cenote import config
 from cenote.tank import TankBase
 from cenote.tank import TYPES as TANK_TYPES
 from cenote.water import *
-from cenote.deco import DecotenguModel, BuhlmannParams, DipplannerModel
+from cenote.deco import BuhlmannParams, DipplannerModel
 
 import numpy as np
 from copy import deepcopy
@@ -136,7 +136,7 @@ class Plan:
     points : list[PlanPoint]
     """
 
-    def __init__(self, water: Water, scr: Scr, tank_info: dict[str, TankInfo], deco: BuhlmannParams):
+    def __init__(self, water: Water, scr: Scr, tank_info: dict, deco: BuhlmannParams):
         self.water = water
         self.scr = scr
         self.tank_info = tank_info
@@ -213,7 +213,6 @@ class Result:
         usage = {name: 0.0 * config.VOLUME_UNIT for name in self.tank_names}
         pressure = {name: tanks[name].pressure for name in self.tank_names}
 
-        # deco = DecotenguModel(plan.deco, plan.water)
         deco = DipplannerModel(plan.deco, plan.water)
         # set gradient factor slope using the max depth
         deco.set_gf_from_max_depth(plan.max_depth())
