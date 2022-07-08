@@ -191,8 +191,9 @@ class Plan:
 
 
 class ResultPoint:
-    def __init__(self, time, usage, pressure, po2, ceiling):
+    def __init__(self, time, depth, usage, pressure, po2, ceiling):
         self.time = deepcopy(time)
+        self.depth = deepcopy(depth)
         self.usage = deepcopy(usage)
         self.pressure = deepcopy(pressure)
         self.po2 = deepcopy(po2)
@@ -216,7 +217,7 @@ class Result:
         deco = DipplannerModel(plan.deco, plan.water)
         # set gradient factor slope using the max depth
         deco.set_gf_from_max_depth(plan.max_depth())
-        
+
         # compute usage for each section between user supplied points
         self.points = []
         for plan_idx in range(1, len(plan.points)):
@@ -266,7 +267,14 @@ class Result:
 
                 # store new point
                 self.points.append(
-                    ResultPoint(time=pt1.time, usage=usage, pressure=pressure, po2=po2, ceiling=ceiling)
+                    ResultPoint(
+                        time=pt1.time,
+                        depth=pt1.depth,
+                        usage=usage,
+                        pressure=pressure,
+                        po2=po2,
+                        ceiling=ceiling,
+                    )
                 )
 
     def back(self):
@@ -274,6 +282,9 @@ class Result:
 
     def times(self):
         return np.array([point.time.magnitude for point in self.points])
+
+    def depths(self):
+        return np.array([point.depth.magnitude for point in self.points])
 
     def usages(self):
         return {

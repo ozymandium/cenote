@@ -27,14 +27,46 @@ class Synchronizer:
             callback(time)
 
 
-class ProfilePlot:
+class PlotBase:
+    """
+    Must define:
+        self.sync
+    """
+
     def __init__(self, plan: Plan, result: Result, sync: Synchronizer):
+        self.sync = sync
+        self.sync.register(self.time_update_callback)
+
+        self.times = result.times()
+        self.time = self.times[0]
+
+    def mouse_handler(self, event):
+        if event.xdata is None:
+            return
+        time = np.clip(event.xdata, np.min(self.times), np.max(self.times))
+        self.sync.time_update(time)
+
+    def key_handler(self, event):
+        if event.key == "right":
+            increment = config.TIME_INCREMENT.magnitude
+        elif event.key == "left":
+            increment = -1 * config.TIME_INCREMENT.magnitude
+        else:
+            return
+        next_time = np.clip(self.time + increment, np.min(self.times), np.max(self.times))
+        self.sync.time_update(next_time)
+
+    def time_update_callback(self, time):
+        raise NotImplementedError("time update callback must be implemented by inheritors")
+
+
+class ProfilePlot(PlotBase):
+    def __init__(self, plan: Plan, result: Result, sync: Synchronizer):
+        super().__init__(plan, result, sync)
+
         # internal state
-        self.times = plan.times()
-        self.depths = plan.depths()
-        self.c_times = result.times()
+        self.depths = result.depths()
         self.ceilings = result.ceilings()
-        self.time = 0
 
         # generate plot entities
         self.fig, self.ax = plt.subplots()
@@ -50,12 +82,14 @@ class ProfilePlot:
             "m",
             alpha=0.5,
         )[0]
-        self.ax.plot(self.c_times, self.ceilings, "r")
+        self.ax.plot(self.times, self.ceilings, "r")
         self.ax.plot(self.times, self.depths, "g")
         self.text = self.ax.text(
             0.95,
             0.05,
-            "Time: 00:00\nDepth: {} ft".format(self.depths[0]),
+            "Time: 00:00\nDepth: {} ft\nCeling: {} ft".format(
+                self.depths[0], int(self.ceilings[0])
+            ),
             transform=self.ax.transAxes,
             fontsize=10,
             verticalalignment="bottom",
@@ -75,29 +109,10 @@ class ProfilePlot:
         self.fig.canvas.mpl_connect("button_press_event", self.mouse_handler)
         self.fig.canvas.mpl_connect("key_press_event", self.key_handler)
 
-        # synchronizer setup
-        self.sync = sync
-        self.sync.register(self.time_update_callback)
-
-    def mouse_handler(self, event):
-        if event.xdata is None:
-            return
-        time = np.clip(np.round(event.xdata, 1), np.min(self.times), np.max(self.times))  # 6 second increments
-        self.sync.time_update(time)
-
-    def key_handler(self, event):
-        if event.key == "right":
-            increment = config.TIME_INCREMENT.magnitude
-        elif event.key == "left":
-            increment = -1 * config.TIME_INCREMENT.magnitude
-        else:
-            return
-        next_time = np.clip(self.time + increment, np.min(self.times), np.max(self.times))
-        self.sync.time_update(next_time)
-
     def time_update_callback(self, time):
         self.time = time
         depth = np.interp(time, self.times, self.depths)
+        ceiling = np.interp(time, self.times, self.ceilings)
 
         # x_cursor
         self.x_cursor.set_xdata([self.time, self.time])
@@ -112,8 +127,11 @@ class ProfilePlot:
             minutes += 1
             seconds = 0
         self.text.set_text(
-            "Time: {min}:{sec:02}\nDepth: {depth} ft".format(
-                min=minutes, sec=seconds, depth=int(depth)
+            "Time: {min}:{sec:02}\nDepth: {depth} ft\nCeiling: {ceiling:.1f} ft".format(
+                min=minutes,
+                sec=seconds,
+                depth=int(depth),
+                ceiling=ceiling,
             )
         )
 
@@ -122,12 +140,12 @@ class ProfilePlot:
         self.fig.canvas.blit(self.ax.bbox)
 
 
-class UsagePlot:
+class UsagePlot(PlotBase):
     def __init__(self, plan: Plan, result: Result, sync: Synchronizer):
+        super().__init__(plan, result, sync)
+
         # internal state
-        self.times = result.times()
         self.usages = result.usages()
-        self.time = 0
 
         # generate plot entities
         self.fig, self.ax = plt.subplots()
@@ -168,26 +186,6 @@ class UsagePlot:
         self.fig.canvas.mpl_connect("button_press_event", self.mouse_handler)
         self.fig.canvas.mpl_connect("key_press_event", self.key_handler)
 
-        # synchronizer setup
-        self.sync = sync
-        self.sync.register(self.time_update_callback)
-
-    def mouse_handler(self, event):
-        if event.xdata is None:
-            return
-        time = np.clip(np.round(event.xdata, 1), np.min(self.times), np.max(self.times))  # 6 second increments
-        self.sync.time_update(time)
-
-    def key_handler(self, event):
-        if event.key == "right":
-            increment = config.TIME_INCREMENT.magnitude
-        elif event.key == "left":
-            increment = -1 * config.TIME_INCREMENT.magnitude
-        else:
-            return
-        next_time = np.clip(self.time + increment, np.min(self.times), np.max(self.times))
-        self.sync.time_update(next_time)
-
     def time_update_callback(self, time):
         self.time = time
         usage = {name: np.interp(time, self.times, self.usages[name]) for name in self.usages}
@@ -216,12 +214,12 @@ class UsagePlot:
         self.fig.canvas.blit(self.ax.bbox)
 
 
-class PressurePlot:
+class PressurePlot(PlotBase):
     def __init__(self, plan: Plan, result: Result, sync: Synchronizer):
+        super().__init__(plan, result, sync)
+
         # internal state
-        self.times = result.times()
         self.pressures = result.pressures()
-        self.time = 0
 
         # generate plot entities
         self.fig, self.ax = plt.subplots()
@@ -264,26 +262,6 @@ class PressurePlot:
         self.fig.canvas.mpl_connect("button_press_event", self.mouse_handler)
         self.fig.canvas.mpl_connect("key_press_event", self.key_handler)
 
-        # synchronizer setup
-        self.sync = sync
-        self.sync.register(self.time_update_callback)
-
-    def mouse_handler(self, event):
-        if event.xdata is None:
-            return
-        time = np.clip(np.round(event.xdata, 1), np.min(self.times), np.max(self.times))  # 6 second increments
-        self.sync.time_update(time)
-
-    def key_handler(self, event):
-        if event.key == "right":
-            increment = config.TIME_INCREMENT.magnitude
-        elif event.key == "left":
-            increment = -1 * config.TIME_INCREMENT.magnitude
-        else:
-            return
-        next_time = np.clip(self.time + increment, np.min(self.times), np.max(self.times))
-        self.sync.time_update(next_time)
-
     def time_update_callback(self, time):
         self.time = time
         pressure = {
@@ -314,12 +292,12 @@ class PressurePlot:
         self.fig.canvas.blit(self.ax.bbox)
 
 
-class PO2Plot:
+class PO2Plot(PlotBase):
     def __init__(self, plan: Plan, result: Result, sync: Synchronizer):
+        super().__init__(plan, result, sync)
+
         # internal state
-        self.times = result.times()
         self.po2s = result.po2s()
-        self.time = 0
 
         # generate plot entities
         self.fig, self.ax = plt.subplots()
@@ -375,26 +353,6 @@ class PO2Plot:
         # callback setup
         self.fig.canvas.mpl_connect("button_press_event", self.mouse_handler)
         self.fig.canvas.mpl_connect("key_press_event", self.key_handler)
-
-        # synchronizer setup
-        self.sync = sync
-        self.sync.register(self.time_update_callback)
-
-    def mouse_handler(self, event):
-        if event.xdata is None:
-            return
-        time = np.clip(np.round(event.xdata, 1), np.min(self.times), np.max(self.times))  # 6 second increments
-        self.sync.time_update(time)
-
-    def key_handler(self, event):
-        if event.key == "right":
-            increment = config.TIME_INCREMENT.magnitude
-        elif event.key == "left":
-            increment = -1 * config.TIME_INCREMENT.magnitude
-        else:
-            return
-        next_time = np.clip(self.time + increment, np.min(self.times), np.max(self.times))
-        self.sync.time_update(next_time)
 
     def time_update_callback(self, time):
         self.time = time

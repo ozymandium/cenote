@@ -12,8 +12,8 @@ tanks:
       po2: 0.97
 scr: 0.75 ft^3 / min
 deco:
-  gf_low: 0.3
-  gf_high: 0.7
+  gf_low: 0.99
+  gf_high: 0.99
 profile:
   - duration: 4 min
     depth: 115 ft

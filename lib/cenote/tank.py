@@ -126,5 +126,5 @@ TYPES = {
     Tank.AL40: Aluminum40,
     Tank.AL80: Aluminum80,
     Tank.LP108: LowPressureSteel108,
-    Tank.SMLP108: SidemountedLowPressureSteel108
+    Tank.SMLP108: SidemountedLowPressureSteel108,
 }

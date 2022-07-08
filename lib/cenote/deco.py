@@ -20,20 +20,21 @@ class DecoModelBase:
 
 
 class DipplannerModel(DecoModelBase):
-
-    def __init__(self, params:BuhlmannParams, water: Water):
+    def __init__(self, params: BuhlmannParams, water: Water):
         self.water = water
 
         # change some global settings in dipplanner
         self.model = dipplanner.model.buhlmann.model.Model()
-        self.model.gradient = dipplanner.model.buhlmann.gradient.Gradient(gf_low=params.gf_low, gf_high=params.gf_high)
+        self.model.gradient = dipplanner.model.buhlmann.gradient.Gradient(
+            gf_low=params.gf_low, gf_high=params.gf_high
+        )
         # don't pass deco model argument. set the default value above and let the default be
         # used in case the default is referenced elsewhere.
-        self.model.set_time_constants(deco_model="ZHL16c") 
+        self.model.set_time_constants(deco_model="ZHL16b")
         self.model.validate_model()
 
-    def log(self, pt0, pt1, mix:Mix):
-        
+    def log(self, pt0, pt1, mix: Mix):
+
         d_time = pt1.time - pt0.time
 
         # update the gf for the average depth of this section
@@ -49,7 +50,7 @@ class DipplannerModel(DecoModelBase):
                 seg_time=d_time.to(UREG.second).magnitude,
                 f_he=0.0,
                 f_n2=mix.pn2,
-                pp_o2=0.0 # use this for open circuit mode
+                pp_o2=0.0,  # use this for open circuit mode
             )
         else:
             # dipplanner adds the surface pressure to the pressure that is passed in here.
@@ -64,7 +65,7 @@ class DipplannerModel(DecoModelBase):
                 rate=depth_rate.to(UREG.meter / UREG.second).magnitude,
                 f_he=0.0,
                 f_n2=mix.pn2,
-                pp_o2=0.0 # use this for open circuit mode
+                pp_o2=0.0,  # use this for open circuit mode
             )
 
     def set_gf_from_max_depth(self, depth):
