@@ -1,9 +1,6 @@
 from cenote import config
-from cenote.water import Water, pressure_from_depth, depth_from_pressure
+from cenote.water import Water, water_pressure_from_depth, depth_from_pressure
 from cenote.mix import Mix
-
-# import decotengu.model
-# import decotengu.engine
 
 import dipplanner.model.buhlmann.model
 import dipplanner.model.buhlmann.gradient
@@ -21,56 +18,6 @@ class BuhlmannParams:
 class DecoModelBase:
     pass
 
-
-# class DecotenguModel(DecoModelBase):
-
-#     def __init__(self, params:BuhlmannParams, water: Water):
-#         self.water = water
-
-#         self.model = decotengu.model.ZH_L16C_GF()
-
-#         # set gradient factors
-#         self.model.gf_low = params.gf_low
-#         self.model.gf_high = params.gf_high
-
-#         # initialize with surface atmospheric pressure
-#         self.data = self.model.init((1.0 * UREG.atm).to(UREG.bar).magnitude)
-
-#     def log(self, pt0, pt1, mix: Mix):
-       
-#         # time is time spent at depth
-#         d_time = (pt1.time - pt0.time).to(UREG.minute)
-        
-#         gas = decotengu.engine.GasMix(
-#             # switch depth [m]?
-#             # it appears this is when the gas is started during the decompression stage. not sure.
-#             # putting mod here but it is probably wrong. doesn't seem to be used.
-#             depth=mix.mod(1.4, self.water).to(UREG.meter).magnitude, 
-#             o2=mix.po2 * 100, 
-#             n2=mix.pn2 * 100, 
-#             he=0)
-
-#         pressure_pt0 = pressure_from_depth(pt0.depth, self.water).to(UREG.bar)
-#         pressure_pt1 = pressure_from_depth(pt1.depth, self.water).to(UREG.bar)
-#         d_pressure = pressure_pt1 - pressure_pt0
-#         pressure_rate = d_pressure / d_time
-
-#         avg_pressure = (pressure_pt0 + pressure_pt1) * 0.5
-
-#         self.data = self.model.load(
-#             abs_p=avg_pressure.to(UREG.bar).magnitude, 
-#             time=d_time.to(UREG.minute).magnitude, 
-#             gas=gas,
-#             rate=pressure_rate.to(UREG.bar / UREG.minute).magnitude,
-#             data=self.data)
-
-#     def ceiling(self):
-#         # need to figure out when to use gf high here.
-#         pressure_bar = self.model.ceiling_limit(self.data)
-#         pressure = pressure_bar * UREG.bar
-#         return depth_from_pressure(pressure, self.water)
-
-#     # def compartment_ceilings(self):
 
 class DipplannerModel(DecoModelBase):
 
@@ -94,22 +41,26 @@ class DipplannerModel(DecoModelBase):
         self.model.gradient.set_gf_at_depth(avg_depth.to(UREG.meter).magnitude)
 
         if pt0.depth == pt1.depth:
-            pressure = pressure_from_depth(pt0.depth, self.water)
+            # dipplanner adds the surface pressure to the pressure that is passed in here.
+            # use water pressure, not absolute pressure.
+            water_pressure = water_pressure_from_depth(pt0.depth, self.water)
             self.model.const_depth(
-                pressure=pressure.to(UREG.bar).magnitude,
+                pressure=water_pressure.to(UREG.bar).magnitude,
                 seg_time=d_time.to(UREG.second).magnitude,
                 f_he=0.0,
                 f_n2=mix.pn2,
                 pp_o2=0.0 # use this for open circuit mode
             )
         else:
-            pressure_pt0 = pressure_from_depth(pt0.depth, self.water)
-            pressure_pt1 = pressure_from_depth(pt1.depth, self.water)
+            # dipplanner adds the surface pressure to the pressure that is passed in here.
+            # use water pressure, not absolute pressure.
+            water_pressure_pt0 = water_pressure_from_depth(pt0.depth, self.water)
+            water_pressure_pt1 = water_pressure_from_depth(pt1.depth, self.water)
             d_depth = pt1.depth - pt0.depth
             depth_rate = d_depth / d_time
             self.model.asc_desc(
-                start=pressure_pt0.to(UREG.bar).magnitude,
-                finish=pressure_pt1.to(UREG.bar).magnitude,
+                start=water_pressure_pt0.to(UREG.bar).magnitude,
+                finish=water_pressure_pt1.to(UREG.bar).magnitude,
                 rate=depth_rate.to(UREG.meter / UREG.second).magnitude,
                 f_he=0.0,
                 f_n2=mix.pn2,
