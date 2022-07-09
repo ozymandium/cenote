@@ -8,7 +8,4 @@ black \
     -t py39
 
 # c++ stuff
-clang-format -i ./lib/bungee/include/bungee/Buhlmann.h
-clang-format -i ./lib/bungee/include/bungee/Compartment.h
-clang-format -i ./lib/bungee/src/Buhlmann.cpp
-clang-format -i ./lib/bungee/src/Compartment.cpp
+find ./lib/bungee/ -iname *.h -o -iname *.cpp | xargs clang-format -i

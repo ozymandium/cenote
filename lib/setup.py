@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 from pybind11.setup_helpers import Pybind11Extension
+from glob import glob
 
 setup(
     name = "cenote",
@@ -22,6 +23,8 @@ setup(
             [
                 "bungee/src/Buhlmann.cpp",
                 "bungee/src/Compartment.cpp",
+                "bungee/src/CompartmentManager.cpp",
+                "bungee/src/Models.cpp",
                 "bungee/pybind.cpp",
             ],
             include_dirs = [

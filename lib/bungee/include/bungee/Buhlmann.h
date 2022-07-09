@@ -1,12 +1,15 @@
 #pragma once
 
-#include "Compartment.h"
+#include "CompartmentManager.h"
 
 namespace bungee {
 
 class Buhlmann {
 public:
-    Buhlmann();
+    Buhlmann(Model model);
+
+private:
+    CompartmentManager _compartments;
 };
 
 } // namespace bungee

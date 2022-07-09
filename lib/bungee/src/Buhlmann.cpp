@@ -2,6 +2,6 @@
 
 namespace bungee {
 
-Buhlmann::Buhlmann() {}
+Buhlmann::Buhlmann(const Model model) : _compartments(model) {}
 
 } // namespace bungee

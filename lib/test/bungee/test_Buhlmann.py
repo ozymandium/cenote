@@ -1,8 +1,8 @@
 import unittest
 
-from bungee import Buhlmann
-
+import bungee
 
 class TestBuhlmann(unittest.TestCase):
     def test_init(self):
-        b = Buhlmann()
+        model = bungee.Model.ZHL_16A
+        b = bungee.Buhlmann(model)
