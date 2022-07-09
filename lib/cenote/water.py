@@ -35,6 +35,7 @@ WATER_DENSITY = {
 GRAVITY = 9.80665 * UREG.meter / UREG.sec ** 2
 AMBIENT_PRESSURE_SURFACE = dipplanner.settings.AMBIANT_PRESSURE_SURFACE * UREG.bar
 
+
 def water_pressure_from_depth(depth, water: Water):
     """Pressure of water, not including atmospheric pressure."""
     density = WATER_DENSITY[water]

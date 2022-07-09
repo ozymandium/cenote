@@ -2,8 +2,6 @@
 
 namespace bungee {
 
-Buhlmann::Buhlmann() {
-    
-}
+Buhlmann::Buhlmann() {}
 
-}
+} // namespace bungee

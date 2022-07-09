@@ -9,4 +9,4 @@ public:
     Buhlmann();
 };
 
-}
+} // namespace bungee
