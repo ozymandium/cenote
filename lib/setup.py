@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+from pybind11.setup_helpers import Pybind11Extension
 
 setup(
     name = "cenote",
@@ -15,4 +16,18 @@ setup(
         ],
     },
     test_suite = "test",
+    ext_modules=[
+        Pybind11Extension(
+            "bungee",
+            [
+                "bungee/src/Buhlmann.cpp",
+                "bungee/src/Compartment.cpp",
+                "bungee/pybind.cpp",
+            ],
+            include_dirs = [
+                "bungee/include",
+            ],
+            cxx_std=17,
+        )
+    ],
 )
