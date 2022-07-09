@@ -1,0 +1,8 @@
+water: FRESH
+tanks:
+  - {name: backmount, type: AL80, pressure: 3000psi, mix: {po2: 0.21}}
+scr: 0.1 ft^3/min
+deco: {gf_low: 0.3, gf_high: 0.7}
+profile:
+  - {depth: 132ft, duration: 0min, tank: backmount}
+  - {depth: 132ft, duration: 20min}

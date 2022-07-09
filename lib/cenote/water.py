@@ -1,5 +1,7 @@
 from cenote import config
 
+import dipplanner.settings
+
 import enum
 
 
@@ -31,7 +33,7 @@ WATER_DENSITY = {
 # take a value close to the mean for gravity.
 # https://en.wikipedia.org/wiki/Gravity_of_Earth
 GRAVITY = 9.80665 * UREG.meter / UREG.sec ** 2
-
+AMBIENT_PRESSURE_SURFACE = dipplanner.settings.AMBIANT_PRESSURE_SURFACE * UREG.bar
 
 def water_pressure_from_depth(depth, water: Water):
     """Pressure of water, not including atmospheric pressure."""
@@ -60,12 +62,12 @@ def pressure_from_depth(depth, water: Water):
     pint pressure
     """
     water_pressure = water_pressure_from_depth(depth, water=water)
-    pressure = 1.0 * UREG.atm + water_pressure
+    pressure = AMBIENT_PRESSURE_SURFACE + water_pressure
     return pressure.to(config.PRESSURE_UNIT)
 
 
 def depth_from_pressure(pressure, water: Water):
     """ """
-    water_pressure = pressure - 1.0 * UREG.atm
+    water_pressure = pressure - AMBIENT_PRESSURE_SURFACE
     depth = depth_from_water_pressure(water_pressure, water)
     return depth.to(config.DEPTH_UNIT)
