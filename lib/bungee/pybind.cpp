@@ -1,5 +1,7 @@
 #include <bungee/Buhlmann.h>
+
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 using namespace bungee;
 namespace py = pybind11;
@@ -12,5 +14,13 @@ PYBIND11_MODULE(bungee, mod) {
     py::class_<Buhlmann>(mod, "Buhlmann")
         .def(py::init<Model>())
     ;
+    py::class_<Compartment::Params>(mod, "CompartmentParams")
+        .def(py::init(&Compartment::Params::Create))
+        .def_readonly("t", &Compartment::Params::t)
+        .def_readonly("a", &Compartment::Params::a)
+        .def_readonly("b", &Compartment::Params::b)
+    ;
+    // py::bind_vector<ModelParams>(mod, "ModelParams");
+    // mod.def("get_model_params", &GetModelParams);
 }
 // clang-format on
