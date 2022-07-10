@@ -53,7 +53,7 @@ class Test_usage_between_points(unittest.TestCase):
         pt1 = PlanPoint(1 * UREG.minute, depth=0 * UREG.foot, scr=scr, tank_name="")
         consumption = _usage_between_points(pt0, pt1, bungee.Water.FRESH)
         helpers.assert_quantity_almost_equal(
-            consumption, 1 * UREG.ft**3, self.GAS_USAGE_VOLUME_TOLERANCE
+            consumption, 1 * UREG.ft ** 3, self.GAS_USAGE_VOLUME_TOLERANCE
         )
 
     def test_depth_gas_usage_square(self):
@@ -62,7 +62,7 @@ class Test_usage_between_points(unittest.TestCase):
         pt1 = PlanPoint(1 * UREG.minute, depth=33.96 * UREG.foot, scr=scr, tank_name="")
         consumption = _usage_between_points(pt0, pt1, bungee.Water.FRESH)
         helpers.assert_quantity_almost_equal(
-            consumption, 2 * UREG.ft**3, self.GAS_USAGE_VOLUME_TOLERANCE
+            consumption, 2 * UREG.ft ** 3, self.GAS_USAGE_VOLUME_TOLERANCE
         )
 
         # def test_trapezoid_gas_usage(self):
@@ -71,7 +71,7 @@ class Test_usage_between_points(unittest.TestCase):
         pt1 = PlanPoint(1 * UREG.minute, depth=67.91 * UREG.foot, scr=scr, tank_name="")
         consumption = _usage_between_points(pt0, pt1, bungee.Water.FRESH)
         helpers.assert_quantity_almost_equal(
-            consumption, 2 * UREG.ft**3, self.GAS_USAGE_VOLUME_TOLERANCE
+            consumption, 2 * UREG.ft ** 3, self.GAS_USAGE_VOLUME_TOLERANCE
         )
 
 
@@ -102,7 +102,7 @@ class TestScr(unittest.TestCase):
         self.assertEqual(sac_from_scr, pressure_rate)
 
     def test_at_depth(self):
-        volume_rate = 0.75 * UREG.ft**3 / UREG.min
+        volume_rate = 0.75 * UREG.ft ** 3 / UREG.min
         tolerance = (
             volume_rate.magnitude * 1e-2
         )  # 1% error (due to depth/pressure approximation below, not in the code)
@@ -127,7 +127,7 @@ class TestScr(unittest.TestCase):
 class TestResult(unittest.TestCase):
     def test_gas_usage(self):
         TANK_NAME = ""
-        scr = Scr(1.0 * UREG.ft**3 / UREG.minute)
+        scr = Scr(1.0 * UREG.ft ** 3 / UREG.minute)
         tank_info = {
             TANK_NAME: TankInfo(
                 enum=tank.Tank.AL80, pressure=tank.Aluminum80.SERVICE_PRESSURE, mix=mix.AIR
@@ -149,5 +149,5 @@ class TestResult(unittest.TestCase):
         )
         result = Result(plan)
         helpers.assert_quantity_almost_equal(
-            result.back().usage[TANK_NAME], 4 * UREG.foot**3, 1e-3
+            result.back().usage[TANK_NAME], 4 * UREG.foot ** 3, 1e-3
         )
