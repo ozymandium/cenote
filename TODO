@@ -1,8 +1,11 @@
 # To Do List
 
-## Library
+## Bungee
+- [ ] Revisit water vapor pressure computation
+
+## Cenote
 - [ ] schema validator for dive profile YAMLs
-- [ ] fix ceilings above zero
+- [ ] handle ceilings above zero
 - [ ] add unit tests to cross check profiles
 
 ## App
