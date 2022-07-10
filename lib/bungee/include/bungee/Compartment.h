@@ -28,17 +28,35 @@ public:
         double b;
     };
 
+    /// \brief Construct compartment with params already set.
+    ///
+    /// \param[in] params Parameters to use.
     Compartment(const Params& params);
+
+    /// \brief Create compartment for a given half time
+    ///
+    /// \param[in] t Half time of the gas for the given tissue compartment [min].
+    Compartment(double t);
 
     /// \brief Initialize or reset
     /// \param[in] P Partial pressure of the gas in the compartment[bar].
     void init(double P);
 
     /// \brief Update the pressure in the compartment by exposing it to a certain inert gas partial
-    /// pressure for a period of time. \param[in] Pgas The absolute partial pressure of the inert
-    /// gas within the lungs, or the "inspired" pressure [bar]. \param[in] dt The amount of time for
-    /// which the compartment was exposed to pressure `Pgas` [min].
+    /// pressure for a period of time. 
+    ///
+    /// TODO: account for water vapor pressure here?
+    ///
+    /// \param[in] Pgas The absolute partial pressure of the inert gas within the lungs, or the "inspired" pressure [bar]. 
+    ///
+    /// \param[in] dt The amount of time for  which the compartment was exposed to pressure `Pgas` [min].
     void update(double Pgas, double dt);
+
+    /// \brief The lowest tolerable pressure.
+    ///
+    /// \return Minimum ambient gas pressure to which this compartment should be exposed based on the current 
+    /// internal gas pressure [bar].
+    double ceiling() const;
 
 private:
     const Params _params;

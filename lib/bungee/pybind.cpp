@@ -20,6 +20,13 @@ PYBIND11_MODULE(bungee, mod) {
         .def_readonly("a", &Compartment::Params::a)
         .def_readonly("b", &Compartment::Params::b)
     ;
+    py::class_<Compartment>(mod, "Compartment")
+        .def(py::init<Compartment::Params>())
+        .def(py::init<double>())
+        .def("init", &Compartment::init)
+        .def("update", &Compartment::update)
+        .def("ceiling", &Compartment::ceiling)
+    ;
     // py::bind_vector<ModelParams>(mod, "ModelParams");
     // mod.def("get_model_params", &GetModelParams);
 }

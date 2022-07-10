@@ -3,8 +3,8 @@ import unittest
 import bungee
 
 
-class TestModels(unittest.TestCase):
-    def test_a_b(self):
+class TestCompartment(unittest.TestCase):
+    def test_Params(self):
         """https://en.wikipedia.org/wiki/B%C3%BChlmann_decompression_algorithm"""
         vals = [
             # ZHL16A Nitrogen
