@@ -43,19 +43,21 @@ public:
     void init(double P);
 
     /// \brief Update the pressure in the compartment by exposing it to a certain inert gas partial
-    /// pressure for a period of time. 
+    /// pressure for a period of time.
     ///
     /// TODO: account for water vapor pressure here?
     ///
-    /// \param[in] Pgas The absolute partial pressure of the inert gas within the lungs, or the "inspired" pressure [bar]. 
+    /// \param[in] Pgas The absolute partial pressure of the inert gas within the lungs, or the
+    /// "inspired" pressure [bar].
     ///
-    /// \param[in] dt The amount of time for  which the compartment was exposed to pressure `Pgas` [min].
+    /// \param[in] dt The amount of time for  which the compartment was exposed to pressure `Pgas`
+    /// [min].
     void update(double Pgas, double dt);
 
     /// \brief The lowest tolerable pressure.
     ///
-    /// \return Minimum ambient gas pressure to which this compartment should be exposed based on the current 
-    /// internal gas pressure [bar].
+    /// \return Minimum ambient gas pressure to which this compartment should be exposed based on
+    /// the current internal gas pressure [bar].
     double ceiling() const;
 
 private:

@@ -14,7 +14,7 @@ def get_water_density(water: bungee.Water):
 def water_pressure_from_depth(depth, water: bungee.Water):
     """Pressure of water, not including atmospheric pressure."""
     depth_meter = depth.to(UREG.meter).magnitude
-    pressure_bar = bungee.water_pressure_from_depth(depth_meter, water) 
+    pressure_bar = bungee.water_pressure_from_depth(depth_meter, water)
     return (pressure_bar * UREG.bar).to(config.PRESSURE_UNIT)
 
 
@@ -38,7 +38,7 @@ def pressure_from_depth(depth, water: bungee.Water):
     pint pressure
     """
     depth_meter = depth.to(UREG.meter).magnitude
-    pressure_bar = bungee.pressure_from_depth(depth_meter, water) 
+    pressure_bar = bungee.pressure_from_depth(depth_meter, water)
     return (pressure_bar * UREG.bar).to(config.PRESSURE_UNIT)
 
 

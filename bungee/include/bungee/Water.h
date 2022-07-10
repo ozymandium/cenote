@@ -4,11 +4,7 @@
 
 namespace bungee {
 
-enum class Water {
-    FRESH,
-    SALT,
-    COUNT
-};
+enum class Water { FRESH, SALT, COUNT };
 
 using WaterDensityLookup = std::map<Water, double>;
 
@@ -29,7 +25,8 @@ double GetWaterDensity(Water water);
 /// \return Relative pressure resulting from water, excluding ambient surface pressure [bar].
 double WaterPressureFromDepth(double depth, Water water);
 
-/// \param[in] pressure Relative pressure resulting from water, excluding ambient surface pressure [bar].
+/// \param[in] pressure Relative pressure resulting from water, excluding ambient surface pressure
+/// [bar].
 ///
 /// \param[in] water Type of water.
 ///
@@ -50,4 +47,4 @@ double PressureFromDepth(double depth, Water water);
 /// \return Depth under the surface [m].
 double DepthFromPressure(double pressure, Water water);
 
-}
+} // namespace bungee

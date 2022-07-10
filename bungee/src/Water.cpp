@@ -1,5 +1,5 @@
-#include <bungee/Water.h>
 #include <bungee/Constants.h>
+#include <bungee/Water.h>
 
 namespace {
 
@@ -7,7 +7,7 @@ namespace {
 static constexpr double BAR_FROM_PA = 1e-5;
 static constexpr double PA_FROM_BAR = 1e5;
 
-}
+} // namespace
 
 namespace bungee {
 
@@ -15,7 +15,8 @@ namespace bungee {
 const WaterDensityLookup WATER_DENSITY_KGM3{
     /// water density varies with temperature, being more dense at lower temperatures.
     /// pure water at 0C is 1000 kg/m3.
-    /// pick a value of pure water at 25C, since contaminnts generally decrease the density, and this
+    /// pick a value of pure water at 25C, since contaminnts generally decrease the density, and
+    /// this
     /// will offset changes due to colder water.
     /// https://en.wikipedia.org/wiki/Properties_of_water
     {Water::FRESH, 997.0474},
@@ -25,9 +26,7 @@ const WaterDensityLookup WATER_DENSITY_KGM3{
     {Water::SALT, 1023.6},
 };
 
-double GetWaterDensity(const Water water) {
-    return WATER_DENSITY_KGM3.at(water);
-}
+double GetWaterDensity(const Water water) { return WATER_DENSITY_KGM3.at(water); }
 
 double WaterPressureFromDepth(double depth, Water water) {
     // density in kg/m^3
@@ -56,4 +55,4 @@ double DepthFromPressure(double pressure, Water water) {
     return DepthFromWaterPressure(pressure - SURFACE_PRESSURE_BAR, water);
 }
 
-}
+} // namespace bungee

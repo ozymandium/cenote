@@ -133,7 +133,9 @@ class TestResult(unittest.TestCase):
                 enum=tank.Tank.AL80, pressure=tank.Aluminum80.SERVICE_PRESSURE, mix=mix.AIR
             )
         }
-        plan = Plan(water=bungee.Water.FRESH, scr=scr, tank_info=tank_info, deco=BuhlmannParams(0.3, 0.7))
+        plan = Plan(
+            water=bungee.Water.FRESH, scr=scr, tank_info=tank_info, deco=BuhlmannParams(0.3, 0.7)
+        )
         plan.add_point(
             UREG.parse_expression("0 min"), UREG.parse_expression("0 feet"), tank_name=TANK_NAME
         )

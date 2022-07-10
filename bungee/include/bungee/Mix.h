@@ -6,7 +6,6 @@ namespace bungee {
 
 class Mix {
 public:
-
     // struct PartialPressure {
     //     double O2;
     //     double N2;
@@ -22,4 +21,4 @@ public:
     const double fN2;
 };
 
-}
+} // namespace bungee

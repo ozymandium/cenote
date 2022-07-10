@@ -2,10 +2,10 @@
 
 # python stuff
 black \
-    ./lib/cenote \
-    ./lib/test \
+    ./cenote \
+    ./test \
     --line-length 100 \
     -t py39
 
 # c++ stuff
-find ./lib/bungee/ -iname *.h -o -iname *.cpp | xargs clang-format -i
+find ./bungee/ -iname *.h -o -iname *.cpp | xargs clang-format -i
