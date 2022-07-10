@@ -36,5 +36,4 @@ class TestMix(unittest.TestCase):
     def test_mod(self):
         helpers.assert_quantity_almost_equal(AIR.mod(1.4, bungee.Water.SALT), 188 * UREG.foot, 0.5)
         helpers.assert_quantity_almost_equal(O2.mod(1.6, bungee.Water.SALT), 20 * UREG.foot, 0.2)
-        helpers.assert_quantity_almost_equal(EAN75.mod(1.6, bungee.Water.SALT), 40 * UREG.foot, 0.5)
         helpers.assert_quantity_almost_equal(EAN50.mod(1.6, bungee.Water.SALT), 70 * UREG.foot, 1.0)
