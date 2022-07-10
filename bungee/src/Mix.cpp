@@ -10,7 +10,7 @@ Mix::Mix(const double fO2) : fO2(fO2), fN2(1.0 - fO2) {
     assert(fO2 + fN2 == 1.0);
 }
 
-Mix::PartialPressure Mix::partialPresure(units::length::meter_t depth, Water water) const {
+Mix::PartialPressure Mix::partialPressure(units::length::meter_t depth, Water water) const {
     // pressure in bar
     const units::pressure::bar_t pressure = PressureFromDepth(depth, water);
     return PartialPressure{

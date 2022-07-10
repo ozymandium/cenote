@@ -23,7 +23,7 @@ public:
     /// \param[in] water Type of water.
     ///
     /// \return Partial pressures of each gas
-    PartialPressure partialPresure(units::length::meter_t depth, Water water) const;
+    PartialPressure partialPressure(units::length::meter_t depth, Water water) const;
 
     /// Fraction of oxygen, 0.0 - 1.0 [unitless]
     const double fO2;
