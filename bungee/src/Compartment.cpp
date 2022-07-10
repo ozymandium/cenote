@@ -1,5 +1,6 @@
 #include <bungee/Compartment.h>
 
+#include <cassert>
 #include <cmath>
 
 namespace {

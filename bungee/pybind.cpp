@@ -8,8 +8,8 @@ namespace py = pybind11;
 // clang-format off
 PYBIND11_MODULE(bungee, mod) {
     // Constants.h
-    mod.attr("SURFACE_PRESSURE_BAR") = py::float_(SURFACE_PRESSURE_BAR);
-    mod.attr("GRAVITY_MS2") = py::float_(GRAVITY_MS2);
+    mod.attr("SURFACE_PRESSURE") = py::float_(SURFACE_PRESSURE);
+    mod.attr("GRAVITY") = py::float_(GRAVITY);
     // Water.h
     py::enum_<Water>(mod, "Water")
         .value("FRESH", Water::FRESH)

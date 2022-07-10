@@ -4,8 +4,7 @@ ENV USER="user"
 ENV HOME_DIR="/home/${USER}"
 ENV SRC_DIR="${HOME_DIR}/src"
 ENV DEP_DIR="${HOME_DIR}/dep"
-ENV WORK_DIR="${SRC_DIR}" \
-    PATH="${HOME_DIR}/.local/bin:${PATH}"
+ENV PATH="${HOME_DIR}/.local/bin:${PATH}"
 
 # configures locale
 RUN apt update -qq > /dev/null \
@@ -23,16 +22,14 @@ RUN apt update -qq > /dev/null \
     cmake \
     ccache \
     git \
+    python3-dev \
     python3-pip \
-    python3-setuptools \
     sudo \
     zsh \
     ranger \
     curl \
     vim \
-    wget \
-    libfmt-dev \
-    g++-10
+    wget
 
 # prepares non root env
 RUN useradd --create-home --shell /bin/zsh ${USER}
@@ -41,7 +38,7 @@ RUN usermod -append --groups sudo ${USER}
 RUN echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 USER ${USER}
-WORKDIR ${WORK_DIR}
+WORKDIR ${SRC_DIR}
 
 # install oh my zsh
 RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
@@ -50,6 +47,17 @@ RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/inst
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --user --upgrade -r /tmp/requirements.txt
 
-# RUN mkdir ${DEP_DIR}
-# COPY cpp_installs.sh /tmp/cpp_installs.sh
-# RUN sh /tmp/cpp_installs.sh ${DEP_DIR}
+## dependencies of c++ stuff
+RUN mkdir ${DEP_DIR}
+
+# install units library
+RUN wget https://github.com/nholthaus/units/archive/refs/tags/v2.3.1.tar.gz -O /tmp/units.tar.gz
+RUN tar -xf /tmp/units.tar.gz -C ${DEP_DIR}
+RUN mkdir ${DEP_DIR}/units-2.3.1/build
+RUN cd ${DEP_DIR}/units-2.3.1/build && cmake .. && sudo make -j4 install
+
+# allow git from inside container
+git config --global --add safe.directory ${SRC_DIR}
+
+# # build the library
+# RUN python3 setup.py build

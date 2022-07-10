@@ -1,5 +1,7 @@
 #pragma once
 
+#include <units.h>
+
 namespace bungee {
 
 /// \brief Water vapor pressure in the lungs [bar].
@@ -14,17 +16,18 @@ namespace bungee {
 /// temperature.
 ///
 /// TODO: Treat this as a variable, and figure out how to compute it.
-static constexpr double WATER_VAPOR_PRESSURE_BAR = 0.0627;
+static const units::pressure::bar_t WATER_VAPOR_PRESSURE(0.0627);
 
 /// \brief Atmospheric pressure at sea level, equivalent to 1 atm [bar].
 ///
 /// TODO: Allow varying this, compute based on altitude and temperature.
-static constexpr double SURFACE_PRESSURE_BAR = 1.01325;
+/// TODO: define in atmospheres.
+static const units::pressure::bar_t SURFACE_PRESSURE(1.01325);
 
 /// Magnitude of gravitational force in m/s^2
 /// take a value close to the mean https://en.wikipedia.org/wiki/Gravity_of_Earth
 ///
 /// TODO: Allow varying this based on latitude
-static constexpr double GRAVITY_MS2 = 9.80665;
+static const units::acceleration::meters_per_second_squared_t GRAVITY(9.80665);
 
 } // namespace bungee

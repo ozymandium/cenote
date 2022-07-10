@@ -7,7 +7,7 @@ setup(
     version = "0.0.1",
     description = "Dive planner",
     packages = find_packages(),
-    python_requires = ">=3.6",
+    python_requires = ">=3.8",
     entry_points = {
         "console_scripts": [
             "scr-from-sac = cenote.util.scr_from_sac:main",
