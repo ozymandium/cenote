@@ -16,6 +16,10 @@ PYBIND11_MODULE(bungee, mod) {
         .value("SALT", Water::SALT)
     ;
     mod.def("get_water_density", &GetWaterDensity);
+    mod.def("water_pressure_from_depth", &WaterPressureFromDepth);
+    mod.def("depth_from_water_pressure", &DepthFromWaterPressure);
+    mod.def("pressure_from_depth", &PressureFromDepth);
+    mod.def("depth_from_pressure", &DepthFromPressure);
     // Models.h
     py::enum_<Model>(mod, "Model")
         .value("ZHL_16A", Model::ZHL_16A)
