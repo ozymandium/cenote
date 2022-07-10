@@ -4,8 +4,14 @@ namespace bungee {
 
 CompartmentManager::CompartmentManager(const Model model) {
     const ModelParams *modelParams = GetModelParams(model);
-    for (auto compartmentParams : *modelParams) {
+    for (const auto& compartmentParams : *modelParams) {
         _compartments.push_back(Compartment(compartmentParams));
+    }
+}
+
+void CompartmentManager::init() {
+    for (auto& compartment : _compartments) {
+        compartment.init()
     }
 }
 

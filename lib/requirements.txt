@@ -8,3 +8,6 @@ pytest
 coverage
 # dipplanner @ git+https://github.com/ThomasChiroux/dipplanner.git
 pybind11
+
+# units
+conan

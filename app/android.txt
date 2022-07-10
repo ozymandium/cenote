@@ -1,3 +1,0 @@
-title=Cenote
-author=roco
-orientation=portrait

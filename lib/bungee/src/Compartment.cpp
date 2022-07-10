@@ -1,5 +1,4 @@
 #include <bungee/Compartment.h>
-#include <bungee/Constants.h>
 
 #include <cmath>
 
