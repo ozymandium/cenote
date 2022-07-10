@@ -8,8 +8,8 @@ namespace bungee {
 ///
 /// This class is not aware of anything related to diving, it is purely a pressure tracker.
 ///
-/// A note on units: Buhlmann's algorithm uses minutes for time units and bar for pressure. All 
-/// time constants are given in minutes in the literature and the exponential decay equations 
+/// A note on units: Buhlmann's algorithm uses minutes for time units and bar for pressure. All
+/// time constants are given in minutes in the literature and the exponential decay equations
 /// assume the same. As such, bar and minutes are used here.
 class Compartment {
 public:
@@ -34,18 +34,18 @@ public:
     /// \param[in] P Partial pressure of the gas in the compartment[bar].
     void init(double P);
 
-    /// \brief Update the pressure in the compartment by exposing it to a certain inert gas partial pressure
-    /// for a period of time.
-    /// \param[in] Pgas The absolute partial pressure of the inert gas within the lungs, or the "inspired" pressure [bar].
-    /// \param[in] dt The amount of time for which the compartment was exposed to pressure `Pgas` [min].
+    /// \brief Update the pressure in the compartment by exposing it to a certain inert gas partial
+    /// pressure for a period of time. \param[in] Pgas The absolute partial pressure of the inert
+    /// gas within the lungs, or the "inspired" pressure [bar]. \param[in] dt The amount of time for
+    /// which the compartment was exposed to pressure `Pgas` [min].
     void update(double Pgas, double dt);
 
 private:
     const Params _params;
 
     /// The absolute pressure of the inert gas [bar].
-    /// Set to nullopt on construction, and initialized by `init()`. Calling any other function before
-    /// initializing this will result in an error.
+    /// Set to nullopt on construction, and initialized by `init()`. Calling any other function
+    /// before initializing this will result in an error.
     std::optional<double> _P;
 };
 

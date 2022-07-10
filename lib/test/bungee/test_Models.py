@@ -2,6 +2,7 @@ import unittest
 
 import bungee
 
+
 class TestModels(unittest.TestCase):
     def test_a_b(self):
         """https://en.wikipedia.org/wiki/B%C3%BChlmann_decompression_algorithm"""

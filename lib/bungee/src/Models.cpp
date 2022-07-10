@@ -27,6 +27,6 @@ extern const ModelParamsLookup MODEL_PARAMS_LOOKUP{
     {Model::ZHL_16A, &ZHL_16A_MODEL_PARAMS},
 };
 
-const ModelParams* GetModelParams(const Model model) { return MODEL_PARAMS_LOOKUP.at(model); }
+const ModelParams *GetModelParams(const Model model) { return MODEL_PARAMS_LOOKUP.at(model); }
 
 } // namespace bungee
