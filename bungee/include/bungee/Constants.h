@@ -20,4 +20,10 @@ static constexpr double WATER_VAPOR_PRESSURE_BAR = 0.0627;
 /// TODO: Allow varying this, compute based on altitude and temperature.
 static constexpr double SURFACE_PRESSURE_BAR = 1.01325;
 
+/// Magnitude of gravitational force in m/s^2
+/// take a value close to the mean https://en.wikipedia.org/wiki/Gravity_of_Earth
+///
+/// TODO: Allow varying this based on latitude
+static constexpr double GRAVITY_MS2 = 9.80665;
+
 } // namespace bungee

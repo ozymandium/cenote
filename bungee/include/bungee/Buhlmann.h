@@ -8,6 +8,8 @@ class Buhlmann {
 public:
     Buhlmann(Model model);
 
+    // void init();
+
 private:
     CompartmentManager _compartments;
 };

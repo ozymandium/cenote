@@ -1,19 +1,30 @@
-#include <bungee/Buhlmann.h>
+#include <bungee/bungee.h>
 
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 using namespace bungee;
 namespace py = pybind11;
 
 // clang-format off
 PYBIND11_MODULE(bungee, mod) {
+    // Constants.h
+    mod.attr("SURFACE_PRESSURE_BAR") = py::float_(SURFACE_PRESSURE_BAR);
+    mod.attr("GRAVITY_MS2") = py::float_(GRAVITY_MS2);
+    // Water.h
+    py::enum_<Water>(mod, "Water")
+        .value("FRESH", Water::FRESH)
+        .value("SALT", Water::SALT)
+    ;
+    mod.def("get_water_density", &GetWaterDensity);
+    // Models.h
     py::enum_<Model>(mod, "Model")
         .value("ZHL_16A", Model::ZHL_16A)
     ;
+    // Buhlmann.h
     py::class_<Buhlmann>(mod, "Buhlmann")
         .def(py::init<Model>())
     ;
+    // Compartment.h
     py::class_<Compartment::Params>(mod, "CompartmentParams")
         .def(py::init(&Compartment::Params::Create))
         .def_readonly("t", &Compartment::Params::t)
@@ -27,7 +38,5 @@ PYBIND11_MODULE(bungee, mod) {
         .def("update", &Compartment::update)
         .def("ceiling", &Compartment::ceiling)
     ;
-    // py::bind_vector<ModelParams>(mod, "ModelParams");
-    // mod.def("get_model_params", &GetModelParams);
 }
 // clang-format on

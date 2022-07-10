@@ -1,5 +1,6 @@
 from cenote.water import *
 from cenote import config
+import bungee
 
 import unittest
 from pint.testsuite import helpers
@@ -13,11 +14,11 @@ class TestPressureAtDepth(unittest.TestCase):
 
     def test_almost(self):
         VALUES = {
-            Water.FRESH: {
+            bungee.Water.FRESH: {
                 100 * UREG.meter: 141.81 * UREG.psi,
                 32.81 * UREG.ft: 14.18 * UREG.psi,
             },
-            Water.SALT: {
+            bungee.Water.SALT: {
                 100 * UREG.meter: 145.59 * UREG.psi,
                 32.81 * UREG.ft: 14.56 * UREG.psi,
             },

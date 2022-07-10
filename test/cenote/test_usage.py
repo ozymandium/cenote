@@ -4,6 +4,7 @@ from cenote import tank
 from cenote import config
 from cenote import mix
 from cenote.deco import BuhlmannParams
+import bungee
 
 from pint.testsuite import helpers
 
@@ -50,7 +51,7 @@ class Test_usage_between_points(unittest.TestCase):
         scr = Scr(UREG.parse_expression("1 ft^3/min"))
         pt0 = PlanPoint(0 * UREG.minute, depth=0 * UREG.foot, scr=scr, tank_name="")
         pt1 = PlanPoint(1 * UREG.minute, depth=0 * UREG.foot, scr=scr, tank_name="")
-        consumption = _usage_between_points(pt0, pt1, Water.FRESH)
+        consumption = _usage_between_points(pt0, pt1, bungee.Water.FRESH)
         helpers.assert_quantity_almost_equal(
             consumption, 1 * UREG.ft ** 3, self.GAS_USAGE_VOLUME_TOLERANCE
         )
@@ -59,7 +60,7 @@ class Test_usage_between_points(unittest.TestCase):
         scr = Scr(UREG.parse_expression("1 ft^3/min"))
         pt0 = PlanPoint(0 * UREG.minute, depth=33.96 * UREG.foot, scr=scr, tank_name="")
         pt1 = PlanPoint(1 * UREG.minute, depth=33.96 * UREG.foot, scr=scr, tank_name="")
-        consumption = _usage_between_points(pt0, pt1, Water.FRESH)
+        consumption = _usage_between_points(pt0, pt1, bungee.Water.FRESH)
         helpers.assert_quantity_almost_equal(
             consumption, 2 * UREG.ft ** 3, self.GAS_USAGE_VOLUME_TOLERANCE
         )
@@ -68,7 +69,7 @@ class Test_usage_between_points(unittest.TestCase):
         scr = Scr(UREG.parse_expression("1 ft^3/min"))
         pt0 = PlanPoint(0 * UREG.minute, depth=0 * UREG.foot, scr=scr, tank_name="")
         pt1 = PlanPoint(1 * UREG.minute, depth=67.91 * UREG.foot, scr=scr, tank_name="")
-        consumption = _usage_between_points(pt0, pt1, Water.FRESH)
+        consumption = _usage_between_points(pt0, pt1, bungee.Water.FRESH)
         helpers.assert_quantity_almost_equal(
             consumption, 2 * UREG.ft ** 3, self.GAS_USAGE_VOLUME_TOLERANCE
         )
@@ -107,19 +108,19 @@ class TestScr(unittest.TestCase):
         )  # 1% error (due to depth/pressure approximation below, not in the code)
         scr = Scr(volume_rate)
         helpers.assert_quantity_almost_equal(
-            scr.at_depth(0 * UREG.ft, Water.FRESH), volume_rate, tolerance
+            scr.at_depth(0 * UREG.ft, bungee.Water.FRESH), volume_rate, tolerance
         )
         helpers.assert_quantity_almost_equal(
-            scr.at_depth(10.4 * UREG.meter, Water.FRESH), 2 * volume_rate, tolerance
+            scr.at_depth(10.4 * UREG.meter, bungee.Water.FRESH), 2 * volume_rate, tolerance
         )
         helpers.assert_quantity_almost_equal(
-            scr.at_depth(10.1 * UREG.meter, Water.SALT), 2 * volume_rate, tolerance
+            scr.at_depth(10.1 * UREG.meter, bungee.Water.SALT), 2 * volume_rate, tolerance
         )
         helpers.assert_quantity_almost_equal(
-            scr.at_depth(20.8 * UREG.meter, Water.FRESH), 3 * volume_rate, tolerance
+            scr.at_depth(20.8 * UREG.meter, bungee.Water.FRESH), 3 * volume_rate, tolerance
         )
         helpers.assert_quantity_almost_equal(
-            scr.at_depth(20.2 * UREG.meter, Water.SALT), 3 * volume_rate, tolerance
+            scr.at_depth(20.2 * UREG.meter, bungee.Water.SALT), 3 * volume_rate, tolerance
         )
 
 
@@ -132,7 +133,7 @@ class TestResult(unittest.TestCase):
                 enum=tank.Tank.AL80, pressure=tank.Aluminum80.SERVICE_PRESSURE, mix=mix.AIR
             )
         }
-        plan = Plan(water=Water.FRESH, scr=scr, tank_info=tank_info, deco=BuhlmannParams(0.3, 0.7))
+        plan = Plan(water=bungee.Water.FRESH, scr=scr, tank_info=tank_info, deco=BuhlmannParams(0.3, 0.7))
         plan.add_point(
             UREG.parse_expression("0 min"), UREG.parse_expression("0 feet"), tank_name=TANK_NAME
         )

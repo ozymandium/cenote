@@ -9,10 +9,10 @@ CompartmentManager::CompartmentManager(const Model model) {
     }
 }
 
-void CompartmentManager::init() {
-    for (auto& compartment : _compartments) {
-        compartment.init()
-    }
-}
+// void CompartmentManager::init() {
+//     for (auto& compartment : _compartments) {
+//         // compartment.init();
+//     }
+// }
 
 } // namespace bungee

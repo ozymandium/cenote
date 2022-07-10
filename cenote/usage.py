@@ -3,6 +3,7 @@ from cenote.tank import TankBase
 from cenote.tank import TYPES as TANK_TYPES
 from cenote.water import *
 from cenote.deco import BuhlmannParams, DipplannerModel
+import bungee
 
 import numpy as np
 from copy import deepcopy
@@ -70,7 +71,7 @@ class Scr:
         """
         return self.volume_rate * tank.SERVICE_PRESSURE / tank.service_volume()
 
-    def at_depth(self, depth, water: Water):
+    def at_depth(self, depth, water: bungee.Water):
         """Translate SCR to volume rate at a particular depth
 
         Parameters
@@ -117,7 +118,7 @@ class PlanPoint:
         )
 
 
-def _usage_between_points(pt0: PlanPoint, pt1: PlanPoint, water: Water):
+def _usage_between_points(pt0: PlanPoint, pt1: PlanPoint, water: bungee.Water):
     avg_depth = (pt0.depth + pt1.depth) * 0.5
     duration = pt1.time - pt0.time
     # assume that the SCR at the beginning of the section is the SCR for the entire section
@@ -136,7 +137,7 @@ class Plan:
     points : list[PlanPoint]
     """
 
-    def __init__(self, water: Water, scr: Scr, tank_info: dict, deco: BuhlmannParams):
+    def __init__(self, water: bungee.Water, scr: Scr, tank_info: dict, deco: BuhlmannParams):
         self.water = water
         self.scr = scr
         self.tank_info = tank_info

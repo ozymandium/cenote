@@ -2,6 +2,7 @@
 
 #include "Compartment.h"
 #include "Models.h"
+#include "Mix.h"
 
 namespace bungee {
 
@@ -14,7 +15,7 @@ public:
     ///
     /// TODO: add a version to initialize to a specific compartment state, e.g., for repetitive 
     /// dives.
-    equilibrium(const Gas& gas, double pressure);
+    // void equilibrium(const Mix& gas, double pressure);
 
 private:
     /// Nitrogen compartments.

@@ -24,7 +24,9 @@ setup(
                 "bungee/src/Buhlmann.cpp",
                 "bungee/src/Compartment.cpp",
                 "bungee/src/CompartmentManager.cpp",
+                "bungee/src/Mix.cpp",
                 "bungee/src/Models.cpp",
+                "bungee/src/Water.cpp",
                 "bungee/pybind.cpp",
             ],
             include_dirs = [

@@ -3,7 +3,8 @@ FROM ubuntu:20.04
 ENV USER="user"
 ENV HOME_DIR="/home/${USER}"
 ENV SRC_DIR="${HOME_DIR}/src"
-ENV WORK_DIR="${SRC_DIR}/app" \
+ENV DEP_DIR="${HOME_DIR}/dep"
+ENV WORK_DIR="${SRC_DIR}" \
     PATH="${HOME_DIR}/.local/bin:${PATH}"
 
 # configures locale
@@ -18,30 +19,20 @@ ENV LANG="en_US.UTF-8" \
 # system requirements to build most of the recipes
 RUN apt update -qq > /dev/null \
     && DEBIAN_FRONTEND=noninteractive apt install -qq --yes --no-install-recommends \
-    # autoconf \
-    # automake \
     build-essential \
-    # ccache \
     cmake \
-    # gettext \
+    ccache \
     git \
-    # libffi-dev \
-    # libltdl-dev \
-    # libssl-dev \
-    # libtool \
-    # openjdk-13-jdk \
-    # patch \
-    # pkg-config \
     python3-pip \
     python3-setuptools \
     sudo \
-    # unzip \
-    # zip \
-    # zlib1g-dev \
     zsh \
     ranger \
-    # python3.8-venv \
-    # curl
+    curl \
+    vim \
+    wget \
+    libfmt-dev \
+    g++-10
 
 # prepares non root env
 RUN useradd --create-home --shell /bin/zsh ${USER}
@@ -55,6 +46,10 @@ WORKDIR ${WORK_DIR}
 # install oh my zsh
 RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-# install app dependencies
-COPY lib/requirements.txt /tmp/requirements.txt
+# install python dependencies
+COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --user --upgrade -r /tmp/requirements.txt
+
+# RUN mkdir ${DEP_DIR}
+# COPY cpp_installs.sh /tmp/cpp_installs.sh
+# RUN sh /tmp/cpp_installs.sh ${DEP_DIR}

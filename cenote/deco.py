@@ -1,6 +1,7 @@
 from cenote import config
-from cenote.water import Water, water_pressure_from_depth, depth_from_pressure
+from cenote.water import water_pressure_from_depth, depth_from_pressure
 from cenote.mix import Mix
+import bungee
 
 import dipplanner.model.buhlmann.model
 import dipplanner.model.buhlmann.gradient
@@ -20,7 +21,7 @@ class DecoModelBase:
 
 
 class DipplannerModel(DecoModelBase):
-    def __init__(self, params: BuhlmannParams, water: Water):
+    def __init__(self, params: BuhlmannParams, water: bungee.Water):
         self.water = water
 
         # change some global settings in dipplanner

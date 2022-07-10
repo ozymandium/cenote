@@ -1,25 +1,25 @@
 #pragma once
 
+#include "Water.h"
+
 namespace bungee {
 
 class Mix {
 public:
 
-    struct PartialPressure {
-        double pO2;
-        double pN2;
-        double depth;
-        Water
-    };
+    // struct PartialPressure {
+    //     double O2;
+    //     double N2;
+    // };
 
     explicit Mix(double pO2);
 
-    Mix atDepth()
+    // PartialPressure atDepth(double depth, Water water);
 
     /// Fraction of oxygen, 0.0 - 1.0 [unitless]
-    const double _pO2;
+    const double fO2;
     /// Fraction of nitrogen, 0.0 - 1.0 [unitless]
-    const double _pN2;
+    const double fN2;
 };
 
 }

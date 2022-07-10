@@ -1,5 +1,6 @@
-from cenote.water import Water, depth_from_pressure, pressure_from_depth
+from cenote.water import depth_from_pressure, pressure_from_depth
 from cenote import config
+import bungee
 
 
 UREG = config.UREG
@@ -29,11 +30,11 @@ class Mix:
         self.po2 = po2
         self.pn2 = 1.0 - po2
 
-    def po2_at_depth(self, depth, water: Water):
+    def po2_at_depth(self, depth, water: bungee.Water):
         pressure = pressure_from_depth(depth, water)
         return self.po2 * pressure.to(UREG.atm)
 
-    def mod(self, max_po2: float, water: Water):
+    def mod(self, max_po2: float, water: bungee.Water):
         multiplier = max_po2 / self.po2
         max_pressure = (multiplier * UREG.atm).to(config.PRESSURE_UNIT)
         return depth_from_pressure(max_pressure, water)
