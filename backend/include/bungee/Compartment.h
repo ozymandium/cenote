@@ -37,10 +37,10 @@ public:
     /// \param[in] params Parameters to use.
     Compartment(const Params& params);
 
-    /// \brief Initialize or reset
+    /// \brief Initialize or reset the compartment pressure.
     ///
-    /// \param[in] P Partial pressure of the gas in the compartment[bar].
-    void init(units::pressure::bar_t P);
+    /// \param[in] pressure Partial pressure of the gas in the compartment[bar].
+    void set(units::pressure::bar_t pressure);
 
     /// \brief Update the pressure in the compartment by exposing it to a certain inert gas partial
     /// pressure for a period of time.
@@ -53,6 +53,8 @@ public:
     void update(units::pressure::bar_t ambientPressure, units::time::minute_t time);
 
     /// \brief The lowest tolerable pressure.
+    ///
+    /// TODO: optimize by computing this once in `update()`?
     ///
     /// \return Minimum ambient gas pressure to which this compartment should be exposed based on
     /// the current internal gas pressure [bar].

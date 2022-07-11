@@ -14,7 +14,7 @@ Compartment::Params Compartment::Params::Create(const units::time::minute_t t) {
 
 Compartment::Compartment(const Params& params) : _params(params) {}
 
-void Compartment::init(const units::pressure::bar_t P) { _pressure = P; }
+void Compartment::set(const units::pressure::bar_t pressure) { _pressure = pressure; }
 
 void Compartment::update(const units::pressure::bar_t ambientPressure,
                          const units::time::minute_t time) {

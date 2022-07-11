@@ -31,4 +31,7 @@ public:
     const double fN2;
 };
 
+/// Atmospheric Air
+extern const Mix AIR;
+
 } // namespace bungee

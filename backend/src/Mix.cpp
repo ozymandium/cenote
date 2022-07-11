@@ -11,12 +11,13 @@ Mix::Mix(const double fO2) : fO2(fO2), fN2(1.0 - fO2) {
 }
 
 Mix::PartialPressure Mix::partialPressure(units::length::meter_t depth, Water water) const {
-    // pressure in bar
     const units::pressure::bar_t pressure = PressureFromDepth(depth, water);
     return PartialPressure{
         .O2 = fO2 * pressure,
         .N2 = fN2 * pressure,
     };
 }
+
+const Mix AIR(0.2095);
 
 } // namespace bungee
