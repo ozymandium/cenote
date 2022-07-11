@@ -24,14 +24,11 @@ units::density::kilograms_per_cubic_meter_t GetWaterDensity(Water water);
 ///
 /// \param[in] water Type of water.
 ///
-/// \return Relative pressure resulting from
-/// water, excluding ambient surface pressure
-/// [bar].
+/// \return Relative pressure resulting from water, excluding ambient surface pressure [bar].
 units::pressure::bar_t WaterPressureFromDepth(units::length::meter_t depth, Water water);
 
-/// \param[in] pressure Relative pressure
-/// resulting from water, excluding ambient
-/// surface pressure [bar].
+/// \param[in] pressure Relative pressure resulting from water, excluding ambient surface pressure
+/// [bar].
 ///
 /// \param[in] water Type of water.
 ///
@@ -42,12 +39,10 @@ units::length::meter_t DepthFromWaterPressure(units::pressure::bar_t pressure, W
 ///
 /// \param[in] water Type of water.
 ///
-/// \return Absolute pressure including ambient
-/// surface pressure [bar].
+/// \return Absolute pressure including ambient surface pressure [bar].
 units::pressure::bar_t PressureFromDepth(units::length::meter_t depth, Water water);
 
-/// \param[in] pressure Absolute pressure
-/// including ambient surface pressure [bar].
+/// \param[in] pressure Absolute pressure including ambient surface pressure [bar].
 ///
 /// \param[in] water Type of water.
 ///

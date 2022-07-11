@@ -6,8 +6,7 @@ namespace bungee {
 
 class Mix {
 public:
-    /// Partial pressures of each gas in the mix
-    /// for a given ambient pressure
+    /// Partial pressures of each gas in the mix for a given ambient pressure
     struct PartialPressure {
         /// Partial pressure of oxygen [bar]
         units::pressure::bar_t O2;
@@ -17,11 +16,9 @@ public:
 
     explicit Mix(double fO2);
 
-    /// \brief Partial pressures of each gas in
-    /// the mix for a given depth
+    /// \brief Partial pressures of each gas in the mix for a given depth
     ///
-    /// \param[in] depth Depth under the surface
-    /// [m].
+    /// \param[in] depth Depth under the surface [m].
     ///
     /// \param[in] water Type of water.
     ///

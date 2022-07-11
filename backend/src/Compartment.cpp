@@ -5,37 +5,37 @@
 
 namespace {
 
-// skip optimizing since this only gets called in
-// startup
+// skip optimizing since this only gets called in startup
 double CalcCoefficientA(double t) { return 2. / std::cbrt(t); }
 
-// skip optimizing since this only gets called in
-// startup
+// skip optimizing since this only gets called in startup
 double CalcCoefficientB(double t) { return 1.005 - 1.0 / std::sqrt(t); }
 
 } // namespace
 
 namespace bungee {
 
-Compartment::Params Compartment::Params::Create(const double t) {
-    return Params{.t = t, .a = CalcCoefficientA(t), .b = CalcCoefficientB(t)};
+Compartment::Params Compartment::Params::Create(const units::time::minute_t t) {
+    return Params{
+        .t = t.value(), .a = CalcCoefficientA(t.value()), .b = CalcCoefficientB(t.value())};
 }
 
 Compartment::Compartment(const Params& params) : _params(params) {}
 
-Compartment::Compartment(const double t) : _params(Params::Create(t)) {}
+Compartment::Compartment(const units::time::minute_t t) : _params(Params::Create(t)) {}
 
-void Compartment::init(const double P) { _P = P; }
+void Compartment::init(const units::pressure::bar_t P) { _pressure = P.value(); }
 
-void Compartment::update(const double Pgas, const double dt) {
-    assert(_P.has_value());
-    const double dP = Pgas - _P.value();
-    _P.value() += dP * (1 - std::pow(2, -dt / _params.t));
+void Compartment::update(const units::pressure::bar_t ambientPressure,
+                         const units::time::minute_t time) {
+    assert(_pressure.has_value());
+    const double dP = ambientPressure.value() - _pressure.value();
+    _pressure.value() += dP * (1 - std::pow(2, -time.value() / _params.t));
 }
 
-double Compartment::ceiling() const {
-    assert(_P.has_value());
-    return (_P.value() - _params.a) * _params.b;
+units::pressure::bar_t Compartment::ceiling() const {
+    assert(_pressure.has_value());
+    return units::pressure::bar_t((_pressure.value() - _params.a) * _params.b);
 }
 
 } // namespace bungee
