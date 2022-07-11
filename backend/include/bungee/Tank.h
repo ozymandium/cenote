@@ -47,7 +47,9 @@ public:
     virtual units::dimensionless::dimensionless_t zFactor() const override { return Z_FACTOR; }
 
     static std::shared_ptr<Tank> CreateFull() {
-        return std::make_shared<Tank>(SERVICE_PRESSURE);
+        using ThisCls = TankImpl<VOLUME, SERVICE_PRESSURE, Z_FACTOR>;
+        auto ptr = std::make_shared<ThisCls>(SERVICE_PRESSURE);
+        return std::dynamic_pointer_cast<Tank, ThisCls>(ptr);
     }
 
 };
