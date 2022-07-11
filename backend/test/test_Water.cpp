@@ -23,12 +23,12 @@ TEST(Water, Pressure)
                 {100_m, 10.038_bar},
             },
         }};
-        for (auto const& [water, vals] : VALUES) {
-                for (auto const& [depth, expectedWaterPressure] : vals) {
-                    const auto waterPressure = WaterPressureFromDepth(depth, water);
-                    const auto pressure = PressureFromDepth(depth, water);
-                    EXPECT_UNIT_NEAR(waterPressure, expectedWaterPressure, TOL);
-                    EXPECT_UNIT_NEAR(pressure, waterPressure + SURFACE_PRESSURE, TOL);
-                }
+    for (auto const& [water, vals] : VALUES) {
+        for (auto const& [depth, expectedWaterPressure] : vals) {
+            const auto waterPressure = WaterPressureFromDepth(depth, water);
+            const auto pressure = PressureFromDepth(depth, water);
+            EXPECT_UNIT_NEAR(waterPressure, expectedWaterPressure, TOL);
+            EXPECT_UNIT_NEAR(pressure, waterPressure + SURFACE_PRESSURE, TOL);
         }
+    }
 }

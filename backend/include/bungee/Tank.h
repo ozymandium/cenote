@@ -39,7 +39,16 @@ private:
     void setVolume(units::volume::liter_t volume);
 
     const Params _params;
+
+    /// The pressure of gas in the tank relative to surface pressure (1 atm).
+    ///
+    /// FIXME: this does not account for ambient pressure at depth, but rather always considers
+    /// the tank to be at the surface.
     units::pressure::bar_t _pressure;
+
+    /// Volume of gas in the tank which corresponds to relative pressures above 1 atm at the
+    /// surface. This does not include the gas at 1 atm which remains in the tank when the pressure
+    /// relative to surface conditions is zero.
     units::volume::liter_t _volume;
 };
 
@@ -53,10 +62,10 @@ enum class TankE {
     // aluminum 80 cuft / 11.1 L
     AL80,
     // Faber low pressure 108 cuft / 17 L
-    LP108
-        // // Double / sidemounted LP108
-        // DLP108,
-        COUNT
+    LP108,
+    // // Double / sidemounted LP108
+    // DLP108,
+    COUNT
 };
 
 // Tank GetTank(TankE type);
