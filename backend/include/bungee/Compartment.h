@@ -24,23 +24,18 @@ public:
         /// \return All necessary parameters for the tissue compartment.
         static Params Create(units::time::minute_t t);
 
-        /// Half time [min]
-        double t;
+        /// Half life
+        units::time::minute_t halfLife;
         /// Coefficient `a`
-        double a;
+        units::pressure::bar_t a;
         /// Coefficient `b`
-        double b;
+        units::dimensionless::dimensionless_t b;
     };
 
     /// \brief Construct compartment with params already set.
     ///
     /// \param[in] params Parameters to use.
     Compartment(const Params& params);
-
-    /// \brief Create compartment for a given half time
-    ///
-    /// \param[in] t Half time of the gas for the given tissue compartment [min].
-    Compartment(units::time::minute_t t);
 
     /// \brief Initialize or reset
     ///
@@ -49,8 +44,6 @@ public:
 
     /// \brief Update the pressure in the compartment by exposing it to a certain inert gas partial
     /// pressure for a period of time.
-    ///
-    /// TODO: account for water vapor pressure here?
     ///
     /// \param[in] ambientPressure The absolute partial pressure of the inert gas within the lungs,
     /// or the "inspired" pressure [bar].
@@ -72,7 +65,7 @@ private:
     /// The absolute pressure of the inert gas [bar]. Set to nullopt on construction, and
     /// initialized by `init()`. Calling any other function before initializing this will result in
     /// an error.
-    std::optional<double> _pressure;
+    std::optional<units::pressure::bar_t> _pressure;
 };
 
 } // namespace bungee
