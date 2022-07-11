@@ -1,6 +1,22 @@
 #include <bungee/Tank.h>
 
+#include <map>
+
 using namespace units::literals;
+
+namespace bungee {
+
+Tank::Tank(const Params& params) : _params(params) {}
+
+Tank::Tank(const Params& params, units::pressure::bar_t pressure) : _params(params)
+{
+    setPressure(pressure);
+}
+
+Tank::Tank(const Params& params, units::volume::liter_t volume) : _params(params)
+{
+    setVolume(volume);
+}
 
 units::volume::liter_t Tank::VolumeAtPressure(const Params& params,
                                               const units::pressure::bar_t pressure)
@@ -8,44 +24,51 @@ units::volume::liter_t Tank::VolumeAtPressure(const Params& params,
     return params.size * pressure / (params.z * 1_atm);
 }
 
-units::volume::bar_t Tank::PressureAtVolume(const Params& params,
+units::pressure::bar_t Tank::PressureAtVolume(const Params& params,
                                             const units::volume::liter_t volume)
 {
     return volume * params.z * 1_atm / params.size;
 }
 
-namespace bungee {
-
-Tank::Tank(units::pressure::bar_t pressure) : _params(params) { setPressure(pressure); }
-
-Tank::Tank(units::volume::liter_t volume) : _params(params) { setVolume(volume); }
-
-units::volume::liter_t Tank::serviceVolume() const
-{
-    return VolumeAtPressure(size(), servicePressure(), zFactor());
-}
-
-void Tank::decreasePressure(units::pressure::bar_t diff) { setPressure(_pressure - diff); }
-
-void Tank::decreaseVolume(units::volume::liter_t diff) { setVolume(_volume - diff); }
-
-void setPressure(units::pressure::bar_t pressure)
+void Tank::setPressure(units::pressure::bar_t pressure)
 {
     _pressure = pressure;
     _volume = VolumeAtPressure(_params, pressure);
 }
 
-void setVolume(units::volume::liter_t volume)
+void Tank::setVolume(units::volume::liter_t volume)
 {
     _volume = volume;
     _pressure = PressureAtVolume(_params, volume);
 }
 
-// Tank GetTank(TankE type) {
-//     switch(type) {
-//         case TankE::AL80:
-//             return
-//     }
+// units::volume::liter_t Tank::serviceVolume() const
+// {
+//     return VolumeAtPressure(_params, _params.servicePressure);
 // }
+
+// void Tank::decreasePressure(units::pressure::bar_t diff) { setPressure(_pressure - diff); }
+
+// void Tank::decreaseVolume(units::volume::liter_t diff) { setVolume(_volume - diff); }
+
+static const std::map<Tank::Type, Tank::Params> TANK_PARAMS{
+    {Tank::AL40, {.size = 5.8_L, .servicePressure = 3000_psi, .z = 1.045}},
+    {Tank::AL80, {.size = 11.1_L, .servicePressure = 3000_psi, .z = 1.0337}},
+    {Tank::LP108, {.size = 17_L, .servicePressure = 2640_psi}},
+};
+
+// Tank generators for each type
+
+Tank GetTank(const Tank::Type type) { return Tank(TANK_PARAMS.at(type)); }
+
+Tank GetTank(const Tank::Type type, const units::pressure::bar_t pressure)
+{
+    return Tank(TANK_PARAMS.at(type), pressure);
+}
+
+Tank GetTank(const Tank::Type type, const units::volume::liter_t volume)
+{
+    return Tank(TANK_PARAMS.at(type), volume);
+}
 
 } // namespace bungee

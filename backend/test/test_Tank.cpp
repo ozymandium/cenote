@@ -4,10 +4,13 @@
 using namespace bungee;
 using namespace units::literals;
 
-TEST(Tank, Capacity) {}
-
-TEST(Tank, CreateFull)
+TEST(Tank, GetTankPressure)
 {
-    const auto al80 = Aluminum80::CreateFull();
-    EXPECT_EQ(al80->pressure(), al80->servicePressure());
+    const auto al80 = GetTank(Tank::AL80, 3000_psi);
+    EXPECT_EQ(al80->pressure(), 3000_psi);
+}
+
+TEST(Tank, VolumePressureStaticMethodRoundTrip)
+{
+    const Tank::Params params{.size = 10_L, .servicePressure};
 }

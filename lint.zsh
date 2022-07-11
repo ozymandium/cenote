@@ -11,4 +11,4 @@ black \
     -t py39
 
 # c++ stuff
-find . -regex '.*\.\(cpp\|h\|inl\)' -exec clang-format -i {} \;
+find . -regex '.*\.\(cpp\|h\|inl\)' -exec clang-format -i {} -style=file:./.clang-format \;
