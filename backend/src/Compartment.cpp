@@ -5,10 +5,12 @@
 
 namespace {
 
-// skip optimizing since this only gets called in startup
+// skip optimizing since this only gets called in
+// startup
 double CalcCoefficientA(double t) { return 2. / std::cbrt(t); }
 
-// skip optimizing since this only gets called in startup
+// skip optimizing since this only gets called in
+// startup
 double CalcCoefficientB(double t) { return 1.005 - 1.0 / std::sqrt(t); }
 
 } // namespace

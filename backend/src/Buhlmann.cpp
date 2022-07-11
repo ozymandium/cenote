@@ -7,7 +7,8 @@ namespace bungee {
 Buhlmann::Buhlmann(const Model model) : _compartments(model) {}
 
 // void Buhlmann::init() {
-//     // _compartments.equilibrium(Air, SURFACE_PRESSURE_BAR);
+//     // _compartments.equilibrium(Air,
+//     SURFACE_PRESSURE_BAR);
 // }
 
 } // namespace bungee

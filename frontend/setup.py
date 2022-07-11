@@ -23,9 +23,6 @@ setup(
             [
                 "bungee.cpp",
             ],
-            # include_dirs = [
-            #     "/usr/",
-            # ],
             cxx_std=17,
         )
     ],

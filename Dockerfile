@@ -30,7 +30,8 @@ RUN apt update -qq > /dev/null \
     ranger \
     curl \
     vim \
-    wget
+    wget \
+    libgtest-dev
 
 # prepares non root env
 RUN useradd --create-home --shell /bin/zsh ${USER}

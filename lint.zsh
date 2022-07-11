@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/zsh
 
 set -e 
 set -o pipefail
@@ -11,4 +11,4 @@ black \
     -t py39
 
 # c++ stuff
-find ./backend/bungee/ -iname *.h -o -iname *.cpp | xargs clang-format -i
+find . -regex '.*\.\(cpp\|h\)' -exec clang-format -i {} \;
