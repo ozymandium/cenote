@@ -21,17 +21,11 @@ setup(
         Pybind11Extension(
             "bungee",
             [
-                "bungee/src/Buhlmann.cpp",
-                "bungee/src/Compartment.cpp",
-                "bungee/src/CompartmentManager.cpp",
-                "bungee/src/Mix.cpp",
-                "bungee/src/Models.cpp",
-                "bungee/src/Water.cpp",
-                "bungee/pybind.cpp",
+                "bungee.cpp",
             ],
-            include_dirs = [
-                "bungee/include",
-            ],
+            # include_dirs = [
+            #     "/usr/",
+            # ],
             cxx_std=17,
         )
     ],
