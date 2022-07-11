@@ -6,7 +6,7 @@ namespace bungee {
 
 class Buhlmann {
 public:
-    Buhlmann(Water water, Model model);
+    Buhlmann(Model model);
 
     /// \brief Initialize compartment to equilibrium with the surface
     void init();
@@ -14,10 +14,9 @@ public:
     /// TODO: temperature consideration
     void update(const Mix::PartialPressure& partialPressure, units::time::minute_t time);
 
-    units::length::meter_t ceiling() const;
+    units::pressure::bar_t ceiling() const;
 
 private:
-    const Water _water;
     CompartmentManager _compartments;
 };
 

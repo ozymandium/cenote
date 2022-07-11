@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(bungee VERSION 0.0.1 LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # set source files
@@ -34,3 +34,9 @@ find_package(GTest REQUIRED)
 add_executable(test_water test/test_Water.cpp)
 target_link_libraries(test_water GTest::GTest GTest::Main bungee)
 add_test(test-water test_water)
+
+# Tank.cpp
+find_package(GTest REQUIRED)
+add_executable(test_tank test/test_Tank.cpp)
+target_link_libraries(test_tank GTest::GTest GTest::Main bungee)
+add_test(test-tank test_tank)

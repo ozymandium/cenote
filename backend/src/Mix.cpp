@@ -18,6 +18,8 @@ Mix::PartialPressure Mix::partialPressure(units::length::meter_t depth, Water wa
     };
 }
 
-const Mix AIR(0.2095);
+const Mix AIR(0.20946);
+const Mix::PartialPressure SURFACE_AIR_PP(AIR.partialPressure(units::length::meter_t(0.),
+                                                              Water::FRESH));
 
 } // namespace bungee

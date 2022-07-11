@@ -27,14 +27,14 @@ void CompartmentManager::update(const Mix::PartialPressure& partialPressure,
 }
 
 units::pressure::bar_t CompartmentManager::ceiling() const {
-    auto minCeiling = _compartments[0].ceiling();
+    auto maxCeiling = _compartments[0].ceiling();
     for (auto& compartment : _compartments) {
         const auto thisCeiling = compartment.ceiling();
-        if (thisCeiling < minCeiling) {
-            minCeiling = thisCeiling;
+        if (thisCeiling > maxCeiling) {
+            maxCeiling = thisCeiling;
         }
     }
-    return minCeiling;
+    return maxCeiling;
 }
 
 } // namespace bungee

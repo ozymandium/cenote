@@ -33,5 +33,7 @@ public:
 
 /// Atmospheric Air
 extern const Mix AIR;
+/// Partial pressures of air at the surface
+extern const Mix::PartialPressure SURFACE_AIR_PP;
 
 } // namespace bungee
