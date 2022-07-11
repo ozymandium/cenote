@@ -4,6 +4,7 @@ ENV USER="user"
 ENV HOME_DIR="/home/${USER}"
 ENV SRC_DIR="${HOME_DIR}/src"
 ENV DEP_DIR="${HOME_DIR}/dep"
+ENV BUILD_DIR="${HOME_DIR}/build"
 ENV PATH="${HOME_DIR}/.local/bin:${PATH}"
 
 # configures locale
@@ -57,7 +58,7 @@ RUN mkdir ${DEP_DIR}/units-2.3.1/build
 RUN cd ${DEP_DIR}/units-2.3.1/build && cmake .. && sudo make -j4 install
 
 # allow git from inside container
-git config --global --add safe.directory ${SRC_DIR}
+RUN git config --global --add safe.directory ${SRC_DIR}
 
-# # build the library
-# RUN python3 setup.py build
+# build the library
+RUN mkdir ${BUILD_DIR}

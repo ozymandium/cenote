@@ -1,5 +1,8 @@
 #!/bin/sh
 
+set -e 
+set -o pipefail
+
 # python stuff
 black \
     ./frontend/cenote \
