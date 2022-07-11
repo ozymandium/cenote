@@ -3,12 +3,12 @@ import bungee
 
 UREG = config.UREG
 
-GRAVITY = bungee.GRAVITY_MS2 * UREG.meter / UREG.sec**2
+GRAVITY = bungee.GRAVITY_MS2 * UREG.meter / UREG.sec ** 2
 AMBIENT_PRESSURE_SURFACE = bungee.SURFACE_PRESSURE_BAR * UREG.bar
 
 
 def get_water_density(water: bungee.Water):
-    return bungee.get_water_density(water) * UREG.kg / UREG.meter**3
+    return bungee.get_water_density(water) * UREG.kg / UREG.meter ** 3
 
 
 def water_pressure_from_depth(depth, water: bungee.Water):
