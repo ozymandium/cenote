@@ -2,30 +2,29 @@
 
 #include <units.h>
 
+#include <memory>
+
 namespace bungee {
 
-constexpr units::volume::liter_t VolumeAtPressure(const units::volume::liter_t volume,
-                                        const units::pressure::bar_t pressure, 
-                                        const units::dimensionless::dimensionless_t z) {
-    return volume * pressure / units::pressure::atmosphere_t(1.0) / z;
-}
-
-template <units::volume::liter_t _VOLUME, 
-          units::pressure::bar_t _SERVICE_PRESSURE,
-          units::dimensionless::dimensionless_t _Z_FACTOR>
 class Tank {
 public:
-    static constexpr units::volume::liter_t EMPTY_VOLUME = _VOLUME;
-    static constexpr units::pressure::bar_t ServicePressure = _SERVICE_PRESSURE;
-    static constexpr units::dimensionless::dimensionless_t ZFactor = _Z_FACTOR;
 
     Tank(units::pressure::bar_t pressure);
 
-    static Tank CreateFull();
+    // overridden
+    virtual units::volume::liter_t emptyVolume() const = 0;
+    // overridden
+    virtual units::pressure::bar_t servicePressure() const = 0;
+    // overridden
+    virtual units::dimensionless::dimensionless_t zFactor() const = 0;
 
-    static constexpr units::volume::liter_t SERVICE_VOLUME = ;
+    // function of overridden functions
+    units::volume::liter_t serviceVolume() const;
 
+    // getters
     units::pressure::bar_t pressure() const { return _pressure; }
+
+    /// TODO: make this part of internal state instead of calculating every time?
     units::volume::liter_t volume() const;
 
     void decreasePressure(units::pressure::bar_t diff);
@@ -35,18 +34,30 @@ private:
     void pressureChange(units::pressure::bar_t diff);
     void volumeChange(units::volume::liter_t diff);
 
-    // const Params _params;
-
     units::pressure::bar_t _pressure;
 };
 
+template <units::volume::liter_t VOLUME, 
+          units::pressure::bar_t SERVICE_PRESSURE,
+          units::dimensionless::dimensionless_t Z_FACTOR>
+class TankImpl : public Tank {
+public:
+    virtual units::volume::liter_t emptyVolume() const override { return VOLUME; }
+    virtual units::pressure::bar_t servicePressure() const override { return SERVICE_PRESSURE; }
+    virtual units::dimensionless::dimensionless_t zFactor() const override { return Z_FACTOR; }
 
-using Aluminum80 = Tank<units::volume::liter_t(11.1), 
+    static std::shared_ptr<Tank> CreateFull() {
+        return std::make_shared<Tank>(SERVICE_PRESSURE);
+    }
+
+};
+
+using Aluminum80 = TankImpl<units::volume::liter_t(11.1), 
                             units::pressure::bar_t(206.8),
                             units::dimensionless::dimensionless_t(1.0337)>;
 
-// enum class Tank { AL80, COUNT };
+// enum class TankE { AL80, COUNT };
+
+// Tank GetTank(TankE type);
 
 } // namespace bungee
-
-#include "Tank.inl"

@@ -7,5 +7,6 @@ using namespace units::literals;
 TEST(Tank, Capacity) {}
 
 TEST(Tank, CreateFull) {
-    EXPECT_EQ(Aluminum80::CreateFull().pressure().value(), Aluminum80::ServicePressure.value());
+    const auto al80 = Aluminum80::CreateFull();
+    EXPECT_EQ(al80->pressure().value(), al80->servicePressure().value());
 }
