@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 ENV USER="user"
 ENV HOME_DIR="/home/${USER}"
@@ -53,9 +53,10 @@ RUN pip3 install --user --upgrade -r /tmp/requirements.txt
 
 ## dependencies of c++ stuff
 RUN mkdir ${DEP_DIR}
-# COPY --chown=${USER}:${USER} conanprofile ${HOME_DIR}/.conan/profiles/default
-# RUN conan remote add conan-mpusz https://mpusz.jfrog.io/artifactory/api/conan/conan-oss
-# RUN chown -R ${USER}${HOME_DIR}/.conan
+COPY --chown=${USER}:${USER} conanprofile ${HOME_DIR}/.conan/profiles/default
+RUN conan remote add conan-mpusz https://mpusz.jfrog.io/artifactory/api/conan/conan-oss
+RUN chown -R ${USER}${HOME_DIR}/.conan
+RUN conan install ${SRC_DIR}
 
 # install units library
 RUN wget https://github.com/nholthaus/units/archive/refs/tags/v2.3.1.tar.gz -O /tmp/units.tar.gz
