@@ -11,5 +11,4 @@ pybind11
 black
 clang-format
 
-# units
 conan

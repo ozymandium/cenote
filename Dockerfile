@@ -31,7 +31,9 @@ RUN apt update -qq > /dev/null \
     curl \
     vim \
     wget \
-    libgtest-dev
+    libgtest-dev \
+    g++-10 \
+    libfmt-dev
 
 # prepares non root env
 RUN useradd --create-home --shell /bin/zsh ${USER}
@@ -51,6 +53,9 @@ RUN pip3 install --user --upgrade -r /tmp/requirements.txt
 
 ## dependencies of c++ stuff
 RUN mkdir ${DEP_DIR}
+# COPY --chown=${USER}:${USER} conanprofile ${HOME_DIR}/.conan/profiles/default
+# RUN conan remote add conan-mpusz https://mpusz.jfrog.io/artifactory/api/conan/conan-oss
+# RUN chown -R ${USER}${HOME_DIR}/.conan
 
 # install units library
 RUN wget https://github.com/nholthaus/units/archive/refs/tags/v2.3.1.tar.gz -O /tmp/units.tar.gz
@@ -63,3 +68,4 @@ RUN git config --global --add safe.directory ${SRC_DIR}
 
 # build the library
 RUN mkdir ${BUILD_DIR}
+

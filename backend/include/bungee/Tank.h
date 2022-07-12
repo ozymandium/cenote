@@ -26,13 +26,10 @@ public:
         /// volume of the physical interior of the tank, the storage capacity of gas at 1 atm
         units::volume::liter_t size;
         units::pressure::bar_t servicePressure;
-        units::dimensionless::dimensionless_t z = 1.0;
+        units::dimensionless::dimensionless_t z;
     };
 
     Tank() = delete;
-
-    /// \brief Create empty tank.
-    Tank(const Params& params);
 
     /// \brief Create tank with specific pressure.
     Tank(const Params& params, units::pressure::bar_t pressure);
@@ -48,6 +45,7 @@ public:
     static units::pressure::bar_t PressureAtVolume(const Params& params,
                                                    units::volume::liter_t volume);
 
+    
     // units::volume::liter_t serviceVolume() const;
 
     // getters
@@ -76,8 +74,9 @@ private:
     units::volume::liter_t _volume;
 };
 
-Tank GetTank(Tank::Type type);
-Tank GetTank(Tank::Type type, units::pressure::bar_t pressure);
-Tank GetTank(Tank::Type type, units::volume::liter_t volume);
+Tank GetEmptyTank(Tank::Type type);
+Tank GetFullTank(Tank::Type type);
+Tank GetTankAtPressure(Tank::Type type, units::pressure::bar_t pressure);
+Tank GetTankAtVolume(Tank::Type type, units::volume::liter_t volume);
 
 } // namespace bungee

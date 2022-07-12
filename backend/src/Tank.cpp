@@ -6,8 +6,6 @@ using namespace units::literals;
 
 namespace bungee {
 
-Tank::Tank(const Params& params) : _params(params) {}
-
 Tank::Tank(const Params& params, units::pressure::bar_t pressure) : _params(params)
 {
     setPressure(pressure);
@@ -54,19 +52,24 @@ void Tank::setVolume(units::volume::liter_t volume)
 static const std::map<Tank::Type, Tank::Params> TANK_PARAMS{
     {Tank::AL40, {.size = 5.8_L, .servicePressure = 3000_psi, .z = 1.045}},
     {Tank::AL80, {.size = 11.1_L, .servicePressure = 3000_psi, .z = 1.0337}},
-    {Tank::LP108, {.size = 17_L, .servicePressure = 2640_psi}},
+    {Tank::LP108, {.size = 17_L, .servicePressure = 2640_psi, .z = 1.0}},
 };
 
 // Tank generators for each type
 
-Tank GetTank(const Tank::Type type) { return Tank(TANK_PARAMS.at(type)); }
+Tank GetEmptyTank(const Tank::Type type) { return Tank(TANK_PARAMS.at(type), 0_bar); }
 
-Tank GetTank(const Tank::Type type, const units::pressure::bar_t pressure)
+Tank GetFullTank(const Tank::Type type) {
+    const auto& params = TANK_PARAMS.at(type);
+    return Tank(params, params.servicePressure);
+}
+
+Tank GetTankAtPressure(const Tank::Type type, const units::pressure::bar_t pressure)
 {
     return Tank(TANK_PARAMS.at(type), pressure);
 }
 
-Tank GetTank(const Tank::Type type, const units::volume::liter_t volume)
+Tank GetTankAtVolume(const Tank::Type type, const units::volume::liter_t volume)
 {
     return Tank(TANK_PARAMS.at(type), volume);
 }

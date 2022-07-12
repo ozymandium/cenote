@@ -1,0 +1,6 @@
+[requires]
+units/2.3.1 
+
+[generators]
+CMakeToolchain
+CMakeDeps

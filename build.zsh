@@ -12,7 +12,7 @@ echo "BUILD_DIR: $BUILD_DIR"
 # c++
 cd $BUILD_DIR
 cmake $SRC_DIR/backend
-make -j4
+make -j8
 sudo make install
 
 # # python
