@@ -23,7 +23,7 @@ units::volume::liter_t Tank::VolumeAtPressure(const Params& params,
 }
 
 units::pressure::bar_t Tank::PressureAtVolume(const Params& params,
-                                            const units::volume::liter_t volume)
+                                              const units::volume::liter_t volume)
 {
     return volume * params.z * 1_atm / params.size;
 }
@@ -40,10 +40,10 @@ void Tank::setVolume(units::volume::liter_t volume)
     _pressure = PressureAtVolume(_params, volume);
 }
 
-// units::volume::liter_t Tank::serviceVolume() const
-// {
-//     return VolumeAtPressure(_params, _params.servicePressure);
-// }
+units::volume::liter_t Tank::serviceVolume() const
+{
+    return VolumeAtPressure(_params, _params.servicePressure);
+}
 
 // void Tank::decreasePressure(units::pressure::bar_t diff) { setPressure(_pressure - diff); }
 
@@ -59,7 +59,8 @@ static const std::map<Tank::Type, Tank::Params> TANK_PARAMS{
 
 Tank GetEmptyTank(const Tank::Type type) { return Tank(TANK_PARAMS.at(type), 0_bar); }
 
-Tank GetFullTank(const Tank::Type type) {
+Tank GetFullTank(const Tank::Type type)
+{
     const auto& params = TANK_PARAMS.at(type);
     return Tank(params, params.servicePressure);
 }

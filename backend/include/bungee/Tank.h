@@ -45,8 +45,8 @@ public:
     static units::pressure::bar_t PressureAtVolume(const Params& params,
                                                    units::volume::liter_t volume);
 
-    
-    // units::volume::liter_t serviceVolume() const;
+    units::pressure::bar_t servicePressure() const { return _params.servicePressure; }
+    units::volume::liter_t serviceVolume() const;
 
     // getters
     units::pressure::bar_t pressure() const { return _pressure; }
