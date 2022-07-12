@@ -11,9 +11,9 @@ echo "BUILD_DIR: $BUILD_DIR"
 
 # c++
 cd $BUILD_DIR
-cmake $SRC_DIR/backend
-make -j8
-sudo make install
+conan install $SRC_DIR/cpp -pr:b=default
+cmake $SRC_DIR/cpp -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
+cmake --build .
 
 # # python
 # cd $SRC_DIR/frontend

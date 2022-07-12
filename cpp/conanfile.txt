@@ -1,5 +1,7 @@
 [requires]
+mp-units/0.7.0
 units/2.3.1 
+gtest/1.10.0
 
 [generators]
 CMakeToolchain
