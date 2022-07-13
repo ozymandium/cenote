@@ -1,9 +1,11 @@
 #include <bungee/Scr.h>
+#include <gtest/gtest.h>
 
 using namespace bungee;
 using namespace units::literals;
 
-TEST(CustomUnits, volume_rate_unit) {
+TEST(CustomUnits, volume_rate_unit)
+{
     const auto x = 1_cu_m_per_s;
     const units::volume_rate::cubic_meters_per_second y = x * 3;
     EXPECT_EQ(y.value() / x.value(), 3);
