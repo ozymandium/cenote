@@ -54,9 +54,7 @@ RUN pip3 install --user --upgrade -r /tmp/requirements.txt
 COPY --chown=${USER}:${USER} conanprofile ${HOME_DIR}/.conan/profiles/default
 # auto installation of fmt is broken, have to manually install it
 # https://github.com/conan-io/conan-center-index/issues/7752
-RUN conan install fmt/8.1.1@ -r conancenter --build fmt
 RUN conan install gtest/1.10.0@ -r conancenter --build gtest
-RUN conan remote add conan-mpusz https://mpusz.jfrog.io/artifactory/api/conan/conan-oss
 # # this conan build stuff moved to build script
 # COPY conanfile.txt /tmp/conanfile.txt
 # RUN conan install /tmp/conanfile.txt
