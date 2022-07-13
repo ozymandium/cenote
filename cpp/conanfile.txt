@@ -1,5 +1,5 @@
 [requires]
-mp-units/0.7.0
+mp-units/0.8.0@mpusz/testing
 units/2.3.1 
 gtest/1.10.0
 

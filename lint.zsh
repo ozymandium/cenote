@@ -5,10 +5,10 @@ set -o pipefail
 
 # python stuff
 black \
-    ./frontend/cenote \
-    ./frontend/test \
+    ./py/cenote \
+    ./py/test \
     --line-length 100 \
     -t py39
 
 # c++ stuff
-find . -regex '.*\.\(cpp\|h\|inl\)' -exec clang-format -i {} -style=file:./.clang-format \;
+find cpp -regex '.*\.\(cpp\|h\|inl\)' -exec clang-format -i {} -style=file:./.clang-format \;
