@@ -6,9 +6,10 @@ using namespace units::literals;
 
 TEST(CustomUnits, volume_rate_unit)
 {
-    const auto x = 1_cu_m_per_s;
-    const units::volume_rate::cubic_meters_per_second y = x * 3;
+    const auto x = 1_L_per_min;
+    const units::volume_rate::cubic_meter_per_second_t y = x * units::dimensionless::dimensionless_t(3);
     EXPECT_EQ(y.value() / x.value(), 3);
+
 }
 
 // TEST(Scr, ScrAtDepthZero)
