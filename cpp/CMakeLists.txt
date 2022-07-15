@@ -53,3 +53,8 @@ add_test(test-tank test_tank)
 add_executable(test_scr test/test_Scr.cpp)
 target_link_libraries(test_scr GTest::GTest GTest::Main bungee)
 add_test(test-scr test_scr)
+
+# Plan.cpp
+add_executable(test_plan test/test_Plan.cpp)
+target_link_libraries(test_plan GTest::GTest GTest::Main bungee)
+add_test(test-plan test_plan)

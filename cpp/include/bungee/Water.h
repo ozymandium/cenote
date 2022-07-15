@@ -6,7 +6,7 @@
 
 namespace bungee {
 
-enum class Water { FRESH, SALT, COUNT };
+enum class Water { FRESH, SALT };
 
 using WaterDensityLookup = std::map<Water, units::density::kilograms_per_cubic_meter_t>;
 

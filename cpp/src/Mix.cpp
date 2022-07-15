@@ -1,14 +1,13 @@
 #include <bungee/Mix.h>
-
-#include <cassert>
+#include <bungee/ensure.h>
 
 namespace bungee {
 
 Mix::Mix(const double fO2) : fO2(fO2), fN2(1.0 - fO2)
 {
-    assert((0 < fO2) && (fO2 <= 1.0));
-    assert((0 <= fN2) && (fN2 < 1.0));
-    assert(fO2 + fN2 == 1.0);
+    ensure((0 < fO2) && (fO2 <= 1.0), "invalid O2 fraction");
+    ensure((0 <= fN2) && (fN2 < 1.0), "invalid N2 fraction");
+    ensure(fO2 + fN2 == 1.0, "total gas fraction not 100%");
 }
 
 Mix::PartialPressure Mix::partialPressure(units::length::meter_t depth, Water water) const
