@@ -76,8 +76,10 @@ public:
         void validate() const;
     };
 
+    using Profile = std::vector<Point>;
+
     /// Will finalize.
-    Plan(Water water, const Scr& scr, const TankLoadout& tanks, const std::vector<Point>& points);
+    Plan(Water water, const Scr& scr, const TankLoadout& tanks, const Profile& points);
 
     /*
      * API for constructing profile one point at a time.
@@ -97,6 +99,15 @@ public:
     void finalize();
     bool finalized() const { return _finalized; }
 
+    /*
+     * Getters
+     */
+
+    Water water() const { return _water; }
+    const Scr& scr() const { return _scr; }
+    const TankLoadout& tanks() const { return _tanks; }
+    const Profile& profile() const { return _profile; }
+
 private:
     const Water _water;
     const Scr _scr;
@@ -104,7 +115,7 @@ private:
     const TankLoadout _tanks;
     /// AoS vs SoA here?
     /// Lots of uses for both cases
-    std::vector<Point> _points;
+    Profile _profile;
 
     std::optional<std::string> _currentTank;
 

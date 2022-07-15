@@ -20,9 +20,10 @@ void Plan::Point::validate() const
     ensure(depth.value() >= 0, "negative depth");
 }
 
-Plan::Plan(Water water, const Scr& scr, const TankLoadout& tanks, const std::vector<Point>& points)
+Plan::Plan(Water water, const Scr& scr, const TankLoadout& tanks, const Profile& points)
     : Plan(water, scr, tanks)
 {
+    _profile.reserve(points.size());
     for (auto point : points) {
         addPoint(point);
     }
@@ -46,8 +47,8 @@ void Plan::setTank(const std::string& name)
 
 void Plan::addPointFromDuration(units::time::minute_t duration, units::length::meter_t depth)
 {
-    ensure(!_points.empty(), "can't add first point from duration");
-    addPoint(_points.back().time + duration, depth);
+    ensure(!_profile.empty(), "can't add first point from duration");
+    addPoint(_profile.back().time + duration, depth);
 }
 
 void Plan::addPoint(units::time::minute_t time, units::length::meter_t depth)
@@ -60,19 +61,19 @@ void Plan::addPoint(const Point& point)
 {
     ensure(!_finalized, "finalized already");
     // checks
-    if (_points.empty()) {
+    if (_profile.empty()) {
         ensure(point.time == 0_min, "first point must start at zero time");
         ensure(point.depth == 0_m, "first point must be start at the surface");
     }
     else {
         // for now, only allow points that increase in time, add on pure square profile support
         // later.
-        ensure(point.time > _points.back().time, "each point must increase in time");
+        ensure(point.time > _profile.back().time, "each point must increase in time");
         // for now, keep time denominated in integer minutes to keep things simple
         ensure(point.time.value() == units::unit_cast<int64_t>(point.time), "time must be in integer (whole) minutes");
     }
     ensure(_tanks.contains(point.tank), "unknown tank name");
-    _points.push_back(point);
+    _profile.push_back(point);
 }
 
 void Plan::finalize()
@@ -80,7 +81,7 @@ void Plan::finalize()
     // water doesn't need validation
     // scr/tank already validated
     // points were validated as they were added
-    ensure(_points.size() > 1, "need at least 2 poins");
+    ensure(_profile.size() > 1, "need at least 2 poins");
     _finalized = true;
 }
 
