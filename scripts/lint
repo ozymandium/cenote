@@ -1,0 +1,20 @@
+#!/bin/zsh
+
+set -e 
+set -o pipefail
+
+# # python stuff
+# black \
+#     ./py/cenote \
+#     ./py/test \
+#     --line-length 100 \
+#     -t py39
+
+STYLE_FILE=$SRC_DIR/setup/.clang-format
+if [[ ! -f $STYLE_FILE ]]; then
+    echo "Clang format style file does not exist: $STYLE_FILE"
+    exit 1
+fi
+
+# c++ stuff
+find cpp -regex '.*\.\(cpp\|h\|inl\)' -exec clang-format -i {} -style=file:$STYLE_FILE \;

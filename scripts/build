@@ -1,0 +1,16 @@
+#!/bin/zsh
+
+#
+# Only run this from inside the docker container. Compiles c++ code.
+#
+
+set -e 
+set -o pipefail
+
+echo "SRC_DIR:   $SRC_DIR"
+echo "BUILD_DIR: $BUILD_DIR"
+
+# c++
+cd $BUILD_DIR
+cmake $SRC_DIR/cpp -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug
+cmake --build .

@@ -1,0 +1,19 @@
+#!/bin/sh
+
+set -e 
+set -o pipefail
+
+# directory where this sript is stored
+SCRIPT_DIR=$(dirname -- "$( readlink -f -- "$0"; )";)
+# repo directory where all source files are
+SRC_DIR=$(readlink -f "$SCRIPT_DIR/..")
+# directory containing setup configs, including the dockerfile
+SETUP_DIR=$SRC_DIR/setup
+
+docker build --tag=cenote $SETUP_DIR
+
+docker run --interactive --tty --rm \
+  --volume "$SRC_DIR":/home/user/src \
+  --volume $HOME/.gitconfig:/etc/gitconfig \
+  --entrypoint /bin/zsh \
+  cenote

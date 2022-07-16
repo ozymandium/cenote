@@ -50,14 +50,15 @@ RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/inst
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --user --upgrade -r /tmp/requirements.txt
 
+## Conan
+RUN mkdir ${BUILD_DIR}
 # set up conan default profile
-COPY --chown=${USER}:${USER} conanprofile ${HOME_DIR}/.conan/profiles/default
-# auto installation of fmt is broken, have to manually install it
+COPY --chown=${USER}:${USER} conan_profile.txt ${HOME_DIR}/.conan/profiles/default
+COPY --chown=${USER}:${USER} conanfile.txt /tmp/conanfile.txt
+# auto installation of some stuff is broken, have to manually install on occasion
 # https://github.com/conan-io/conan-center-index/issues/7752
 RUN conan install gtest/1.10.0@ -r conancenter --build gtest
-# # this conan build stuff moved to build script
-# COPY conanfile.txt /tmp/conanfile.txt
-# RUN conan install /tmp/conanfile.txt
+RUN cd ${BUILD_DIR} && conan install /tmp/conanfile.txt -pr:b=default
 
 # # install units library
 # RUN wget https://github.com/nholthaus/units/archive/refs/tags/v2.3.1.tar.gz -O /tmp/units.tar.gz
@@ -67,7 +68,3 @@ RUN conan install gtest/1.10.0@ -r conancenter --build gtest
 
 # allow git from inside container
 RUN git config --global --add safe.directory ${SRC_DIR}
-
-# build the library
-RUN mkdir ${BUILD_DIR}
-

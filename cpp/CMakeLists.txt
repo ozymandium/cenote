@@ -68,31 +68,31 @@ install(
     PUBLIC_HEADER DESTINATION /usr/local/include/bungee
 )
 
-## Testing
+# ## Testing
 
-enable_testing()
+# enable_testing()
 
-# Water.cpp
-add_executable(test_water test/test_Water.cpp)
-target_link_libraries(test_water GTest::GTest GTest::Main bungee)
-add_test(test-water test_water)
+# # Water.cpp
+# add_executable(test_water test/test_Water.cpp)
+# target_link_libraries(test_water GTest::GTest GTest::Main bungee)
+# add_test(test-water test_water)
 
-# Tank.cpp
-add_executable(test_tank test/test_Tank.cpp)
-target_link_libraries(test_tank GTest::GTest GTest::Main bungee)
-add_test(test-tank test_tank)
+# # Tank.cpp
+# add_executable(test_tank test/test_Tank.cpp)
+# target_link_libraries(test_tank GTest::GTest GTest::Main bungee)
+# add_test(test-tank test_tank)
 
-# Scr.cpp
-add_executable(test_scr test/test_Scr.cpp)
-target_link_libraries(test_scr GTest::GTest GTest::Main bungee)
-add_test(test-scr test_scr)
+# # Scr.cpp
+# add_executable(test_scr test/test_Scr.cpp)
+# target_link_libraries(test_scr GTest::GTest GTest::Main bungee)
+# add_test(test-scr test_scr)
 
-# Plan.cpp
-add_executable(test_plan test/test_Plan.cpp)
-target_link_libraries(test_plan GTest::GTest GTest::Main bungee)
-add_test(test-plan test_plan)
+# # Plan.cpp
+# add_executable(test_plan test/test_Plan.cpp)
+# target_link_libraries(test_plan GTest::GTest GTest::Main bungee)
+# add_test(test-plan test_plan)
 
-# Result.cpp
-add_executable(test_result test/test_Result.cpp)
-target_link_libraries(test_result GTest::GTest GTest::Main bungee)
-add_test(test-result test_result)
+# # Result.cpp
+# add_executable(test_result test/test_Result.cpp)
+# target_link_libraries(test_result GTest::GTest GTest::Main bungee)
+# add_test(test-result test_result)
