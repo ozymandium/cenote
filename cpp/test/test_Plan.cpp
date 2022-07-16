@@ -13,8 +13,8 @@ TEST(PlanPoint, validate)
 
 TEST(Usage, OutOfOrder)
 {
-    EXPECT_ANY_THROW(Usage(Plan::Point{1_s, 0_m, ""}, Plan::Point{0_s, 0_m, ""}, 
-                     1_L_per_min, Water::FRESH));
+    EXPECT_ANY_THROW(
+        Usage(Plan::Point{1_s, 0_m, ""}, Plan::Point{0_s, 0_m, ""}, 1_L_per_min, Water::FRESH));
 }
 
 TEST(Usage, Surface)

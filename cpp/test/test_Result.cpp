@@ -1,9 +1,10 @@
-#include <bungee/Result.h>
 #include "utils.h"
+#include <bungee/Result.h>
 
 using namespace bungee;
 
-TEST(Interpolate, Basic) {
+TEST(Interpolate, Basic)
+{
     Eigen::ArrayXd xp, yp, x, expected;
     xp << 0, -1, 1;
     yp << 0, 1, 2;

@@ -41,6 +41,9 @@ class Plan {
 
 public:
     struct Scr {
+        // /// Provide a constructor to prevent pybind from default initializing
+        // Scr(units::volume_rate::liter_per_minute_t, units::volume_rate::liter_per_minute_t);
+
         /// SCR during the bottom portion of the dive, i.e., everything until the final ascent.
         units::volume_rate::liter_per_minute_t work;
         /// SCR during the decompression portion of the dive, i.e., during the final ascent.
@@ -51,6 +54,9 @@ public:
 
     /// Represents and single tank configuration at the start of the dive
     struct TankConfig {
+        // /// Provide a constructor to prevent pybind from default initializing
+        // TankConfig()
+
         /// The type of tank.
         Tank::Type type;
         /// The initial pressure at the start of the dive.

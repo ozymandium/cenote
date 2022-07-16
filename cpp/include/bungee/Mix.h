@@ -14,7 +14,14 @@ public:
         units::pressure::bar_t N2;
     };
 
-    explicit Mix(double fO2);
+    /// Do not use explicit here as it prevents pybind from wrapping the ctor.
+    Mix(double fO2);
+
+    // /// Must define the copy assignment operator for pybind to work
+    // Mix& operator=(const Mix& other);
+
+    double fO2() const { return _fO2; }
+    double fN2() const { return _fN2; }
 
     /// \brief Partial pressures of each gas in the mix for a given depth
     ///
@@ -25,11 +32,21 @@ public:
     /// \return Partial pressures of each gas
     PartialPressure partialPressure(units::length::meter_t depth, Water water) const;
 
+private:
+    void set(double fO2);
+
     /// Fraction of oxygen, 0.0 - 1.0 [unitless]
-    const double fO2;
+    /// 
+    /// Left non-const for mixing and fill calculations later on.
+    double _fO2;
     /// Fraction of nitrogen, 0.0 - 1.0 [unitless]
-    const double fN2;
+    /// 
+    /// Left non-const for mixing and fill calculations later on.
+    double _fN2;
 };
+
+// bool operator==(const Mix& lhs, const Mix& rhs);
+
 
 /// Atmospheric Air
 extern const Mix AIR;

@@ -70,7 +70,8 @@ void Plan::addPoint(const Point& point)
         // later.
         ensure(point.time > _profile.back().time, "each point must increase in time");
         // for now, keep time denominated in integer minutes to keep things simple
-        ensure(point.time.value() == units::unit_cast<int64_t>(point.time), "time must be in integer (whole) minutes");
+        ensure(point.time.value() == units::unit_cast<int64_t>(point.time),
+               "time must be in integer (whole) minutes");
     }
     ensure(_tanks.contains(point.tank), "unknown tank name");
     _profile.push_back(point);
@@ -85,7 +86,8 @@ void Plan::finalize()
     _finalized = true;
 }
 
-Eigen::ArrayXd Plan::time() const {
+Eigen::ArrayXd Plan::time() const
+{
     Eigen::Matrix2Xd data(2, _profile.size());
     for (size_t i = 0; i < _profile.size(); ++i) {
         data(0, i) = _profile[i].time();
@@ -93,7 +95,8 @@ Eigen::ArrayXd Plan::time() const {
     return data;
 }
 
-Eigen::ArrayXd Plan::depth() const {
+Eigen::ArrayXd Plan::depth() const
+{
     Eigen::Matrix2Xd data(2, _profile.size());
     for (size_t i = 0; i < _profile.size(); ++i) {
         data(1, i) = _profile[i].depth();
