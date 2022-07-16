@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-from pybind11.setup_helpers import Pybind11Extension
+# from pybind11.setup_helpers import Pybind11Extension
 from glob import glob
 
 setup(
@@ -17,13 +17,13 @@ setup(
         ],
     },
     test_suite = "test",
-    ext_modules=[
-        Pybind11Extension(
-            "bungee",
-            [
-                "bungee.cpp",
-            ],
-            cxx_std=17,
-        )
-    ],
+    # ext_modules=[
+    #     Pybind11Extension(
+    #         "bungee",
+    #         [
+    #             "bungee.cpp",
+    #         ],
+    #         cxx_std=17,
+    #     )
+    # ],
 )

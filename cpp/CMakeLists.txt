@@ -13,21 +13,54 @@ file(GLOB HDR_FILES ${PROJECT_SOURCE_DIR}/include/bungee/*.h)
 find_package(units CONFIG REQUIRED)
 find_package(GTest CONFIG REQUIRED)
 find_package(Eigen3 CONFIG REQUIRED)
+find_package(pybind11 CONFIG REQUIRED)
+find_package(Python REQUIRED COMPONENTS Interpreter Development)
+
+## Core library
 
 # the pybind11 library has to be shared, but dependencies of the pybind11 module
 # can be static https://github.com/pybind/pybind11/issues/466#issuecomment-256386257
-add_library(bungee STATIC ${SRC_FILES})
+# make it static for packing, shared for faster dev
+# add_library(bungee STATIC ${SRC_FILES})
+add_library(bungee SHARED ${SRC_FILES})
 target_link_libraries(bungee 
     ${units_LIBRARIES} # header only, but whatever
     ${Eigen3_LIBRARIES}
+    ${pybind11_LIBRARIES}
+    ${Python_LIBRARIES}
 )
 target_include_directories(bungee PUBLIC 
     include 
     ${units_INCLUDE_DIRS}
     ${Eigen3_INCLUDE_DIRS}
+    ${pybind11_INCLUDE_DIRS}
+    ${Python_INCLUDE_DIRS}
 )
 set_target_properties(bungee PROPERTIES PUBLIC_HEADER "${HDR_FILES}")
 target_compile_features(bungee PUBLIC cxx_std_20)
+
+## Python bindings
+
+# conan fucking sucks
+# https://github.com/conan-io/conan-center-index/issues/9343
+if(NOT COMMAND pybind11_add_module)
+foreach(INCDIR IN LISTS pybind11_INCLUDE_DIRS)
+	if(EXISTS "${INCDIR}/../lib/cmake/pybind11/pybind11Tools.cmake")
+		include("${INCDIR}/../lib/cmake/pybind11/pybind11Common.cmake")
+		include("${INCDIR}/../lib/cmake/pybind11/pybind11Tools.cmake")
+		break()
+	elseif(EXISTS "${INCDIR}/../../lib/cmake/pybind11/pybind11Tools.cmake")
+		include("${INCDIR}/../../lib/cmake/pybind11/pybind11Common.cmake")
+		include("${INCDIR}/../../lib/cmake/pybind11/pybind11Tools.cmake")
+		break()
+	endif()
+endforeach()
+endif()
+
+pybind11_add_module(bungee_py src/pybind.cpp)
+target_link_libraries(bungee_py PRIVATE bungee)
+
+## Installation
 
 install(
     TARGETS bungee 
