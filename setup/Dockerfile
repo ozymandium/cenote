@@ -40,8 +40,8 @@ RUN useradd --create-home --shell /bin/zsh ${USER}
 RUN usermod -append --groups sudo ${USER}
 RUN echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
+# end system level stuff
 USER ${USER}
-WORKDIR ${SRC_DIR}
 
 # install oh my zsh
 RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
@@ -62,3 +62,5 @@ RUN cd ${BUILD_DIR} && conan install /tmp/conanfile.txt -pr:b=default
 
 # allow git from inside container
 RUN git config --global --add safe.directory ${SRC_DIR}
+
+WORKDIR ${SRC_DIR}/scripts
