@@ -11,20 +11,20 @@ file(GLOB HDR_FILES ${PROJECT_SOURCE_DIR}/include/bungee/*.h)
 
 # get dependencies
 find_package(units CONFIG REQUIRED)
-find_package(GTest REQUIRED)
+find_package(GTest CONFIG REQUIRED)
+find_package(Eigen3 CONFIG REQUIRED)
 
 # the pybind11 library has to be shared, but dependencies of the pybind11 module
 # can be static https://github.com/pybind/pybind11/issues/466#issuecomment-256386257
 add_library(bungee STATIC ${SRC_FILES})
 target_link_libraries(bungee 
-    ${mp-units_LIBRARIES}
-
+    ${units_LIBRARIES} # header only, but whatever
+    ${Eigen3_LIBRARIES}
 )
 target_include_directories(bungee PUBLIC 
     include 
     ${units_INCLUDE_DIRS}
-    ${mp-units_INCLUDE_DIR}
-    ${mp-units_INCLUDE_DIRS}
+    ${Eigen3_INCLUDE_DIRS}
 )
 set_target_properties(bungee PROPERTIES PUBLIC_HEADER "${HDR_FILES}")
 target_compile_features(bungee PUBLIC cxx_std_20)
@@ -58,3 +58,8 @@ add_test(test-scr test_scr)
 add_executable(test_plan test/test_Plan.cpp)
 target_link_libraries(test_plan GTest::GTest GTest::Main bungee)
 add_test(test-plan test_plan)
+
+# Result.cpp
+add_executable(test_result test/test_Result.cpp)
+target_link_libraries(test_result GTest::GTest GTest::Main bungee)
+add_test(test-result test_result)

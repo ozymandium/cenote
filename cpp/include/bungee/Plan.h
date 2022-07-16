@@ -5,6 +5,8 @@
 #include "Water.h"
 #include "custom_units.h"
 
+#include <Eigen/Dense>
+
 #include <optional>
 #include <vector>
 
@@ -107,6 +109,9 @@ public:
     const Scr& scr() const { return _scr; }
     const TankLoadout& tanks() const { return _tanks; }
     const Profile& profile() const { return _profile; }
+
+    Eigen::ArrayXd time() const;
+    Eigen::ArrayXd depth() const;
 
 private:
     const Water _water;

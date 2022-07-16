@@ -85,6 +85,22 @@ void Plan::finalize()
     _finalized = true;
 }
 
+Eigen::ArrayXd Plan::time() const {
+    Eigen::Matrix2Xd data(2, _profile.size());
+    for (size_t i = 0; i < _profile.size(); ++i) {
+        data(0, i) = _profile[i].time();
+    }
+    return data;
+}
+
+Eigen::ArrayXd Plan::depth() const {
+    Eigen::Matrix2Xd data(2, _profile.size());
+    for (size_t i = 0; i < _profile.size(); ++i) {
+        data(1, i) = _profile[i].depth();
+    }
+    return data;
+}
+
 units::volume::liter_t Usage(const Plan::Point& pt0, const Plan::Point& pt1,
                              const units::volume_rate::liter_per_minute_t scr, const Water water)
 {
