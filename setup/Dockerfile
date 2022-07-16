@@ -60,11 +60,5 @@ COPY --chown=${USER}:${USER} conanfile.txt /tmp/conanfile.txt
 RUN conan install gtest/1.10.0@ -r conancenter --build gtest
 RUN cd ${BUILD_DIR} && conan install /tmp/conanfile.txt -pr:b=default
 
-# # install units library
-# RUN wget https://github.com/nholthaus/units/archive/refs/tags/v2.3.1.tar.gz -O /tmp/units.tar.gz
-# RUN tar -xf /tmp/units.tar.gz -C ${DEP_DIR}
-# RUN mkdir ${DEP_DIR}/units-2.3.1/build
-# RUN cd ${DEP_DIR}/units-2.3.1/build && cmake .. && sudo make -j4 install
-
 # allow git from inside container
 RUN git config --global --add safe.directory ${SRC_DIR}

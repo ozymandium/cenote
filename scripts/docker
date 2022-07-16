@@ -16,4 +16,5 @@ docker run --interactive --tty --rm \
   --volume "$SRC_DIR":/home/user/src \
   --volume $HOME/.gitconfig:/etc/gitconfig \
   --entrypoint /bin/zsh \
+  -p 8900:8900 \
   cenote
