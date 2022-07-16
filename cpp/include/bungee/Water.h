@@ -8,11 +8,6 @@ namespace bungee {
 
 enum class Water { FRESH, SALT };
 
-using WaterDensityLookup = std::map<Water, units::density::kilograms_per_cubic_meter_t>;
-
-/// Density of water in kg/m^3
-extern const WaterDensityLookup WATER_DENSITY;
-
 /// \brief Look up the density of water.
 ///
 /// \param[in] water Type of water.

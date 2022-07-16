@@ -36,17 +36,16 @@ private:
     void set(double fO2);
 
     /// Fraction of oxygen, 0.0 - 1.0 [unitless]
-    /// 
+    ///
     /// Left non-const for mixing and fill calculations later on.
     double _fO2;
     /// Fraction of nitrogen, 0.0 - 1.0 [unitless]
-    /// 
+    ///
     /// Left non-const for mixing and fill calculations later on.
     double _fN2;
 };
 
 // bool operator==(const Mix& lhs, const Mix& rhs);
-
 
 /// Atmospheric Air
 extern const Mix AIR;

@@ -1,24 +1,30 @@
 #include <bungee/Constants.h>
 #include <bungee/Water.h>
 
-namespace bungee {
+#include <stdexcept>
 
-/// https://bluerobotics.com/learn/pressure-depth-calculator/#hydrostatic-water-pressure-formula
-const WaterDensityLookup WATER_DENSITY{
-    /// water density varies with temperature, being more dense at lower temperatures. pure water at
-    /// 0C is 1000 kg/m3. pick a value of pure water at 25C, since contaminnts generally decrease
-    /// the density, and this will offset changes due to colder water.
-    /// https://en.wikipedia.org/wiki/Properties_of_water
-    {Water::FRESH, units::density::kilograms_per_cubic_meter_t(997.0474)},
-    /// Deep salt water has higher density (1050 kg/m3) than surface water, which varies from
-    /// 1020-1029 kg/m3. Pick a median value of surface seawater at 25C.
-    /// https://en.wikipedia.org/wiki/Seawater
-    {Water::SALT, units::density::kilograms_per_cubic_meter_t(1023.6)},
-};
+using namespace units::literals;
+
+namespace bungee {
 
 units::density::kilograms_per_cubic_meter_t GetWaterDensity(const Water water)
 {
-    return WATER_DENSITY.at(water);
+    /// https://bluerobotics.com/learn/pressure-depth-calculator/#hydrostatic-water-pressure-formula
+    switch (water) {
+    case Water::FRESH:
+        /// water density varies with temperature, being more dense at lower temperatures. pure
+        /// water at 0C is 1000 kg/m3. pick a value of pure water at 25C, since contaminnts
+        /// generally decrease the density, and this will offset changes due to colder water.
+        /// https://en.wikipedia.org/wiki/Properties_of_water
+        return 997.0474_kg_per_cu_m;
+    case Water::SALT:
+        /// Deep salt water has higher density (1050 kg/m3) than surface water, which varies from
+        /// 1020-1029 kg/m3. Pick a median value of surface seawater at 25C.
+        /// https://en.wikipedia.org/wiki/Seawater
+        return 1023.6_kg_per_cu_m;
+    default:
+        throw std::invalid_argument("unimplemented water type");
+    };
 }
 
 units::pressure::bar_t WaterPressureFromDepth(units::length::meter_t depth, Water water)

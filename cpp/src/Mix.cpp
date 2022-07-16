@@ -3,10 +3,7 @@
 
 namespace bungee {
 
-Mix::Mix(const double fO2) 
-{
-    set(fO2);
-}
+Mix::Mix(const double fO2) { set(fO2); }
 
 Mix::PartialPressure Mix::partialPressure(units::length::meter_t depth, Water water) const
 {
