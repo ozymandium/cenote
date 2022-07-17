@@ -4,7 +4,7 @@ ENV USER="user"
 ENV HOME_DIR="/home/${USER}"
 ENV SRC_DIR="${HOME_DIR}/src"
 ENV BUILD_DIR="${HOME_DIR}/build"
-ENV PATH="${HOME_DIR}/.local/bin:${PATH}"
+ENV PATH="${BUILD_DIR}:${HOME_DIR}/.local/bin:${PATH}"
 
 # configures locale
 RUN apt update -qq > /dev/null \

@@ -6,7 +6,7 @@ project(bungee VERSION 0.0.1 LANGUAGES CXX)
 include(${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
 
 # set source/header files
-file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
+file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/bungee/*.cpp)
 file(GLOB HDR_FILES ${PROJECT_SOURCE_DIR}/include/bungee/*.h)
 
 # get dependencies
@@ -68,7 +68,27 @@ install(
     PUBLIC_HEADER DESTINATION /usr/local/include/bungee
 )
 
-# ## Testing
+## Scratch binary for figuring shit out
+
+add_executable(scratch src/scratch.cpp)
+target_link_libraries(scratch
+    bungee 
+    # ${units_LIBRARIES} # header only, but whatever
+    # ${Eigen3_LIBRARIES}
+    # ${pybind11_LIBRARIES}
+    # ${Python_LIBRARIES}
+)
+# target_include_directories(bungee PUBLIC 
+#     include 
+#     ${units_INCLUDE_DIRS}
+#     ${Eigen3_INCLUDE_DIRS}
+#     ${pybind11_INCLUDE_DIRS}
+#     ${Python_INCLUDE_DIRS}
+# )
+set_target_properties(scratch PROPERTIES PUBLIC_HEADER "${HDR_FILES}")
+target_compile_features(scratch PUBLIC cxx_std_20)
+
+## Testing
 
 # enable_testing()
 

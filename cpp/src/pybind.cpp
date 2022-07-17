@@ -1,5 +1,6 @@
 #include <bungee/bungee.h>
 
+// probably none of these includes are necessary. whatever.
 #include <pybind11/chrono.h>
 #include <pybind11/complex.h>
 #include <pybind11/functional.h>
@@ -14,13 +15,37 @@ namespace py = pybind11;
         py::class_<cls>(mod, #name).def(py::init<double>());                                       \
     }
 
+namespace {
+
+// https://stackoverflow.com/a/3418285
+void replaceAll(std::string& str, const std::string& from, const std::string& to) {
+    if(from.empty())
+        return;
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+    }
+}
+
+std::string GetVolumeRateUnitStr() {
+    using namespace units::literals;
+    std::string abbreviation = units::abbreviation(1_L_per_min);
+    replaceAll(abbreviation, "_", " ");
+    return abbreviation;
+}
+
+}
+
+
 // clang-format off
 PYBIND11_MODULE(bungee_py, mod) {
     // units
-    WRAP_UNIT(mod, units::volume_rate::liter_per_minute_t, LiterPerMinuteT)
-    WRAP_UNIT(mod, units::pressure::bar_t, BarT)
-    WRAP_UNIT(mod, units::time::minute_t, MinuteT)
-    WRAP_UNIT(mod, units::length::meter_t, MeterT)
+    WRAP_UNIT(mod, units::volume_rate::liter_per_minute_t, VolumeRateT)
+    mod.def("get_volume_rate_unit_str", &GetVolumeRateUnitStr);
+    WRAP_UNIT(mod, units::pressure::bar_t, PressureT)
+    WRAP_UNIT(mod, units::time::minute_t, TimeT)
+    WRAP_UNIT(mod, units::length::meter_t, LengthT)
     // Tank.h
     py::enum_<Tank::Type>(mod, "Tank")
         .value("AL40", Tank::AL40)
