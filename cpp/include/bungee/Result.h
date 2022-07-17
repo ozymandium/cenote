@@ -3,13 +3,13 @@
 #include "Plan.h"
 
 #include <Eigen/Dense>
-#include <units.h>
+#include "custom_units.h"
 
 namespace bungee {
 
 struct Result {
     // 0.1 minutes to help avoid floating point problems
-    static constexpr auto TIME_INCREMENT = units::time::second_t(6);
+    static constexpr Time TIME_INCREMENT = units::time::second_t(6);
 
     /// \param[in} N number of points to allocate for all arrays (will be same sized)
     Result(size_t N);

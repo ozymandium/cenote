@@ -25,7 +25,7 @@ namespace bungee {
 //     ///
 //     /// FIXME: allow points to be at the same time as the current point to build pure square
 //     /// profiles for investigation purposes.
-//     void addPoint(units::time::minute_t time, units::length::meter_t depth);
+//     void addPoint(Time time, Depth depth);
 
 //     const std::vector<Point> get() const;
 
@@ -42,12 +42,12 @@ class Plan {
 public:
     struct Scr {
         // /// Provide a constructor to prevent pybind from default initializing
-        // Scr(units::volume_rate::liter_per_minute_t, units::volume_rate::liter_per_minute_t);
+        // Scr(VolumeRate, VolumeRate);
 
         /// SCR during the bottom portion of the dive, i.e., everything until the final ascent.
-        units::volume_rate::liter_per_minute_t work;
+        VolumeRate work;
         /// SCR during the decompression portion of the dive, i.e., during the final ascent.
-        units::volume_rate::liter_per_minute_t deco;
+        VolumeRate deco;
 
         void validate() const;
     };
@@ -60,7 +60,7 @@ public:
         /// The type of tank.
         Tank::Type type;
         /// The initial pressure at the start of the dive.
-        units::pressure::bar_t pressure;
+        Pressure pressure;
         /// What gas is in the tank.
         Mix mix;
 
@@ -72,9 +72,9 @@ public:
     /// A dive plan is simply a series of points of depth and time, with other relevant info added.
     struct Point {
         /// Time elapsed since the beginning of the dive [min]
-        units::time::minute_t time;
+        Time time;
         /// Distance below surface [m]
-        units::length::meter_t depth;
+        Depth depth;
         /// Name of tank in use beginning at `time` and proceeding forward to the next point.
         std::string tank;
 
@@ -100,8 +100,8 @@ public:
 
     void setTank(const std::string& name);
 
-    void addPointFromDuration(units::time::minute_t duration, units::length::meter_t depth);
-    void addPoint(units::time::minute_t time, units::length::meter_t depth);
+    void addPointFromDuration(Time duration, Depth depth);
+    void addPoint(Time time, Depth depth);
     void addPoint(const Point& point);
 
     void finalize();
@@ -150,7 +150,7 @@ private:
 /// \param[in] water The type of water, assumed to be constant betwwen pt0 and pt1.
 ///
 /// \return Consumed gas in surface volume.
-units::volume::liter_t Usage(const Plan::Point& pt0, const Plan::Point& pt1,
-                             units::volume_rate::liter_per_minute_t scr, Water water);
+Volume Usage(const Plan::Point& pt0, const Plan::Point& pt1,
+                             VolumeRate scr, Water water);
 
 } // namespace bungee

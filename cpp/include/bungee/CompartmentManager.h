@@ -17,9 +17,9 @@ public:
     /// dives.
     void equilibrium(const Mix::PartialPressure& partialPressure);
 
-    void update(const Mix::PartialPressure& partialPressure, const units::time::minute_t time);
+    void update(const Mix::PartialPressure& partialPressure, const Time time);
 
-    units::pressure::bar_t ceiling() const;
+    Pressure ceiling() const;
 
 private:
     /// Nitrogen compartments.

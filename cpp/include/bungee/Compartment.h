@@ -12,7 +12,10 @@ namespace bungee {
 ///
 /// A note on units: Buhlmann's algorithm uses minutes for time units and bar for pressure. All time
 /// constants are given in minutes in the literature and the exponential decay equations assume the
-/// same. As such, bar and minutes are used here.
+/// same. As such, bar and minutes are used here. Everywhere else in the code we typedef units so
+/// that they can be changed over in the future. However, since the equations have to be in bar
+/// and minutes, the typedefs are not used. In the event that the rest of the modules are switched
+/// to, e.g., psi and seconds, this code will have to stay in bar and minutes.
 class Compartment {
 public:
     struct Params {

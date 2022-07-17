@@ -1,6 +1,6 @@
 #pragma once
 
-#include <units.h>
+#include "custom_units.h"
 
 #include <map>
 
@@ -13,14 +13,14 @@ enum class Water { FRESH, SALT };
 /// \param[in] water Type of water.
 ///
 /// \return Water density in kg/m^3
-units::density::kilograms_per_cubic_meter_t GetWaterDensity(Water water);
+Density GetWaterDensity(Water water);
 
 /// \param[in] depth Depth under the surface [m].
 ///
 /// \param[in] water Type of water.
 ///
 /// \return Relative pressure resulting from water, excluding ambient surface pressure [bar].
-units::pressure::bar_t WaterPressureFromDepth(units::length::meter_t depth, Water water);
+Pressure WaterPressureFromDepth(Depth depth, Water water);
 
 /// \param[in] pressure Relative pressure resulting from water, excluding ambient surface pressure
 /// [bar].
@@ -28,20 +28,20 @@ units::pressure::bar_t WaterPressureFromDepth(units::length::meter_t depth, Wate
 /// \param[in] water Type of water.
 ///
 /// \return Depth under the surface [m].
-units::length::meter_t DepthFromWaterPressure(units::pressure::bar_t pressure, Water water);
+Depth DepthFromWaterPressure(Pressure pressure, Water water);
 
 /// \param[in] depth Depth under the surface [m].
 ///
 /// \param[in] water Type of water.
 ///
 /// \return Absolute pressure including ambient surface pressure [bar].
-units::pressure::bar_t PressureFromDepth(units::length::meter_t depth, Water water);
+Pressure PressureFromDepth(Depth depth, Water water);
 
 /// \param[in] pressure Absolute pressure including ambient surface pressure [bar].
 ///
 /// \param[in] water Type of water.
 ///
 /// \return Depth under the surface [m].
-units::length::meter_t DepthFromPressure(units::pressure::bar_t pressure, Water water);
+Depth DepthFromPressure(Pressure pressure, Water water);
 
 } // namespace bungee

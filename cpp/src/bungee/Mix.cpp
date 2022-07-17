@@ -5,7 +5,7 @@ namespace bungee {
 
 Mix::Mix(const double fO2) { set(fO2); }
 
-Mix::PartialPressure Mix::partialPressure(units::length::meter_t depth, Water water) const
+Mix::PartialPressure Mix::partialPressure(Depth depth, Water water) const
 {
     const units::pressure::bar_t pressure = PressureFromDepth(depth, water);
     return PartialPressure{
@@ -24,7 +24,7 @@ void Mix::set(const double fO2)
 }
 
 const Mix AIR(0.20946);
-const Mix::PartialPressure SURFACE_AIR_PP(AIR.partialPressure(units::length::meter_t(0.),
+const Mix::PartialPressure SURFACE_AIR_PP(AIR.partialPressure(Depth(0.),
                                                               Water::FRESH));
 
 } // namespace bungee

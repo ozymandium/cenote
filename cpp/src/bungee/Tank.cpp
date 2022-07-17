@@ -6,48 +6,48 @@ using namespace units::literals;
 
 namespace bungee {
 
-Tank::Tank(const Params& params, units::pressure::bar_t pressure) : _params(params)
+Tank::Tank(const Params& params, Pressure pressure) : _params(params)
 {
     setPressure(pressure);
 }
 
-Tank::Tank(const Params& params, units::volume::liter_t volume) : _params(params)
+Tank::Tank(const Params& params, Volume volume) : _params(params)
 {
     setVolume(volume);
 }
 
-units::volume::liter_t Tank::VolumeAtPressure(const Params& params,
-                                              const units::pressure::bar_t pressure)
+Volume Tank::VolumeAtPressure(const Params& params,
+                                              const Pressure pressure)
 {
     return params.size * pressure / (params.z * 1_atm);
 }
 
-units::pressure::bar_t Tank::PressureAtVolume(const Params& params,
-                                              const units::volume::liter_t volume)
+Pressure Tank::PressureAtVolume(const Params& params,
+                                              const Volume volume)
 {
     return volume * params.z * 1_atm / params.size;
 }
 
-void Tank::setPressure(units::pressure::bar_t pressure)
+void Tank::setPressure(Pressure pressure)
 {
     _pressure = pressure;
     _volume = VolumeAtPressure(_params, pressure);
 }
 
-void Tank::setVolume(units::volume::liter_t volume)
+void Tank::setVolume(Volume volume)
 {
     _volume = volume;
     _pressure = PressureAtVolume(_params, volume);
 }
 
-units::volume::liter_t Tank::serviceVolume() const
+Volume Tank::serviceVolume() const
 {
     return VolumeAtPressure(_params, _params.servicePressure);
 }
 
-// void Tank::decreasePressure(units::pressure::bar_t diff) { setPressure(_pressure - diff); }
+// void Tank::decreasePressure(Pressure diff) { setPressure(_pressure - diff); }
 
-// void Tank::decreaseVolume(units::volume::liter_t diff) { setVolume(_volume - diff); }
+// void Tank::decreaseVolume(Volume diff) { setVolume(_volume - diff); }
 
 static const std::map<Tank::Type, Tank::Params> TANK_PARAMS{
     {Tank::AL40, {.size = 5.8_L, .servicePressure = 3000_psi, .z = 1.045}},
@@ -65,12 +65,12 @@ Tank GetFullTank(const Tank::Type type)
     return Tank(params, params.servicePressure);
 }
 
-Tank GetTankAtPressure(const Tank::Type type, const units::pressure::bar_t pressure)
+Tank GetTankAtPressure(const Tank::Type type, const Pressure pressure)
 {
     return Tank(TANK_PARAMS.at(type), pressure);
 }
 
-Tank GetTankAtVolume(const Tank::Type type, const units::volume::liter_t volume)
+Tank GetTankAtVolume(const Tank::Type type, const Volume volume)
 {
     return Tank(TANK_PARAMS.at(type), volume);
 }

@@ -7,7 +7,7 @@ using namespace units::literals;
 
 namespace bungee {
 
-units::density::kilograms_per_cubic_meter_t GetWaterDensity(const Water water)
+Density GetWaterDensity(const Water water)
 {
     /// https://bluerobotics.com/learn/pressure-depth-calculator/#hydrostatic-water-pressure-formula
     switch (water) {
@@ -27,31 +27,31 @@ units::density::kilograms_per_cubic_meter_t GetWaterDensity(const Water water)
     };
 }
 
-units::pressure::bar_t WaterPressureFromDepth(units::length::meter_t depth, Water water)
+Pressure WaterPressureFromDepth(Depth depth, Water water)
 {
     // density in kg/m^3
-    const units::density::kilograms_per_cubic_meter_t density = GetWaterDensity(water);
+    const Density density = GetWaterDensity(water);
     // pressure from water in Pascal. 1 Pa = 1 kg/(m*s^2)
     const auto pressure = density * GRAVITY * depth;
     // convert Pa to bar
     return pressure;
 }
 
-units::length::meter_t DepthFromWaterPressure(units::pressure::bar_t pressure, Water water)
+Depth DepthFromWaterPressure(Pressure pressure, Water water)
 {
     // density in kg/m^3
-    const units::density::kilograms_per_cubic_meter_t density = GetWaterDensity(water);
+    const Density density = GetWaterDensity(water);
     // depth in m
-    const units::length::meter_t depth = pressure / (density * GRAVITY);
+    const Depth depth = pressure / (density * GRAVITY);
     return depth;
 }
 
-units::pressure::bar_t PressureFromDepth(units::length::meter_t depth, Water water)
+Pressure PressureFromDepth(Depth depth, Water water)
 {
     return WaterPressureFromDepth(depth, water) + SURFACE_PRESSURE;
 }
 
-units::length::meter_t DepthFromPressure(units::pressure::bar_t pressure, Water water)
+Depth DepthFromPressure(Pressure pressure, Water water)
 {
     return DepthFromWaterPressure(pressure - SURFACE_PRESSURE, water);
 }

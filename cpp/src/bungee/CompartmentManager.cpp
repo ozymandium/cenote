@@ -22,14 +22,14 @@ void CompartmentManager::equilibrium(const Mix::PartialPressure& partialPressure
 }
 
 void CompartmentManager::update(const Mix::PartialPressure& partialPressure,
-                                const units::time::minute_t time)
+                                const Time time)
 {
     for (auto& compartment : _compartments) {
         compartment.update(partialPressure.N2, time);
     }
 }
 
-units::pressure::bar_t CompartmentManager::ceiling() const
+Pressure CompartmentManager::ceiling() const
 {
     auto maxCeiling = _compartments[0].ceiling();
     for (auto& compartment : _compartments) {

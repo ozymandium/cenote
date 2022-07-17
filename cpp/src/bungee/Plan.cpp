@@ -45,13 +45,13 @@ void Plan::setTank(const std::string& name)
     _currentTank = name;
 }
 
-void Plan::addPointFromDuration(units::time::minute_t duration, units::length::meter_t depth)
+void Plan::addPointFromDuration(Time duration, Depth depth)
 {
     ensure(!_profile.empty(), "can't add first point from duration");
     addPoint(_profile.back().time + duration, depth);
 }
 
-void Plan::addPoint(units::time::minute_t time, units::length::meter_t depth)
+void Plan::addPoint(Time time, Depth depth)
 {
     ensure(_currentTank.has_value(), "current tank not set");
     addPoint(Point{time, depth, _currentTank.value()});

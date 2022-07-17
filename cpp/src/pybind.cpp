@@ -10,42 +10,47 @@
 using namespace bungee;
 namespace py = pybind11;
 
-#define WRAP_UNIT(mod, cls, name)                                                                  \
+#define WRAP_UNIT(mod, cls)                                                                  \
     {                                                                                              \
-        py::class_<cls>(mod, #name).def(py::init<double>());                                       \
+        py::class_<cls>(mod, #cls).def(py::init<double>());                                       \
     }
 
 namespace {
 
 // https://stackoverflow.com/a/3418285
-void replaceAll(std::string& str, const std::string& from, const std::string& to) {
-    if(from.empty())
+void replaceAll(std::string& str, const std::string& from, const std::string& to)
+{
+    if (from.empty())
         return;
     size_t start_pos = 0;
-    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+    while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
         str.replace(start_pos, from.length(), to);
         start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
     }
 }
 
-std::string GetVolumeRateUnitStr() {
+template<typename Unit>
+std::string GetUnitStr()
+{
     using namespace units::literals;
-    std::string abbreviation = units::abbreviation(1_L_per_min);
+    std::string abbreviation = units::abbreviation(Unit(1));
     replaceAll(abbreviation, "_", " ");
     return abbreviation;
 }
 
-}
-
+} // namespace
 
 // clang-format off
 PYBIND11_MODULE(bungee_py, mod) {
     // units
-    WRAP_UNIT(mod, units::volume_rate::liter_per_minute_t, VolumeRateT)
-    mod.def("get_volume_rate_unit_str", &GetVolumeRateUnitStr);
-    WRAP_UNIT(mod, units::pressure::bar_t, PressureT)
-    WRAP_UNIT(mod, units::time::minute_t, TimeT)
-    WRAP_UNIT(mod, units::length::meter_t, LengthT)
+    WRAP_UNIT(mod, VolumeRate)
+    WRAP_UNIT(mod, Pressure)
+    WRAP_UNIT(mod, Time)
+    WRAP_UNIT(mod, Depth)
+    mod.def("get_volume_rate_unit_str", &GetUnitStr<VolumeRate>);
+    mod.def("get_pressure_rate_unit_str", &GetUnitStr<Pressure>);
+    mod.def("get_time_unit_str", &GetUnitStr<Time>);
+    mod.def("get_depth_unit_str", &GetUnitStr<Depth>);
     // Tank.h
     py::enum_<Tank::Type>(mod, "Tank")
         .value("AL40", Tank::AL40)
@@ -58,12 +63,12 @@ PYBIND11_MODULE(bungee_py, mod) {
     ;
     // Plan.h
     py::class_<Plan::Scr>(mod, "Scr")
-        .def(py::init<units::volume_rate::liter_per_minute_t, units::volume_rate::liter_per_minute_t>())
+        .def(py::init<VolumeRate, VolumeRate>())
         .def_readwrite("work", &Plan::Scr::work)
         .def_readwrite("deco", &Plan::Scr::deco)
     ;
     py::class_<Plan::TankConfig>(mod, "TankConfig")
-        .def(py::init<Tank::Type, units::pressure::bar_t, Mix>())
+        .def(py::init<Tank::Type, Pressure, Mix>())
         .def_readwrite("type", &Plan::TankConfig::type)
         .def_readwrite("pressure", &Plan::TankConfig::pressure)
         .def_readwrite("mix", &Plan::TankConfig::mix)

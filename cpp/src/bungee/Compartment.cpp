@@ -6,28 +6,28 @@
 
 namespace bungee {
 
-Compartment::Params Compartment::Params::Create(const units::time::minute_t t)
+Compartment::Params Compartment::Params::Create(const Time t)
 {
     return Params{.halfLife = t,
-                  .a = units::pressure::bar_t(2. / std::cbrt(t.value())),
+                  .a = Pressure(2. / std::cbrt(t.value())),
                   .b = 1.005 - 1.0 / std::sqrt(t.value())};
 }
 
 Compartment::Compartment(const Params& params) : _params(params) {}
 
-void Compartment::set(const units::pressure::bar_t pressure) { _pressure = pressure; }
+void Compartment::set(const Pressure pressure) { _pressure = pressure; }
 
-void Compartment::update(const units::pressure::bar_t ambientPressure,
-                         const units::time::minute_t time)
+void Compartment::update(const Pressure ambientPressure,
+                         const Time time)
 {
     assert(_pressure.has_value());
-    const units::pressure::bar_t pressureDiff =
+    const Pressure pressureDiff =
         ambientPressure - WATER_VAPOR_PRESSURE - _pressure.value();
-    const units::dimensionless::dimensionless_t timeRatio = time / _params.halfLife;
+    const Scalar timeRatio = time / _params.halfLife;
     _pressure.value() += pressureDiff * (1 - std::pow(2, -timeRatio.value()));
 }
 
-units::pressure::bar_t Compartment::ceiling() const
+Pressure Compartment::ceiling() const
 {
     assert(_pressure.has_value());
     return (_pressure.value() - _params.a) * _params.b;

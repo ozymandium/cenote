@@ -9,7 +9,7 @@ namespace bungee {
 
 namespace {
 
-size_t GetNumPoints(units::time::minute_t duration)
+size_t GetNumPoints(Time duration)
 {
     // check that the time increment is such that we can divide the plan cleanly in time
     // TODO: make this a static assert

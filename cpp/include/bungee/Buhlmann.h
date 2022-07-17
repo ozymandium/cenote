@@ -12,9 +12,9 @@ public:
     void init();
 
     /// TODO: temperature consideration
-    void update(const Mix::PartialPressure& partialPressure, units::time::minute_t time);
+    void update(const Mix::PartialPressure& partialPressure, Time time);
 
-    units::pressure::bar_t ceiling() const;
+    Pressure ceiling() const;
 
 private:
     CompartmentManager _compartments;

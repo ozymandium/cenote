@@ -9,9 +9,9 @@ public:
     /// Partial pressures of each gas in the mix for a given ambient pressure
     struct PartialPressure {
         /// Partial pressure of oxygen [bar]
-        units::pressure::bar_t O2;
+        Pressure O2;
         /// Partial pressure of nitrogen [bar]
-        units::pressure::bar_t N2;
+        Pressure N2;
     };
 
     /// Do not use explicit here as it prevents pybind from wrapping the ctor.
@@ -30,7 +30,7 @@ public:
     /// \param[in] water Type of water.
     ///
     /// \return Partial pressures of each gas
-    PartialPressure partialPressure(units::length::meter_t depth, Water water) const;
+    PartialPressure partialPressure(Depth depth, Water water) const;
 
 private:
     void set(double fO2);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <units.h>
+#include "custom_units.h"
 
 namespace bungee {
 
@@ -18,18 +18,18 @@ namespace bungee {
 ///
 /// TODO: Treat this as a variable, and figure out
 /// how to compute it.
-static const units::pressure::bar_t WATER_VAPOR_PRESSURE(0.0627);
+static constexpr Pressure WATER_VAPOR_PRESSURE = units::pressure::bar_t(0.0627);
 
 /// \brief Atmospheric pressure at sea level, equivalent to 1 atm [bar].
 ///
 /// TODO: Allow varying this, compute based on altitude and temperature.
 /// TODO: define in atmospheres.
-static const units::pressure::bar_t SURFACE_PRESSURE(1.01325);
+static constexpr Pressure SURFACE_PRESSURE = units::pressure::bar_t(1.01325);
 
 /// Magnitude of gravitational force in m/s^2 take a value close to the mean
 /// https://en.wikipedia.org/wiki/Gravity_of_Earth
 ///
 /// TODO: Allow varying this based on latitude
-static const units::acceleration::meters_per_second_squared_t GRAVITY(9.80665);
+static const Acceleration GRAVITY = units::acceleration::meters_per_second_squared_t (9.80665);
 
 } // namespace bungee
