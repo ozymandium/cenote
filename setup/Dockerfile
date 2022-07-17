@@ -63,4 +63,12 @@ RUN cd ${BUILD_DIR} && conan install /tmp/conanfile.txt -pr:b=default
 # allow git from inside container
 RUN git config --global --add safe.directory ${SRC_DIR}
 
+# jupyter theme setup
+RUN jt -t monokai -cellw 95%
+
+# add build dir to python path so bungee pybind module can be imported from anywhere
+ENV PYTHONPATH="${BUILD_DIR}:${PYTHONPATH}"
+
+# working directory is the script dir for ease of dev since all primary development actions
+# are in scripts
 WORKDIR ${SRC_DIR}/scripts

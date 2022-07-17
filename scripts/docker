@@ -3,6 +3,9 @@
 set -e 
 set -o pipefail
 
+# build and run docker container.
+# run this from the host, obviously.
+
 # directory where this sript is stored
 SCRIPT_DIR=$(dirname -- "$( readlink -f -- "$0"; )";)
 # repo directory where all source files are
@@ -17,4 +20,5 @@ docker run --interactive --tty --rm \
   --volume $HOME/.gitconfig:/etc/gitconfig \
   --entrypoint /bin/zsh \
   -p 8888:8888 \
+  --name cenote \
   cenote

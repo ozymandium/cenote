@@ -1,0 +1,27 @@
+water: FRESH
+tanks:
+  Sidemount:
+    type: LP108
+    pressure: 3600 psi
+    mix: 
+      fO2: 0.21
+  Deco:
+    type: AL40
+    pressure: 2200 psi
+    mix: 
+      fO2: 0.97
+scr: 
+  work: 0.75 ft^3 / min
+  deco: 0.55 ft^3 / min
+profile:
+  - {depth: 115 ft, duration: 4 min, tank: Sidemount}
+  - {depth: 115 ft, duration: 26 min}
+  - {depth: 50 ft,  duration: 3 min}
+  - {depth: 50 ft,  duration: 2 min}
+  - {depth: 40 ft,  duration: 1 min}
+  - {depth: 40 ft,  duration: 4 min}
+  - {depth: 30 ft,  duration: 1 min}
+  - {depth: 30 ft,  duration: 6 min}
+  - {depth: 20 ft,  duration: 1 min}
+  - {depth: 20 ft,  duration: 11 min, tank: Deco}
+  - {depth: 0 ft,   duration: 1 min}

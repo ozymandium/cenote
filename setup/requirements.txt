@@ -12,3 +12,4 @@ black
 clang-format
 conan
 jupyter
+jupyterthemes

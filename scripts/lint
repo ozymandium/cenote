@@ -1,9 +1,12 @@
 #!/bin/zsh
 
+# Meant to be run from within docker container.
+# Fix style errors in place.
+
 set -e 
 set -o pipefail
 
 STYLE_FILE=$SRC_DIR/setup/.clang-format
 
 # c++ stuff
-find cpp -regex '.*\.\(cpp\|h\|inl\)' -exec clang-format -i {} -style=file:$STYLE_FILE \;
+find $SRC_DIR/cpp -regex '.*\.\(cpp\|h\|inl\)' -exec clang-format -i {} -style=file:$STYLE_FILE \;
