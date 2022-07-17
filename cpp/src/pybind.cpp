@@ -10,9 +10,9 @@
 using namespace bungee;
 namespace py = pybind11;
 
-#define WRAP_UNIT(mod, cls)                                                                  \
+#define WRAP_UNIT(mod, cls)                                                                        \
     {                                                                                              \
-        py::class_<cls>(mod, #cls).def(py::init<double>());                                       \
+        py::class_<cls>(mod, #cls).def(py::init<double>());                                        \
     }
 
 namespace {
@@ -29,8 +29,7 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
     }
 }
 
-template<typename Unit>
-std::string GetUnitStr()
+template <typename Unit> std::string GetUnitStr()
 {
     using namespace units::literals;
     std::string abbreviation = units::abbreviation(Unit(1));

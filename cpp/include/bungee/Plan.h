@@ -150,7 +150,6 @@ private:
 /// \param[in] water The type of water, assumed to be constant betwwen pt0 and pt1.
 ///
 /// \return Consumed gas in surface volume.
-Volume Usage(const Plan::Point& pt0, const Plan::Point& pt1,
-                             VolumeRate scr, Water water);
+Volume Usage(const Plan::Point& pt0, const Plan::Point& pt1, VolumeRate scr, Water water);
 
 } // namespace bungee

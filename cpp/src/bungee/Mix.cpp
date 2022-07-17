@@ -24,7 +24,6 @@ void Mix::set(const double fO2)
 }
 
 const Mix AIR(0.20946);
-const Mix::PartialPressure SURFACE_AIR_PP(AIR.partialPressure(Depth(0.),
-                                                              Water::FRESH));
+const Mix::PartialPressure SURFACE_AIR_PP(AIR.partialPressure(Depth(0.), Water::FRESH));
 
 } // namespace bungee

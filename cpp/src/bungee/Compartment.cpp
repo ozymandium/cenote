@@ -17,12 +17,10 @@ Compartment::Compartment(const Params& params) : _params(params) {}
 
 void Compartment::set(const Pressure pressure) { _pressure = pressure; }
 
-void Compartment::update(const Pressure ambientPressure,
-                         const Time time)
+void Compartment::update(const Pressure ambientPressure, const Time time)
 {
     assert(_pressure.has_value());
-    const Pressure pressureDiff =
-        ambientPressure - WATER_VAPOR_PRESSURE - _pressure.value();
+    const Pressure pressureDiff = ambientPressure - WATER_VAPOR_PRESSURE - _pressure.value();
     const Scalar timeRatio = time / _params.halfLife;
     _pressure.value() += pressureDiff * (1 - std::pow(2, -timeRatio.value()));
 }

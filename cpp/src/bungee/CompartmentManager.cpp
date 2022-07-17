@@ -21,8 +21,7 @@ void CompartmentManager::equilibrium(const Mix::PartialPressure& partialPressure
     }
 }
 
-void CompartmentManager::update(const Mix::PartialPressure& partialPressure,
-                                const Time time)
+void CompartmentManager::update(const Mix::PartialPressure& partialPressure, const Time time)
 {
     for (auto& compartment : _compartments) {
         compartment.update(partialPressure.N2, time);

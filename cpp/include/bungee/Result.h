@@ -2,8 +2,8 @@
 
 #include "Plan.h"
 
-#include <Eigen/Dense>
 #include "custom_units.h"
+#include <Eigen/Dense>
 
 namespace bungee {
 

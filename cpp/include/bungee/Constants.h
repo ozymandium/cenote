@@ -30,6 +30,6 @@ static constexpr Pressure SURFACE_PRESSURE = units::pressure::bar_t(1.01325);
 /// https://en.wikipedia.org/wiki/Gravity_of_Earth
 ///
 /// TODO: Allow varying this based on latitude
-static const Acceleration GRAVITY = units::acceleration::meters_per_second_squared_t (9.80665);
+static const Acceleration GRAVITY = units::acceleration::meters_per_second_squared_t(9.80665);
 
 } // namespace bungee

@@ -38,12 +38,10 @@ public:
     Tank(const Params& params, Volume volume);
 
     /// \brief compute gas volume for a given pressure
-    static Volume VolumeAtPressure(const Params& params,
-                                                   Pressure pressure);
+    static Volume VolumeAtPressure(const Params& params, Pressure pressure);
 
     /// \brief compute gas pressure for a given volume
-    static Pressure PressureAtVolume(const Params& params,
-                                                   Volume volume);
+    static Pressure PressureAtVolume(const Params& params, Volume volume);
 
     Pressure servicePressure() const { return _params.servicePressure; }
     Volume serviceVolume() const;
