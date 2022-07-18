@@ -58,6 +58,7 @@ COPY --chown=${USER}:${USER} conanfile.txt /tmp/conanfile.txt
 # auto installation of some stuff is broken, have to manually install on occasion
 # https://github.com/conan-io/conan-center-index/issues/7752
 RUN conan install gtest/1.10.0@ -r conancenter --build gtest
+RUN conan install fmt/9.0.0@ -r conancenter --build fmt
 RUN cd ${BUILD_DIR} && conan install /tmp/conanfile.txt -pr:b=default
 
 # allow git from inside container

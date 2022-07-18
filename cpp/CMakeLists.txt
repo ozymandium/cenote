@@ -15,13 +15,25 @@ find_package(GTest CONFIG REQUIRED)
 find_package(Eigen3 CONFIG REQUIRED)
 find_package(pybind11 CONFIG REQUIRED)
 find_package(Python REQUIRED COMPONENTS Interpreter Development)
+find_package(fmt CONFIG REQUIRED)
+
+## Core library
+
+add_library(bungee_core SHARED ${SRC_FILES})
+target_link_libraries(bungee_core 
+    PUBLIC
+    units::units # header only, but whatever
+    Eigen3::Eigen
+    ${fmt_LIBRARIES}
+)
+target_include_directories(bungee_core PUBLIC 
+    include 
+    ${units_INCLUDE_DIRS}
+    ${Eigen3_INCLUDE_DIRS}
+    ${fmt_INCLUDE_DIRS}
+)
 
 ## Python bindings
-
-# instead of building the python bindings as a thin library that links to the main library
-# do a redundant python library that includes because i can't figure out how to get the linker
-# to find libbungee.so and am pretty fucking done with build system problems. jesus christ just
-# let me write code already.
 
 # conan fucking sucks
 # https://github.com/conan-io/conan-center-index/issues/9343
@@ -40,21 +52,23 @@ endforeach()
 endif()
 
 pybind11_add_module(bungee 
-    ${HDR_FILES}
+    ${HDR_FILES} # is the necessary
     ${SRC_FILES}
     src/pybind.cpp
 )
 target_link_libraries(bungee 
     PUBLIC
-    ${units_LIBRARIES} # header only, but whatever
-    ${Eigen3_LIBRARIES}
-    ${pybind11_LIBRARIES}
+    units::units # header only, but whatever
+    Eigen3::Eigen
+    # pybind11::pybind11
+    ${fmt_LIBRARIES}
 )
 target_include_directories(bungee PUBLIC 
     include 
     ${units_INCLUDE_DIRS}
     ${Eigen3_INCLUDE_DIRS}
     ${pybind11_INCLUDE_DIRS}
+    ${fmt_INCLUDE_DIRS}
 )
 
 ## Installation
@@ -66,29 +80,29 @@ install(
 
 ## Testing
 
-# enable_testing()
+enable_testing()
 
-# # Water.cpp
-# add_executable(test_water test/test_Water.cpp)
-# target_link_libraries(test_water GTest::GTest GTest::Main bungee)
-# add_test(test-water test_water)
+# Water.cpp
+add_executable(test_water test/test_Water.cpp)
+target_link_libraries(test_water bungee_core ${GTest_LIBRARIES})
+add_test(test-water test_water)
 
-# # Tank.cpp
-# add_executable(test_tank test/test_Tank.cpp)
-# target_link_libraries(test_tank GTest::GTest GTest::Main bungee)
-# add_test(test-tank test_tank)
+# Tank.cpp
+add_executable(test_tank test/test_Tank.cpp)
+target_link_libraries(test_tank bungee_core ${GTest_LIBRARIES})
+add_test(test-tank test_tank)
 
-# # Scr.cpp
-# add_executable(test_scr test/test_Scr.cpp)
-# target_link_libraries(test_scr GTest::GTest GTest::Main bungee)
-# add_test(test-scr test_scr)
+# Scr.cpp
+add_executable(test_scr test/test_Scr.cpp)
+target_link_libraries(test_scr bungee_core ${GTest_LIBRARIES})
+add_test(test-scr test_scr)
 
-# # Plan.cpp
-# add_executable(test_plan test/test_Plan.cpp)
-# target_link_libraries(test_plan GTest::GTest GTest::Main bungee)
-# add_test(test-plan test_plan)
+# Plan.cpp
+add_executable(test_plan test/test_Plan.cpp)
+target_link_libraries(test_plan bungee_core ${GTest_LIBRARIES})
+add_test(test-plan test_plan)
 
-# # Result.cpp
-# add_executable(test_result test/test_Result.cpp)
-# target_link_libraries(test_result GTest::GTest GTest::Main bungee)
-# add_test(test-result test_result)
+# Result.cpp
+add_executable(test_result test/test_Result.cpp)
+target_link_libraries(test_result bungee_core ${GTest_LIBRARIES})
+add_test(test-result test_result)

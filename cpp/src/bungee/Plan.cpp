@@ -63,20 +63,20 @@ void Plan::finalize()
     _finalized = true;
 }
 
-Eigen::ArrayXd Plan::time() const
+Eigen::VectorXd Plan::time() const
 {
-    Eigen::Matrix2Xd data(2, _profile.size());
+    Eigen::VectorXd data(_profile.size());
     for (size_t i = 0; i < _profile.size(); ++i) {
-        data(0, i) = _profile[i].time();
+        data(i) = _profile[i].time();
     }
     return data;
 }
 
-Eigen::ArrayXd Plan::depth() const
+Eigen::VectorXd Plan::depth() const
 {
-    Eigen::Matrix2Xd data(2, _profile.size());
+    Eigen::VectorXd data(_profile.size());
     for (size_t i = 0; i < _profile.size(); ++i) {
-        data(1, i) = _profile[i].depth();
+        data(i) = _profile[i].depth();
     }
     return data;
 }

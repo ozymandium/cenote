@@ -2,6 +2,9 @@
 #include <bungee/ensure.h>
 
 #include <unsupported/Eigen/Splines>
+#include <fmt/format.h>
+
+#include <iostream>
 
 using namespace units::literals;
 
@@ -22,52 +25,48 @@ size_t GetNumPoints(Time duration)
 /// STL abs is not constexpr
 template <typename T> constexpr auto Abs(T const& x) noexcept { return x < 0 ? -x : x; }
 
-/// returns a percentage (0.1 = 10%)
-constexpr double PercentDiff(const double val, const double expected)
-{
-    return Abs((val - expected) / expected);
-}
-
 } // namespace
 
-Result::Result(const size_t N) : time(N), depth(N) {}
-
-Result GetResult(const Plan& plan)
-{
+Result::Result(const Plan& plan) {
     ensure(plan.finalized(), "plan not finalized");
 
     // start by figuring out the number of points
     const size_t N = GetNumPoints(plan.profile().back().time);
 
-    Result result(N);
-
     // linearly space time points
-    result.time = Eigen::ArrayXd::LinSpaced(N, 0, plan.profile().back().time());
-    result.depth = Interpolate(plan.time(), plan.depth(), result.time);
-
-    return result;
+    time = Eigen::VectorXd::LinSpaced(N, 0, plan.profile().back().time());
+    depth = Interpolate(plan.time(), plan.depth(), time);
 }
 
-Eigen::ArrayXd Interpolate(Eigen::Ref<const Eigen::ArrayXd> xp, Eigen::Ref<const Eigen::ArrayXd> yp,
-                           Eigen::Ref<const Eigen::ArrayXd> x)
+Eigen::VectorXd Interpolate(Eigen::Ref<const Eigen::VectorXd> xp, Eigen::Ref<const Eigen::VectorXd> yp,
+                           Eigen::Ref<const Eigen::VectorXd> x)
 {
-    using Spline2d = Eigen::Spline<double, 2>;
+    ensure(xp.size() == yp.size(), "xp and yp must be same size");
+    // check that xp is increasing
+    for (size_t i = 1; i < xp.size(); ++i) {
+        ensure(xp[i] > xp[i-1], "Interpolate: xp must be increasing");
+    }
+    // check range of x
+    ensure((xp[0] <= x.array()).all(), "cannot interpolate before beginning");
+    ensure((x.array() <= xp.tail(1)[0]).all(), "cannot interpolate after end");
 
-    Eigen::Matrix2Xd data;
-    data << xp, yp;
+    auto FindIdx = [&](const double val) {
+        for (size_t i = 0; i < x.size() - 1; ++i) {
+            if ((xp[i] <= val) && (val <= xp[i + 1])) {
+                return i;
+            }
+        }   
+        ensure(false, "didn't find it");
+    };
 
     // interpolate works on value between 0.0 and 1.0
     // create normalized value
-    const double xpRange = xp.maxCoeff() - xp.minCoeff();
-    const Eigen::ArrayXd xn = (xp - xp.minCoeff()) / xpRange;
-
-    const Spline2d spline = Eigen::SplineFitting<Spline2d>::Interpolate(data, 2);
-    Eigen::ArrayXd y(x.size());
+    Eigen::VectorXd y(x.size());
     for (size_t i = 0; i < x.size(); ++i) {
-        const Eigen::ArrayXd res = spline(xn[i]);
-        ensure(PercentDiff(res(1), x[i]) < 1e-12,
-               "interpolated value doesn't match expected value");
-        y[i] = res(1);
+        const size_t j = FindIdx(x[i]);
+        const double slope = (yp[j + 1] - yp[j]) / (xp[j + 1] - xp[j]);
+        const double diff = x[i] - xp[j];
+        y[i] = yp[j] + slope * diff;
     }
     return y;
 }

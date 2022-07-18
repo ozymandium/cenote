@@ -6,6 +6,7 @@
 #include <pybind11/functional.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/eigen.h>
 
 using namespace bungee;
 namespace py = pybind11;
@@ -18,7 +19,7 @@ namespace py = pybind11;
 namespace {
 
 // https://stackoverflow.com/a/3418285
-void replaceAll(std::string& str, const std::string& from, const std::string& to)
+void Replace(std::string& str, const std::string& from, const std::string& to)
 {
     if (from.empty())
         return;
@@ -33,7 +34,7 @@ template <typename Unit> std::string GetUnitStr()
 {
     using namespace units::literals;
     std::string abbreviation = units::abbreviation(Unit(1));
-    replaceAll(abbreviation, "_", " ");
+    Replace(abbreviation, "_", " ");
     return abbreviation;
 }
 
@@ -77,6 +78,8 @@ PYBIND11_MODULE(bungee, mod) {
         .def("set_tank", &Plan::setTank)
         .def("add_segment", &Plan::addSegment)
         .def("finalize", &Plan::finalize)
+        .def("time", &Plan::time)
+        .def("depth", &Plan::depth)
     ;
     // Water.h
     py::enum_<Water>(mod, "Water")
@@ -84,10 +87,10 @@ PYBIND11_MODULE(bungee, mod) {
         .value("SALT", Water::SALT)
     ;
     // Result.h
-    mod.def("get_result", &GetResult);
     py::class_<Result>(mod, "Result")
-        .def_readwrite("time", &Result::time)
-        .def_readwrite("depth", &Result::depth)
+        .def(py::init<const Plan&>())
+        .def_readonly("time", &Result::time)
+        .def_readonly("depth", &Result::depth)
     ;
 
 }

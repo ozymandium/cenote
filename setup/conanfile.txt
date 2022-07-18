@@ -3,6 +3,7 @@ units/2.3.1
 gtest/1.10.0
 eigen/3.4.0 
 pybind11/2.9.2 
+fmt/9.0.0 
 
 [generators]
 CMakeToolchain

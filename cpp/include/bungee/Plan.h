@@ -80,8 +80,10 @@ public:
     const TankLoadout& tanks() const { return _tanks; }
     const Profile& profile() const { return _profile; }
 
-    Eigen::ArrayXd time() const;
-    Eigen::ArrayXd depth() const;
+    /// FIXME: use Eigen::Map to avoid creating new array, but will have to fix the size of the 
+    /// tank member in Point and switch to a different type
+    Eigen::VectorXd time() const;
+    Eigen::VectorXd depth() const;
 
 private:
     const Water _water;

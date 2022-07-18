@@ -13,9 +13,10 @@ echo "BUILD_DIR: $BUILD_DIR"
 # c++
 cd $BUILD_DIR
 cmake $SRC_DIR/cpp -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug
-cmake --build .
+cmake --build . -j 4
 make install
 
 # python
 cd $SRC_DIR/py
-python3 setup.py install --user
+# setuptools sucks with artifacts, puts shit in the source tree, just less shit with the -b flag
+python3 setup.py build -b $BUILD_DIR install --user
