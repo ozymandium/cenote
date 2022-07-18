@@ -7,7 +7,6 @@ matplotlib
 pytest
 coverage
 dipplanner @ git+https://github.com/ozymandium/dipplanner.git
-pybind11
 black
 clang-format
 conan

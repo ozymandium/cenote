@@ -4,7 +4,7 @@ ENV USER="user"
 ENV HOME_DIR="/home/${USER}"
 ENV SRC_DIR="${HOME_DIR}/src"
 ENV BUILD_DIR="${HOME_DIR}/build"
-ENV PATH="${BUILD_DIR}:${HOME_DIR}/.local/bin:${PATH}"
+ENV PATH="${HOME_DIR}/.local/bin:${PATH}"
 
 # configures locale
 RUN apt update -qq > /dev/null \
@@ -66,8 +66,8 @@ RUN git config --global --add safe.directory ${SRC_DIR}
 # jupyter theme setup
 RUN jt -t monokai -cellw 95%
 
-# add build dir to python path so bungee pybind module can be imported from anywhere
-ENV PYTHONPATH="${BUILD_DIR}:${PYTHONPATH}"
+# # add build dir to python path so bungee pybind module can be imported from anywhere
+# ENV PYTHONPATH="${BUILD_DIR}:${PYTHONPATH}"
 
 # working directory is the script dir for ease of dev since all primary development actions
 # are in scripts

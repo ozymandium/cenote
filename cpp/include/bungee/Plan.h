@@ -12,38 +12,12 @@
 
 namespace bungee {
 
-// /// This is used to construct the list of Point as they are added in a loop so that they don't
-// /// have to be figured out in batch.
-// class PlanBuilder {
-// public:
-//     PlanBuilder();
-
-//     /// \brief Set the tank type that will be used for any points added.
-//     void setTank(const std::string& tank);
-
-//     /// \brief Add a point at the specified depth and time using the currently set SCR and tank.
-//     ///
-//     /// FIXME: allow points to be at the same time as the current point to build pure square
-//     /// profiles for investigation purposes.
-//     void addPoint(Time time, Depth depth);
-
-//     const std::vector<Point> get() const;
-
-// private:
-//     std::optional<std::string> _tank;
-//     std::vector<Point> _points;
-// };
-
 /// A coarse dive plan that is provided by the user. Computations are done based on this input.
 /// PlanBuilder should be used to compute constructor args.
 /// This may or may not include the final ascent.
 class Plan {
-
 public:
     struct Scr {
-        // /// Provide a constructor to prevent pybind from default initializing
-        // Scr(VolumeRate, VolumeRate);
-
         /// SCR during the bottom portion of the dive, i.e., everything until the final ascent.
         VolumeRate work;
         /// SCR during the decompression portion of the dive, i.e., during the final ascent.
@@ -54,9 +28,6 @@ public:
 
     /// Represents and single tank configuration at the start of the dive
     struct TankConfig {
-        // /// Provide a constructor to prevent pybind from default initializing
-        // TankConfig()
-
         /// The type of tank.
         Tank::Type type;
         /// The initial pressure at the start of the dive.
@@ -78,31 +49,24 @@ public:
         /// Name of tank in use beginning at `time` and proceeding forward to the next point.
         std::string tank;
 
-        /// \brief Assert plausibility.
-        ///
-        /// TODO: lock down construction instead?
+        /// \brief Except if not plausible.
         void validate() const;
     };
 
     using Profile = std::vector<Point>;
-
-    /// Will finalize.
-    Plan(Water water, const Scr& scr, const TankLoadout& tanks, const Profile& points);
-
-    /*
-     * API for constructing profile one point at a time.
-     */
 
     /// \brief Construct without providing point, for use when parsing a list that doesn't require
     /// the user to specify a tank every point (only at swaps).
     ///
     Plan(Water water, const Scr& scr, const TankLoadout& tanks);
 
+    /*
+     * Builders
+     */
+
     void setTank(const std::string& name);
 
-    void addPointFromDuration(Time duration, Depth depth);
-    void addPoint(Time time, Depth depth);
-    void addPoint(const Point& point);
+    void addSegment(Time duration, Depth depth);
 
     void finalize();
     bool finalized() const { return _finalized; }

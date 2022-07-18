@@ -20,20 +20,13 @@ void Plan::Point::validate() const
     ensure(depth.value() >= 0, "negative depth");
 }
 
-Plan::Plan(Water water, const Scr& scr, const TankLoadout& tanks, const Profile& points)
-    : Plan(water, scr, tanks)
-{
-    _profile.reserve(points.size());
-    for (auto point : points) {
-        addPoint(point);
-    }
-    finalize();
-}
-
 Plan::Plan(Water water, const Scr& scr, const TankLoadout& tanks)
     : _water(water), _scr(scr), _tanks(tanks), _finalized(false)
 {
+    // water doesn't need checking
+    // check scr
     _scr.validate();
+    // check tank config
     for (auto const& [name, tank] : tanks) {
         tank.validate();
     }
@@ -43,38 +36,22 @@ void Plan::setTank(const std::string& name)
 {
     ensure(_tanks.contains(name), "unknown tank");
     _currentTank = name;
-}
-
-void Plan::addPointFromDuration(Time duration, Depth depth)
-{
-    ensure(!_profile.empty(), "can't add first point from duration");
-    addPoint(_profile.back().time + duration, depth);
-}
-
-void Plan::addPoint(Time time, Depth depth)
-{
-    ensure(_currentTank.has_value(), "current tank not set");
-    addPoint(Point{time, depth, _currentTank.value()});
-}
-
-void Plan::addPoint(const Point& point)
-{
-    ensure(!_finalized, "finalized already");
-    // checks
     if (_profile.empty()) {
-        ensure(point.time == 0_min, "first point must start at zero time");
-        ensure(point.depth == 0_m, "first point must be start at the surface");
+        _profile.emplace_back(0_s, 0_m, name);
     }
-    else {
-        // for now, only allow points that increase in time, add on pure square profile support
-        // later.
-        ensure(point.time > _profile.back().time, "each point must increase in time");
-        // for now, keep time denominated in integer minutes to keep things simple
-        ensure(point.time.value() == units::unit_cast<int64_t>(point.time),
-               "time must be in integer (whole) minutes");
-    }
-    ensure(_tanks.contains(point.tank), "unknown tank name");
-    _profile.push_back(point);
+}
+
+void Plan::addSegment(Time duration, Depth endDepth)
+{
+    ensure(duration > 0_s, "negative segment duration");
+    ensure(duration() == units::unit_cast<int64_t>(duration),
+            "duration must be in integer minutes");
+    ensure(_currentTank.has_value(), "current tank not set");
+    ensure(!_profile.empty(), "points empty. setting current tank should have set this.");
+    ensure(!_finalized, "finalized already");
+    const Time time = _profile.back().time + duration;
+    ensure(time > _profile.back().time, "negative segment duration");
+    _profile.emplace_back(time, endDepth, _currentTank.value());
 }
 
 void Plan::finalize()

@@ -40,16 +40,16 @@ template <typename Unit> std::string GetUnitStr()
 } // namespace
 
 // clang-format off
-PYBIND11_MODULE(bungee_py, mod) {
-    // units
-    WRAP_UNIT(mod, VolumeRate)
+PYBIND11_MODULE(bungee, mod) {
+    // custom_units.h
+    WRAP_UNIT(mod, Depth)
     WRAP_UNIT(mod, Pressure)
     WRAP_UNIT(mod, Time)
-    WRAP_UNIT(mod, Depth)
-    mod.def("get_volume_rate_unit_str", &GetUnitStr<VolumeRate>);
-    mod.def("get_pressure_rate_unit_str", &GetUnitStr<Pressure>);
-    mod.def("get_time_unit_str", &GetUnitStr<Time>);
+    WRAP_UNIT(mod, VolumeRate)
     mod.def("get_depth_unit_str", &GetUnitStr<Depth>);
+    mod.def("get_pressure_unit_str", &GetUnitStr<Pressure>);
+    mod.def("get_time_unit_str", &GetUnitStr<Time>);
+    mod.def("get_volume_rate_unit_str", &GetUnitStr<VolumeRate>);
     // Tank.h
     py::enum_<Tank::Type>(mod, "Tank")
         .value("AL40", Tank::AL40)
@@ -75,7 +75,7 @@ PYBIND11_MODULE(bungee_py, mod) {
     py::class_<Plan>(mod, "Plan")
         .def(py::init<Water, const Plan::Scr&, const Plan::TankLoadout&>())
         .def("set_tank", &Plan::setTank)
-        .def("add_point", &Plan::addPointFromDuration)
+        .def("add_segment", &Plan::addSegment)
         .def("finalize", &Plan::finalize)
     ;
     // Water.h
@@ -84,6 +84,7 @@ PYBIND11_MODULE(bungee_py, mod) {
         .value("SALT", Water::SALT)
     ;
     // Result.h
+    mod.def("get_result", &GetResult);
     py::class_<Result>(mod, "Result")
         .def_readwrite("time", &Result::time)
         .def_readwrite("depth", &Result::depth)

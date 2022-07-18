@@ -9,37 +9,19 @@ include(${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
 file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/bungee/*.cpp)
 file(GLOB HDR_FILES ${PROJECT_SOURCE_DIR}/include/bungee/*.h)
 
-# get dependencies
+## get dependencies
 find_package(units CONFIG REQUIRED)
 find_package(GTest CONFIG REQUIRED)
 find_package(Eigen3 CONFIG REQUIRED)
 find_package(pybind11 CONFIG REQUIRED)
 find_package(Python REQUIRED COMPONENTS Interpreter Development)
 
-## Core library
-
-# the pybind11 library has to be shared, but dependencies of the pybind11 module
-# can be static https://github.com/pybind/pybind11/issues/466#issuecomment-256386257
-# make it static for packing, shared for faster dev
-# add_library(bungee STATIC ${SRC_FILES})
-add_library(bungee SHARED ${SRC_FILES})
-target_link_libraries(bungee 
-    ${units_LIBRARIES} # header only, but whatever
-    ${Eigen3_LIBRARIES}
-    ${pybind11_LIBRARIES}
-    ${Python_LIBRARIES}
-)
-target_include_directories(bungee PUBLIC 
-    include 
-    ${units_INCLUDE_DIRS}
-    ${Eigen3_INCLUDE_DIRS}
-    ${pybind11_INCLUDE_DIRS}
-    ${Python_INCLUDE_DIRS}
-)
-set_target_properties(bungee PROPERTIES PUBLIC_HEADER "${HDR_FILES}")
-target_compile_features(bungee PUBLIC cxx_std_20)
-
 ## Python bindings
+
+# instead of building the python bindings as a thin library that links to the main library
+# do a redundant python library that includes because i can't figure out how to get the linker
+# to find libbungee.so and am pretty fucking done with build system problems. jesus christ just
+# let me write code already.
 
 # conan fucking sucks
 # https://github.com/conan-io/conan-center-index/issues/9343
@@ -57,36 +39,30 @@ foreach(INCDIR IN LISTS pybind11_INCLUDE_DIRS)
 endforeach()
 endif()
 
-pybind11_add_module(bungee_py src/pybind.cpp)
-target_link_libraries(bungee_py PRIVATE bungee)
+pybind11_add_module(bungee 
+    ${HDR_FILES}
+    ${SRC_FILES}
+    src/pybind.cpp
+)
+target_link_libraries(bungee 
+    PUBLIC
+    ${units_LIBRARIES} # header only, but whatever
+    ${Eigen3_LIBRARIES}
+    ${pybind11_LIBRARIES}
+)
+target_include_directories(bungee PUBLIC 
+    include 
+    ${units_INCLUDE_DIRS}
+    ${Eigen3_INCLUDE_DIRS}
+    ${pybind11_INCLUDE_DIRS}
+)
 
 ## Installation
 
 install(
-    TARGETS bungee 
-    LIBRARY DESTINATION /usr/local/lib
-    PUBLIC_HEADER DESTINATION /usr/local/include/bungee
+    TARGETS bungee
+    LIBRARY DESTINATION /home/user/.local/lib/python3.10/site-packages #??
 )
-
-## Scratch binary for figuring shit out
-
-add_executable(scratch src/scratch.cpp)
-target_link_libraries(scratch
-    bungee 
-    # ${units_LIBRARIES} # header only, but whatever
-    # ${Eigen3_LIBRARIES}
-    # ${pybind11_LIBRARIES}
-    # ${Python_LIBRARIES}
-)
-# target_include_directories(bungee PUBLIC 
-#     include 
-#     ${units_INCLUDE_DIRS}
-#     ${Eigen3_INCLUDE_DIRS}
-#     ${pybind11_INCLUDE_DIRS}
-#     ${Python_INCLUDE_DIRS}
-# )
-set_target_properties(scratch PROPERTIES PUBLIC_HEADER "${HDR_FILES}")
-target_compile_features(scratch PUBLIC cxx_std_20)
 
 ## Testing
 
