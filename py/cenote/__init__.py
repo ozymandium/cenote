@@ -40,7 +40,7 @@ def get_plan(path: str):
         pressure = bungee.Pressure(pressure_pint.m)
         mix = bungee.Mix(info["mix"]["fO2"])
         tanks[name] = bungee.TankConfig(enum, pressure, mix)
-        
+
     # Plan
     plan = bungee.Plan(water, scr, tanks)
 
@@ -60,11 +60,10 @@ def get_plan(path: str):
 
 
 class Result:
-
     def __init__(self, bungee_result: bungee.Result):
         self.depth = (bungee_result.depth * DEPTH_UNIT).to(DEPTH_DISPLAY_UNIT)
         self.time = (bungee_result.time * TIME_UNIT).to(TIME_DISPLAY_UNIT)
-        
+
 
 def get_result(plan: bungee.Plan):
     bungee_result = bungee.Result(plan)

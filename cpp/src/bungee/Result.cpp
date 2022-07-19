@@ -1,8 +1,8 @@
 #include <bungee/Result.h>
 #include <bungee/ensure.h>
 
-#include <unsupported/Eigen/Splines>
 #include <fmt/format.h>
+#include <unsupported/Eigen/Splines>
 
 #include <iostream>
 
@@ -27,7 +27,8 @@ template <typename T> constexpr auto Abs(T const& x) noexcept { return x < 0 ? -
 
 } // namespace
 
-Result::Result(const Plan& plan) {
+Result::Result(const Plan& plan)
+{
     ensure(plan.finalized(), "plan not finalized");
 
     // start by figuring out the number of points
@@ -45,13 +46,14 @@ Result::Result(const Plan& plan) {
     }
 }
 
-Eigen::VectorXd Interpolate(Eigen::Ref<const Eigen::VectorXd> xp, Eigen::Ref<const Eigen::VectorXd> yp,
-                           Eigen::Ref<const Eigen::VectorXd> x)
+Eigen::VectorXd Interpolate(Eigen::Ref<const Eigen::VectorXd> xp,
+                            Eigen::Ref<const Eigen::VectorXd> yp,
+                            Eigen::Ref<const Eigen::VectorXd> x)
 {
     ensure(xp.size() == yp.size(), "xp and yp must be same size");
     // check that xp is increasing
     for (size_t i = 1; i < xp.size(); ++i) {
-        ensure(xp[i] > xp[i-1], "Interpolate: xp must be increasing");
+        ensure(xp[i] > xp[i - 1], "Interpolate: xp must be increasing");
     }
     // check range of x
     ensure((xp[0] <= x.array()).all(), "cannot interpolate before beginning");
@@ -62,7 +64,7 @@ Eigen::VectorXd Interpolate(Eigen::Ref<const Eigen::VectorXd> xp, Eigen::Ref<con
             if ((xp[i] <= val) && (val <= xp[i + 1])) {
                 return i;
             }
-        }   
+        }
         ensure(false, "didn't find it");
     };
 

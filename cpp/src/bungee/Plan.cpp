@@ -38,7 +38,8 @@ void Plan::setTank(const std::string& name)
     _currentTank = name;
     if (_profile.empty()) {
         _profile.emplace_back(0_s, 0_m, name);
-    } else {
+    }
+    else {
         _profile.back().tank = name;
     }
 }
@@ -47,7 +48,7 @@ void Plan::addSegment(Time duration, Depth endDepth)
 {
     ensure(duration > 0_s, "negative segment duration");
     ensure(duration() == units::unit_cast<int64_t>(duration),
-            "duration must be in integer minutes");
+           "duration must be in integer minutes");
     ensure(_currentTank.has_value(), "current tank not set");
     ensure(!_profile.empty(), "points empty. setting current tank should have set this.");
     ensure(!_finalized, "finalized already");
@@ -83,7 +84,8 @@ Eigen::VectorXd Plan::depth() const
     return data;
 }
 
-std::string Plan::getTankAtTime(const Time time) const {
+std::string Plan::getTankAtTime(const Time time) const
+{
     ensure(_profile.front().time <= time, "getTankAtTime: time is before beginning of dive");
     ensure(time <= _profile.back().time, "getTankAtTime: time is after end of dive");
     for (size_t i = 0; i < _profile.size() - 1; ++i) {

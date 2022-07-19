@@ -3,10 +3,10 @@
 // probably none of these includes are necessary. whatever.
 #include <pybind11/chrono.h>
 #include <pybind11/complex.h>
+#include <pybind11/eigen.h>
 #include <pybind11/functional.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <pybind11/eigen.h>
 
 using namespace bungee;
 namespace py = pybind11;

@@ -10,3 +10,10 @@ STYLE_FILE=$SRC_DIR/setup/.clang-format
 
 # c++ stuff
 find $SRC_DIR/cpp -regex '.*\.\(cpp\|h\|inl\)' -exec clang-format -i {} -style=file:$STYLE_FILE \;
+
+# python setuff
+black \
+    $SRC_DIR/py/cenote \
+    $SRC_DIR/py/test \
+    --line-length 100 \
+    -t py310

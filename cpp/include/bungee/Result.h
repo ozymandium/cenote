@@ -34,7 +34,8 @@ struct Result {
 ///    [ x1, x2, ..., xN ]
 ///
 /// \return interpolated y data corresponding to x
-Eigen::VectorXd Interpolate(Eigen::Ref<const Eigen::VectorXd> xp, Eigen::Ref<const Eigen::VectorXd> yp,
-                           Eigen::Ref<const Eigen::VectorXd> x);
+Eigen::VectorXd Interpolate(Eigen::Ref<const Eigen::VectorXd> xp,
+                            Eigen::Ref<const Eigen::VectorXd> yp,
+                            Eigen::Ref<const Eigen::VectorXd> x);
 
 } // namespace bungee
