@@ -96,5 +96,4 @@ const std::string& Plan::getTankAtTime(const Time time) const
     ensure(false, "couldn't find tank");
 }
 
-
 } // namespace bungee

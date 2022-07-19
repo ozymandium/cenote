@@ -14,6 +14,17 @@ struct Result {
     /// \param[in} N number of points to allocate for all arrays (will be same sized)
     Result(const Plan& plan);
 
+    /// FIXME: need to select working vs deco scr.
+    static std::map<std::string, Eigen::VectorXd>
+    GetPressure(const Plan& plan, Eigen::Ref<const Eigen::VectorXd> time,
+                Eigen::Ref<const Eigen::VectorXd> depth);
+
+    /// FIXME: this assumes that the model units are the same as the units in the rest of bungee,
+    /// whereas the model stuff was left explicit instead of typedef'd explicitly to allow them
+    /// to potentially be different in the future.
+    static Eigen::VectorXd GetCeiling(const Plan& plan, Eigen::Ref<const Eigen::VectorXd> time,
+                                      Eigen::Ref<const Eigen::VectorXd> depth);
+
     /// time in minutes
     ///
     /// FIXME: use array instead? is it lighter weight?
@@ -22,6 +33,8 @@ struct Result {
     Eigen::VectorXd depth;
     /// tank pressure by tank name
     std::map<std::string, Eigen::VectorXd> pressure;
+    /// Minimum depth for decompression model
+    Eigen::VectorXd ceiling;
 };
 
 /// \brief 1d interpolation

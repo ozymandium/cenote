@@ -67,6 +67,7 @@ class Result:
             tank: (pressure * PRESSURE_UNIT).to(PRESSURE_DISPLAY_UNIT)
             for tank, pressure in bungee_result.pressure.items()
         }
+        self.ceiling = (bungee_result.ceiling * DEPTH_UNIT).to(DEPTH_DISPLAY_UNIT)
 
 
 def get_result(plan: bungee.Plan):

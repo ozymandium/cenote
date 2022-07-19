@@ -21,24 +21,10 @@ TEST(Interpolate, FailBeyondEdges) {}
 
 TEST(Interpolate, IncreasingXp) {}
 
-TEST(Usage, NegativeDuration)
-{
-    EXPECT_ANY_THROW(
-        Usage(-1_s, 0_m, 1_L_per_min, Water::FRESH));
-}
+TEST(Usage, NegativeDuration) { EXPECT_ANY_THROW(Usage(-1_s, 0_m, 1_L_per_min, Water::FRESH)); }
 
-TEST(Usage, NegativeScr) {
-        EXPECT_ANY_THROW(
-        Usage(60_s, 0_m, -1_L_per_min, Water::FRESH));
+TEST(Usage, NegativeScr) { EXPECT_ANY_THROW(Usage(60_s, 0_m, -1_L_per_min, Water::FRESH)); }
 
-}
+TEST(Usage, Surface) { EXPECT_EQ(Usage(60_s, 0_m, 10_L_per_min, Water::SALT), 10_L); }
 
-TEST(Usage, Surface)
-{
-    EXPECT_EQ(Usage(60_s, 0_m, 10_L_per_min, Water::SALT), 10_L);
-}
-
-TEST(Usage, Depth)
-{
-    EXPECT_UNIT_NEAR(Usage(60_s, 10_m, 10_L_per_min, Water::SALT), 20_L, 0.1_L);
-}
+TEST(Usage, Depth) { EXPECT_UNIT_NEAR(Usage(60_s, 10_m, 10_L_per_min, Water::SALT), 20_L, 0.1_L); }

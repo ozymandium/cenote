@@ -17,7 +17,7 @@ public:
     /// dives.
     void equilibrium(const Mix::PartialPressure& partialPressure);
 
-    void update(const Mix::PartialPressure& partialPressure, const Time time);
+    void update(const Mix::PartialPressure& partialPressure, const Time duration);
 
     Pressure ceiling() const;
 

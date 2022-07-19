@@ -1,6 +1,7 @@
+#include <bungee/Buhlmann.h>
 #include <bungee/Result.h>
-#include <bungee/ensure.h>
 #include <bungee/Scr.h>
+#include <bungee/ensure.h>
 
 #include <fmt/format.h>
 #include <unsupported/Eigen/Splines>
@@ -39,7 +40,15 @@ Result::Result(const Plan& plan)
     time = Eigen::VectorXd::LinSpaced(N, 0, plan.profile().back().time());
     // linearly interpolate from plan to get depths at high resolution
     depth = Interpolate(plan.time(), plan.depth(), time);
+    pressure = GetPressure(plan, time, depth);
+    ceiling = GetCeiling(plan, time, depth);
+}
 
+std::map<std::string, Eigen::VectorXd> Result::GetPressure(const Plan& plan,
+                                                           Eigen::Ref<const Eigen::VectorXd> time,
+                                                           Eigen::Ref<const Eigen::VectorXd> depth)
+{
+    std::map<std::string, Eigen::VectorXd> pressure;
     // get tank pressures
     // first initialize tanks
     std::map<std::string, Tank> tanks;
@@ -48,11 +57,11 @@ Result::Result(const Plan& plan)
     }
     // initialize pressure arrays to zero and copy starting pressures into the 0th slot
     for (auto const& [name, tank] : tanks) {
-        pressure.emplace(name, Eigen::VectorXd::Zero(N));
+        pressure.emplace(name, Eigen::VectorXd::Zero(time.size()));
         pressure[name][0] = tank.pressure()();
     }
     // iterate through time decreasing pressure in whatever tank is active
-    for (size_t i = 1; i < N; ++i) {
+    for (size_t i = 1; i < time.size(); ++i) {
         // compute the average depth and treat it as constant. smaller time increments work better
         // here.
         const Time duration(time[i] - time[i - 1]);
@@ -60,12 +69,12 @@ Result::Result(const Plan& plan)
         // get the amount consumed at this depth
         // FIXME: need to select working vs deco scr.
         const Volume volumeConsumed = Usage(duration, avgDepth, plan.scr().work, plan.water());
-        // tank at the beginning of the increment is the tank for the duration of the increment. 
+        // tank at the beginning of the increment is the tank for the duration of the increment.
         // same principle as for the broad segments in the plan.
         const std::string& activeTank = plan.getTankAtTime(Time(time[i - 1]));
         // iterate over all tanks
         for (auto& [name, tank] : tanks) {
-            // if tank is active, reduce the volume by the amount consumed this increment and 
+            // if tank is active, reduce the volume by the amount consumed this increment and
             if (name == activeTank) {
                 tank.decreaseVolume(volumeConsumed);
             }
@@ -73,6 +82,33 @@ Result::Result(const Plan& plan)
             pressure[name][i] = tank.pressure()();
         }
     }
+    return pressure;
+}
+
+Eigen::VectorXd Result::GetCeiling(const Plan& plan, Eigen::Ref<const Eigen::VectorXd> time,
+                                   Eigen::Ref<const Eigen::VectorXd> depth)
+{
+    Eigen::VectorXd ceiling = Eigen::VectorXd::Zero(time.size());
+    // tank name to mix
+
+    Buhlmann model(Model::ZHL_16A);
+    model.init();
+
+    // set initial value in the 0th position
+    ceiling[0] = model.ceiling(plan.water())();
+
+    // iterate over increments
+    for (size_t i = 1; i < time.size(); ++i) {
+        const Time duration(time[i] - time[i - 1]);
+        const Depth avgDepth((depth[i - 1] + depth[i]) * 0.5);
+        const std::string& activeTank = plan.getTankAtTime(Time(time[i - 1]));
+        const Mix& mix = plan.tanks().at(activeTank).mix;
+        const Mix::PartialPressure partialPressure = mix.partialPressure(avgDepth, plan.water());
+        model.update(partialPressure, duration);
+        ceiling[i] = model.ceiling(plan.water())();
+    }
+
+    return ceiling;
 }
 
 Volume Usage(const Time duration, const Depth depth, const VolumeRate scr, const Water water)

@@ -99,6 +99,7 @@ PYBIND11_MODULE(bungee, mod) {
         .def_readonly("time", &Result::time)
         .def_readonly("depth", &Result::depth)
         .def_readonly("pressure", &Result::pressure)
+        .def_readonly("ceiling", &Result::ceiling)
     ;
 
 }

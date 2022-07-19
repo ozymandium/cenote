@@ -7,7 +7,7 @@
 
 namespace bungee {
 
-enum class Model { ZHL_16A, COUNT };
+enum class Model { ZHL_16A };
 
 using ModelParams = std::vector<Compartment::Params>;
 

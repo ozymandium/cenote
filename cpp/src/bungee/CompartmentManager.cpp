@@ -21,10 +21,10 @@ void CompartmentManager::equilibrium(const Mix::PartialPressure& partialPressure
     }
 }
 
-void CompartmentManager::update(const Mix::PartialPressure& partialPressure, const Time time)
+void CompartmentManager::update(const Mix::PartialPressure& partialPressure, const Time duration)
 {
     for (auto& compartment : _compartments) {
-        compartment.update(partialPressure.N2, time);
+        compartment.update(partialPressure.N2, duration);
     }
 }
 
@@ -37,6 +37,8 @@ Pressure CompartmentManager::ceiling() const
             maxCeiling = thisCeiling;
         }
     }
+    // max ceiling is now the minimum pressure of N2. divide by the fraction of N2 to get the
+    // ambient pressure
     return maxCeiling;
 }
 

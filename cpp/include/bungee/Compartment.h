@@ -51,9 +51,9 @@ public:
     /// \param[in] ambientPressure The absolute partial pressure of the inert gas within the lungs,
     /// or the "inspired" pressure [bar].
     ///
-    /// \param[in] time The amount of time for which the compartment was exposed to pressure
+    /// \param[in] duration The amount of time for which the compartment was exposed to pressure
     /// `ambientPressure` [min].
-    void update(units::pressure::bar_t ambientPressure, units::time::minute_t time);
+    void update(units::pressure::bar_t ambientPressure, units::time::minute_t duration);
 
     /// \brief The lowest tolerable pressure.
     ///
