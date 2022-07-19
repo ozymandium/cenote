@@ -17,5 +17,5 @@ setup(
     #         "mod = cenote.util.mod:main",
     #     ],
     # },
-    # test_suite = "test",
+    test_suite = "test.py",
 )

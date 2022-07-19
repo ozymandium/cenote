@@ -82,8 +82,14 @@ public:
 
     /// FIXME: use Eigen::Map to avoid creating new array, but will have to fix the size of the 
     /// tank member in Point and switch to a different type
+    /// 
+    /// FIXME: save these as members on finalize?
     Eigen::VectorXd time() const;
     Eigen::VectorXd depth() const;
+
+    /// FIXME: this is an O(N) lookup. That's dogshit. Figure out a way to do O(1) lookup. Will 
+    /// have to index tanks in an array or something other than using strings.
+    std::string getTankAtTime(Time time) const;
 
 private:
     const Water _water;

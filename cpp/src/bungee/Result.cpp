@@ -35,7 +35,14 @@ Result::Result(const Plan& plan) {
 
     // linearly space time points
     time = Eigen::VectorXd::LinSpaced(N, 0, plan.profile().back().time());
+    // linearly interpolate from plan to get depths at high resolution
     depth = Interpolate(plan.time(), plan.depth(), time);
+
+    // get tank pressures
+    std::map<std::string, Tank> tanks;
+    for (auto const& [name, tankConfig] : plan.tanks()) {
+        tanks.emplace(name, GetTankAtPressure(tankConfig.type, tankConfig.pressure));
+    }
 }
 
 Eigen::VectorXd Interpolate(Eigen::Ref<const Eigen::VectorXd> xp, Eigen::Ref<const Eigen::VectorXd> yp,

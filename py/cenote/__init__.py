@@ -11,6 +11,11 @@ PRESSURE_UNIT = UREG.parse_expression(bungee.get_pressure_unit_str()).units
 TIME_UNIT = UREG.parse_expression(bungee.get_time_unit_str()).units
 VOLUME_RATE_UNIT = UREG.parse_expression(bungee.get_volume_rate_unit_str()).units
 
+DEPTH_DISPLAY_UNIT = UREG.foot
+PRESSURE_DISPLAY_UNIT = UREG.psi
+TIME_DISPLAY_UNIT = UREG.minute
+VOLUME_RATE_DISPLAY_UNIT = UREG.ft**3 / UREG.minute
+
 
 def get_plan(path: str):
     with open(path, "r") as f:
@@ -52,3 +57,15 @@ def get_plan(path: str):
     plan.finalize()
 
     return plan
+
+
+class Result:
+
+    def __init__(self, bungee_result: bungee.Result):
+        self.depth = (bungee_result.depth * DEPTH_UNIT).to(DEPTH_DISPLAY_UNIT)
+        self.time = (bungee_result.time * TIME_UNIT).to(TIME_DISPLAY_UNIT)
+        
+
+def get_result(plan: bungee.Plan):
+    bungee_result = bungee.Result(plan)
+    return Result(bungee_result)

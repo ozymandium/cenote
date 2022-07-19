@@ -38,6 +38,8 @@ void Plan::setTank(const std::string& name)
     _currentTank = name;
     if (_profile.empty()) {
         _profile.emplace_back(0_s, 0_m, name);
+    } else {
+        _profile.back().tank = name;
     }
 }
 
@@ -79,6 +81,17 @@ Eigen::VectorXd Plan::depth() const
         data(i) = _profile[i].depth();
     }
     return data;
+}
+
+std::string Plan::getTankAtTime(const Time time) const {
+    ensure(_profile.front().time <= time, "getTankAtTime: time is before beginning of dive");
+    ensure(time <= _profile.back().time, "getTankAtTime: time is after end of dive");
+    for (size_t i = 0; i < _profile.size() - 1; ++i) {
+        if ((_profile[i].time <= time) && (time <= _profile[i + 1].time)) {
+            return _profile[i].tank;
+        }
+    }
+    ensure(false, "couldn't find tank");
 }
 
 units::volume::liter_t Usage(const Plan::Point& pt0, const Plan::Point& pt1,

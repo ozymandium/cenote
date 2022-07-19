@@ -20,6 +20,8 @@ struct Result {
     Eigen::VectorXd time;
     /// depth in meters
     Eigen::VectorXd depth;
+    /// tank pressure by tank name
+    std::map<std::string, Eigen::VectorXd> pressure;
 };
 
 /// \brief 1d interpolation

@@ -3,7 +3,8 @@
 set -e 
 set -o pipefail
 
-BUILD_DIR=$HOME/build
-
 cd $BUILD_DIR
 make test
+
+cd $SRC_DIR/py
+python3 setup.py test

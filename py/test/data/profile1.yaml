@@ -1,0 +1,26 @@
+water: FRESH
+tanks:
+  bottom:
+    type: LP108
+    pressure: 3600 psi
+    mix: {fO2: 0.21}
+  deco50:
+    type: AL80
+    pressure: 3000 psi
+    mix: {fO2: 0.5}
+  deco100:
+    type: AL40
+    pressure: 2200 psi
+    mix: {fO2: 0.97}
+scr: 
+  work: 1.0 ft^3 / min
+  deco: 0.5 ft^3 / min
+profile:
+  - {duration: 5 min,  depth: 132 ft, tank: bottom}
+  - {duration: 25 min, depth: 132 ft}
+  - {duration: 5 min,  depth: 70 ft}
+  - {duration: 5 min,  depth: 70 ft, tank: deco50}
+  - {duration: 5 min,  depth: 20 ft, tank: bottom}
+  - {duration: 10 min, depth: 20 ft, tank: deco100}
+  - {duration: 5 min,  depth: 10 ft}
+  - {duration: 1 min, depth: 0 ft}

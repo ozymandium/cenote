@@ -73,6 +73,12 @@ PYBIND11_MODULE(bungee, mod) {
         .def_readwrite("pressure", &Plan::TankConfig::pressure)
         .def_readwrite("mix", &Plan::TankConfig::mix)
     ;
+    py::class_<Plan::Point>(mod, "PlanPoint")
+        .def(py::init<Time, Depth, const std::string&>())
+        .def_readonly("time", &Plan::Point::time)
+        .def_readonly("depth", &Plan::Point::depth)
+        .def_readonly("tank", &Plan::Point::tank)
+    ;
     py::class_<Plan>(mod, "Plan")
         .def(py::init<Water, const Plan::Scr&, const Plan::TankLoadout&>())
         .def("set_tank", &Plan::setTank)
@@ -80,6 +86,7 @@ PYBIND11_MODULE(bungee, mod) {
         .def("finalize", &Plan::finalize)
         .def("time", &Plan::time)
         .def("depth", &Plan::depth)
+        .def("profile", &Plan::profile)
     ;
     // Water.h
     py::enum_<Water>(mod, "Water")
