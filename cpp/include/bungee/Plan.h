@@ -89,7 +89,7 @@ public:
 
     /// FIXME: this is an O(N) lookup. That's dogshit. Figure out a way to do O(1) lookup. Will
     /// have to index tanks in an array or something other than using strings.
-    std::string getTankAtTime(Time time) const;
+    const std::string& getTankAtTime(Time time) const;
 
 private:
     const Water _water;
@@ -104,24 +104,5 @@ private:
 
     bool _finalized;
 };
-
-/// \brief Gas consumption between 2 plan points. Assume that the scr in point 0 applies throughout
-/// and ignore the scr in point 1. Allows times to be equal. For changes in depth, compute at the
-/// average of the two depths.
-///
-/// TODO: this uses average depth and a single SCR, which is suboptimal. Integrating (whether
-/// analytically or numerically) would be much more accurate for large differences in depth between
-/// the 2 points.
-///
-/// \param[in] pt0 The first point.
-///
-/// \param[in] pt1 The second point.
-///
-/// \param[in] scr SCR, assumed to be constant between pt0 and pt1.
-///
-/// \param[in] water The type of water, assumed to be constant betwwen pt0 and pt1.
-///
-/// \return Consumed gas in surface volume.
-Volume Usage(const Plan::Point& pt0, const Plan::Point& pt1, VolumeRate scr, Water water);
 
 } // namespace bungee

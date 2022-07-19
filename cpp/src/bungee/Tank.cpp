@@ -36,7 +36,7 @@ Volume Tank::serviceVolume() const { return VolumeAtPressure(_params, _params.se
 
 // void Tank::decreasePressure(Pressure diff) { setPressure(_pressure - diff); }
 
-// void Tank::decreaseVolume(Volume diff) { setVolume(_volume - diff); }
+void Tank::decreaseVolume(Volume diff) { setVolume(_volume - diff); }
 
 static const std::map<Tank::Type, Tank::Params> TANK_PARAMS{
     {Tank::AL40, {.size = 5.8_L, .servicePressure = 3000_psi, .z = 1.045}},
@@ -44,7 +44,9 @@ static const std::map<Tank::Type, Tank::Params> TANK_PARAMS{
     {Tank::LP108, {.size = 17_L, .servicePressure = 2640_psi, .z = 1.0}},
 };
 
-// Tank generators for each type
+/*
+ * Tank generators for each type
+ */
 
 Tank GetEmptyTank(const Tank::Type type) { return Tank(TANK_PARAMS.at(type), 0_bar); }
 

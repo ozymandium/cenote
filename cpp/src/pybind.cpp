@@ -98,6 +98,7 @@ PYBIND11_MODULE(bungee, mod) {
         .def(py::init<const Plan&>())
         .def_readonly("time", &Result::time)
         .def_readonly("depth", &Result::depth)
+        .def_readonly("pressure", &Result::pressure)
     ;
 
 }

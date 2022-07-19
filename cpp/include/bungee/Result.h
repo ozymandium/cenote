@@ -38,4 +38,23 @@ Eigen::VectorXd Interpolate(Eigen::Ref<const Eigen::VectorXd> xp,
                             Eigen::Ref<const Eigen::VectorXd> yp,
                             Eigen::Ref<const Eigen::VectorXd> x);
 
+/// \brief Gas consumption between 2 plan points. Assume that the scr in point 0 applies throughout
+/// and ignore the scr in point 1. Allows times to be equal. For changes in depth, compute at the
+/// average of the two depths.
+///
+/// TODO: this uses average depth and a single SCR, which is suboptimal. Integrating (whether
+/// analytically or numerically) would be much more accurate for large differences in depth between
+/// the 2 points.
+///
+/// \param[in] duration Amount of time spent at depth
+///
+/// \param[in] depth Depth, assumed to be constant for all of `duration`.
+///
+/// \param[in] scr SCR, assumed to be constant between pt0 and pt1.
+///
+/// \param[in] water The type of water, assumed to be constant betwwen pt0 and pt1.
+///
+/// \return Consumed gas in surface volume.
+Volume Usage(Time duration, Depth depth, VolumeRate scr, Water water);
+
 } // namespace bungee

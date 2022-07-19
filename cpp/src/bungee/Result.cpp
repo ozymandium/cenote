@@ -1,5 +1,6 @@
 #include <bungee/Result.h>
 #include <bungee/ensure.h>
+#include <bungee/Scr.h>
 
 #include <fmt/format.h>
 #include <unsupported/Eigen/Splines>
@@ -40,10 +41,46 @@ Result::Result(const Plan& plan)
     depth = Interpolate(plan.time(), plan.depth(), time);
 
     // get tank pressures
+    // first initialize tanks
     std::map<std::string, Tank> tanks;
     for (auto const& [name, tankConfig] : plan.tanks()) {
         tanks.emplace(name, GetTankAtPressure(tankConfig.type, tankConfig.pressure));
     }
+    // initialize pressure arrays to zero and copy starting pressures into the 0th slot
+    for (auto const& [name, tank] : tanks) {
+        pressure.emplace(name, Eigen::VectorXd::Zero(N));
+        pressure[name][0] = tank.pressure()();
+    }
+    // iterate through time decreasing pressure in whatever tank is active
+    for (size_t i = 1; i < N; ++i) {
+        // compute the average depth and treat it as constant. smaller time increments work better
+        // here.
+        const Time duration(time[i] - time[i - 1]);
+        const Depth avgDepth((depth[i - 1] + depth[i]) * 0.5);
+        // get the amount consumed at this depth
+        // FIXME: need to select working vs deco scr.
+        const Volume volumeConsumed = Usage(duration, avgDepth, plan.scr().work, plan.water());
+        // tank at the beginning of the increment is the tank for the duration of the increment. 
+        // same principle as for the broad segments in the plan.
+        const std::string& activeTank = plan.getTankAtTime(Time(time[i - 1]));
+        // iterate over all tanks
+        for (auto& [name, tank] : tanks) {
+            // if tank is active, reduce the volume by the amount consumed this increment and 
+            if (name == activeTank) {
+                tank.decreaseVolume(volumeConsumed);
+            }
+            // record the new pressure at the end of the increment
+            pressure[name][i] = tank.pressure()();
+        }
+    }
+}
+
+Volume Usage(const Time duration, const Depth depth, const VolumeRate scr, const Water water)
+{
+    ensure(duration() > 0, "Usage: negative or zero time duration");
+    ensure(scr() > 0, "negative or zero scr");
+    const auto volumeRate = ScrAtDepth(scr, depth, water);
+    return volumeRate * duration;
 }
 
 Eigen::VectorXd Interpolate(Eigen::Ref<const Eigen::VectorXd> xp,

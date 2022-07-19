@@ -21,7 +21,7 @@ def get_plan(path: str):
     with open(path, "r") as f:
         data = yaml.load(f, Loader=yaml.FullLoader)
 
-    # water type
+    # Water type
     water = getattr(bungee.Water, data["water"])
 
     # SCR
@@ -63,6 +63,10 @@ class Result:
     def __init__(self, bungee_result: bungee.Result):
         self.depth = (bungee_result.depth * DEPTH_UNIT).to(DEPTH_DISPLAY_UNIT)
         self.time = (bungee_result.time * TIME_UNIT).to(TIME_DISPLAY_UNIT)
+        self.pressure = {
+            tank: (pressure * PRESSURE_UNIT).to(PRESSURE_DISPLAY_UNIT)
+            for tank, pressure in bungee_result.pressure.items()
+        }
 
 
 def get_result(plan: bungee.Plan):

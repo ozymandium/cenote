@@ -84,7 +84,7 @@ Eigen::VectorXd Plan::depth() const
     return data;
 }
 
-std::string Plan::getTankAtTime(const Time time) const
+const std::string& Plan::getTankAtTime(const Time time) const
 {
     ensure(_profile.front().time <= time, "getTankAtTime: time is before beginning of dive");
     ensure(time <= _profile.back().time, "getTankAtTime: time is after end of dive");
@@ -96,15 +96,5 @@ std::string Plan::getTankAtTime(const Time time) const
     ensure(false, "couldn't find tank");
 }
 
-units::volume::liter_t Usage(const Plan::Point& pt0, const Plan::Point& pt1,
-                             const units::volume_rate::liter_per_minute_t scr, const Water water)
-{
-    ensure(pt0.time <= pt1.time, "second point before first point");
-    ensure(scr.value() > 0, "negative or zero scr");
-    const auto duration = pt1.time - pt0.time;
-    const auto avgDepth = (pt0.depth + pt1.depth) * 0.5;
-    const auto volumeRate = ScrAtDepth(scr, avgDepth, water);
-    return volumeRate * duration;
-}
 
 } // namespace bungee

@@ -55,7 +55,7 @@ public:
     void setVolume(Volume volume);
 
     // void decreasePressure(Pressure diff);
-    // void decreaseVolume(Volume diff);
+    void decreaseVolume(Volume diff);
 
 private:
     const Params _params;

@@ -6,9 +6,8 @@
 set -e 
 set -o pipefail
 
-STYLE_FILE=$SRC_DIR/setup/.clang-format
-
 # c++ stuff
+STYLE_FILE=$SRC_DIR/setup/.clang-format
 find $SRC_DIR/cpp -regex '.*\.\(cpp\|h\|inl\)' -exec clang-format -i {} -style=file:$STYLE_FILE \;
 
 # python setuff
