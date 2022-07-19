@@ -1,8 +1,8 @@
-#include <bungee/Buhlmann.h>
+#include <bungee/deco/buhlmann/Buhlmann.h>
 #include <bungee/Constants.h>
 #include <bungee/Mix.h>
 
-namespace bungee {
+namespace bungee::deco::buhlmann {
 
 Buhlmann::Buhlmann(const Model model) : _compartments(model) {}
 
@@ -13,8 +13,9 @@ void Buhlmann::update(const Mix::PartialPressure& partialPressure, Time duration
     _compartments.update(partialPressure, duration);
 }
 
-Pressure Buhlmann::ceiling() const { return _compartments.ceiling(); }
-
-Depth Buhlmann::ceiling(const Water water) const { return DepthFromPressure(ceiling(), water); }
+Depth Buhlmann::ceiling(const Water water) const
+{
+    return DepthFromPressure(_compartments.M0(), water);
+}
 
 } // namespace bungee

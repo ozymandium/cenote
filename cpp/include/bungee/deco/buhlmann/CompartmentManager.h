@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Compartment.h"
-#include "Mix.h"
+#include <bungee/Mix.h>
 #include "Models.h"
 
-namespace bungee {
+namespace bungee::deco::buhlmann {
 
 class CompartmentManager {
 public:
@@ -19,7 +19,7 @@ public:
 
     void update(const Mix::PartialPressure& partialPressure, const Time duration);
 
-    Pressure ceiling() const;
+    Pressure M0() const;
 
 private:
     /// Nitrogen compartments.

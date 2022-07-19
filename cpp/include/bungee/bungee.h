@@ -1,11 +1,11 @@
 #pragma once
 
-#include <bungee/Buhlmann.h>
-#include <bungee/Compartment.h>
-#include <bungee/CompartmentManager.h>
+#include <bungee/deco/buhlmann/Buhlmann.h>
+#include <bungee/deco/buhlmann/Compartment.h>
+#include <bungee/deco/buhlmann/CompartmentManager.h>
 #include <bungee/Constants.h>
 #include <bungee/Mix.h>
-#include <bungee/Models.h>
+#include <bungee/deco/buhlmann/Models.h>
 #include <bungee/Plan.h>
 #include <bungee/Result.h>
 #include <bungee/Scr.h>

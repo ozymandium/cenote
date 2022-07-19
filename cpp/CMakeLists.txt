@@ -6,8 +6,8 @@ project(bungee VERSION 0.0.1 LANGUAGES CXX)
 include(${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
 
 # set source/header files
-file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/bungee/*.cpp)
-file(GLOB HDR_FILES ${PROJECT_SOURCE_DIR}/include/bungee/*.h)
+file(GLOB_RECURSE SRC_FILES ${PROJECT_SOURCE_DIR}/src/bungee/*.cpp)
+file(GLOB_RECURSE HDR_FILES ${PROJECT_SOURCE_DIR}/include/bungee/*.h)
 
 ## get dependencies
 find_package(units CONFIG REQUIRED)

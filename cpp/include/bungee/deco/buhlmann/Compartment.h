@@ -4,7 +4,7 @@
 
 #include <optional>
 
-namespace bungee {
+namespace bungee::deco::buhlmann {
 
 /// Tracks loading of a single inert gas (N2, He, etc) in a single tissue compartment.
 ///
@@ -29,9 +29,9 @@ public:
 
         /// Half life
         units::time::minute_t halfLife;
-        /// Coefficient `a`
+        /// Coefficient `a` is the y-intercept of the M-value line
         units::pressure::bar_t a;
-        /// Coefficient `b`
+        /// Coefficient `b` is the reciprocal of the slope of the M-value line
         units::dimensionless::dimensionless_t b;
     };
 
@@ -61,7 +61,7 @@ public:
     ///
     /// \return Minimum ambient gas pressure to which this compartment should be exposed based on
     /// the current internal gas pressure [bar].
-    units::pressure::bar_t ceiling() const;
+    units::pressure::bar_t M0() const;
 
 private:
     /// Constant coefficients

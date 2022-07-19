@@ -1,9 +1,10 @@
 #pragma once
 
 #include "CompartmentManager.h"
-#include "Water.h"
+#include <bungee/Water.h>
+#include "Models.h"
 
-namespace bungee {
+namespace bungee::deco::buhlmann {
 
 class Buhlmann {
 public:
@@ -15,7 +16,6 @@ public:
     /// TODO: temperature consideration
     void update(const Mix::PartialPressure& partialPressure, Time duration);
 
-    Pressure ceiling() const;
     Depth ceiling(Water water) const;
 
 private:

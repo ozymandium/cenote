@@ -1,8 +1,8 @@
-#include <bungee/CompartmentManager.h>
+#include <bungee/deco/buhlmann/CompartmentManager.h>
 
 #include <cassert>
 
-namespace bungee {
+namespace bungee::deco::buhlmann {
 
 CompartmentManager::CompartmentManager(const Model model)
 {
@@ -28,18 +28,16 @@ void CompartmentManager::update(const Mix::PartialPressure& partialPressure, con
     }
 }
 
-Pressure CompartmentManager::ceiling() const
+Pressure CompartmentManager::M0() const
 {
-    auto maxCeiling = _compartments[0].ceiling();
+    Pressure maxM0(0);
     for (auto& compartment : _compartments) {
-        const auto thisCeiling = compartment.ceiling();
-        if (thisCeiling > maxCeiling) {
-            maxCeiling = thisCeiling;
+        const auto thisCeiling = compartment.M0();
+        if (thisCeiling > maxM0) {
+            maxM0 = thisCeiling;
         }
     }
-    // max ceiling is now the minimum pressure of N2. divide by the fraction of N2 to get the
-    // ambient pressure
-    return maxCeiling;
+    return maxM0;
 }
 
 } // namespace bungee
