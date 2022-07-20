@@ -25,4 +25,4 @@ extern const ModelParamsLookup MODEL_PARAMS_LOOKUP;
 
 const ModelParams *GetModelParams(Model model);
 
-} // namespace bungee
+} // namespace bungee::deco::buhlmann

@@ -1,6 +1,6 @@
-#include <bungee/deco/buhlmann/Buhlmann.h>
 #include <bungee/Result.h>
 #include <bungee/Scr.h>
+#include <bungee/deco/buhlmann/Buhlmann.h>
 #include <bungee/ensure.h>
 
 #include <fmt/format.h>
@@ -91,7 +91,8 @@ Eigen::VectorXd Result::GetCeiling(const Plan& plan, Eigen::Ref<const Eigen::Vec
     Eigen::VectorXd ceiling = Eigen::VectorXd::Zero(time.size());
     // tank name to mix
 
-    deco::buhlmann::Buhlmann model(deco::buhlmann::Model::ZHL_16A);
+    deco::buhlmann::Buhlmann model(deco::buhlmann::Model::ZHL_16A,
+                                   deco::buhlmann::Gradient(0.3, 0.7));
     model.init();
 
     // set initial value in the 0th position

@@ -1,10 +1,10 @@
-#include <bungee/deco/buhlmann/Buhlmann.h>
 #include <bungee/Constants.h>
 #include <bungee/Mix.h>
+#include <bungee/deco/buhlmann/Buhlmann.h>
 
 namespace bungee::deco::buhlmann {
 
-Buhlmann::Buhlmann(const Model model) : _compartments(model) {}
+Buhlmann::Buhlmann(const Model model, const Gradient& gf) : _gf(gf), _compartments(model) {}
 
 void Buhlmann::init() { _compartments.equilibrium(SURFACE_AIR_PP); }
 
@@ -18,4 +18,4 @@ Depth Buhlmann::ceiling(const Water water) const
     return DepthFromPressure(_compartments.M0(), water);
 }
 
-} // namespace bungee
+} // namespace bungee::deco::buhlmann

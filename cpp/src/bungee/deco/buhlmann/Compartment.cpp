@@ -1,5 +1,5 @@
-#include <bungee/deco/buhlmann/Compartment.h>
 #include <bungee/Constants.h>
+#include <bungee/deco/buhlmann/Compartment.h>
 #include <bungee/ensure.h>
 
 #include <cassert>
@@ -21,7 +21,8 @@ void Compartment::set(const units::pressure::bar_t pressure) { _pressure = press
 void Compartment::update(const units::pressure::bar_t ambientPressure, const Time duration)
 {
     ensure(_pressure.has_value(), "Compartment::update: pressure not initialized.");
-    const units::pressure::bar_t pressureDiff = ambientPressure - WATER_VAPOR_PRESSURE - _pressure.value();
+    const units::pressure::bar_t pressureDiff =
+        ambientPressure - WATER_VAPOR_PRESSURE - _pressure.value();
     const Scalar timeRatio = duration / _params.halfLife;
     _pressure.value() += pressureDiff * (1 - std::pow(2, -timeRatio.value()));
 }
@@ -32,4 +33,4 @@ units::pressure::bar_t Compartment::M0() const
     return (_pressure.value() - _params.a) * _params.b;
 }
 
-} // namespace bungee
+} // namespace bungee::deco::buhlmann

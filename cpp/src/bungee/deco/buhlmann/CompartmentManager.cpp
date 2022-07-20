@@ -40,4 +40,4 @@ Pressure CompartmentManager::M0() const
     return maxM0;
 }
 
-} // namespace bungee
+} // namespace bungee::deco::buhlmann

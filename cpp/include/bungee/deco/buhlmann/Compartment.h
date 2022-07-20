@@ -73,4 +73,4 @@ private:
     std::optional<units::pressure::bar_t> _pressure;
 };
 
-} // namespace bungee
+} // namespace bungee::deco::buhlmann

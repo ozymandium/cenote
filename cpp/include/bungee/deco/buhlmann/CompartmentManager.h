@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Compartment.h"
-#include <bungee/Mix.h>
 #include "Models.h"
+#include <bungee/Mix.h>
 
 namespace bungee::deco::buhlmann {
 
@@ -28,4 +28,4 @@ private:
     std::vector<Compartment> _compartments;
 };
 
-} // namespace bungee
+} // namespace bungee::deco::buhlmann

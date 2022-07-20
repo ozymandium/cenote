@@ -1,14 +1,15 @@
 #pragma once
 
 #include "CompartmentManager.h"
-#include <bungee/Water.h>
+#include "Gradient.h"
 #include "Models.h"
+#include <bungee/Water.h>
 
 namespace bungee::deco::buhlmann {
 
 class Buhlmann {
 public:
-    Buhlmann(Model model);
+    Buhlmann(Model model, const Gradient& gf);
 
     /// \brief Initialize compartment to equilibrium with the surface
     void init();
@@ -19,7 +20,8 @@ public:
     Depth ceiling(Water water) const;
 
 private:
+    Gradient _gf;
     CompartmentManager _compartments;
 };
 
-} // namespace bungee
+} // namespace bungee::deco::buhlmann

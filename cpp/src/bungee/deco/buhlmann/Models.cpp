@@ -36,4 +36,4 @@ extern const ModelParamsLookup MODEL_PARAMS_LOOKUP{
 
 const ModelParams *GetModelParams(const Model model) { return MODEL_PARAMS_LOOKUP.at(model); }
 
-} // namespace bungee
+} // namespace bungee::deco::buhlmann
