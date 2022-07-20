@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bungee/Water.h>
 #include <bungee/custom_units.h>
 #include <optional>
 
@@ -9,16 +10,19 @@ class Gradient {
 public:
     Gradient(double low, double high);
 
-    void ascendFrom(Depth depth);
+    double low() const { return _low; }
+    double high() const { return _high; }
 
-    double at(Depth depth) const;
+    // void ascendFrom(Pressure ambientPressure);
+
+    // Scalar at(Pressure ambientPressure) const;
 
 private:
-    const double _low;
-    const double _high;
+    const Scalar _low;
+    const Scalar _high;
 
     // std::optional<Depth> _ascentStart;
-    std::optional<double> _slope;
+    std::optional<Scalar> _slope;
 };
 
 } // namespace bungee::deco::buhlmann

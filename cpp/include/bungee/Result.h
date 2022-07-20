@@ -8,8 +8,8 @@
 namespace bungee {
 
 struct Result {
-    // 0.1 minutes to help avoid floating point problems
-    static constexpr Time TIME_INCREMENT = units::time::second_t(6);
+    // must be clean divisor of 60
+    static constexpr Time TIME_INCREMENT = units::time::second_t(1);
 
     /// \param[in} N number of points to allocate for all arrays (will be same sized)
     Result(const Plan& plan);

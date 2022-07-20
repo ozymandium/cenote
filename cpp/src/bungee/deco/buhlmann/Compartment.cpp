@@ -29,6 +29,19 @@ void Compartment::update(const units::pressure::bar_t ambientPressure, const Tim
 
 units::pressure::bar_t Compartment::M0() const
 {
+    /*
+    M value plot has ambient pressure on x axis and compartment pressure on y axis
+    M value forms a line with slope and y intercept forms the tolerable compartment pressure at the
+    surface.
+
+    Ptol = (Pcmp - a) * b
+
+    Ptol = 1/b * Pcmp - a/b
+
+    slope: 1/b
+    y-intercept: a/b
+
+    */
     ensure(_pressure.has_value(), "Compartment::update: pressure not initialized.");
     return (_pressure.value() - _params.a) * _params.b;
 }

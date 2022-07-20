@@ -101,6 +101,9 @@ Eigen::VectorXd Result::GetCeiling(const Plan& plan, Eigen::Ref<const Eigen::Vec
     // iterate over increments
     for (size_t i = 1; i < time.size(); ++i) {
         const Time duration(time[i] - time[i - 1]);
+        // This computes pressure at the average depth.
+        // dipplanner uses Schreiner equation for segments with non-constant depth, which would
+        // allow using large increments
         const Depth avgDepth((depth[i - 1] + depth[i]) * 0.5);
         const std::string& activeTank = plan.getTankAtTime(Time(time[i - 1]));
         const Mix& mix = plan.tanks().at(activeTank).mix;

@@ -12,20 +12,20 @@ Gradient::Gradient(const double low, const double high) : _low(low), _high(high)
     ensure(high <= 1.0, "gf high must be at most 100%");
 }
 
-void Gradient::ascendFrom(const Depth depth)
-{
-    // _ascentStart = depth;
-    _slope = (_high - _low) / depth();
-}
+// void Gradient::ascendFrom(const Depth depth)
+// {
+//     // _ascentStart = depth;
+//     _slope = (_high - _low) / depth();
+// }
 
-double Gradient::at(const Depth depth) const
-{
-    if (_slope.has_value()) {
-        return _slope.value() * depth() + _low;
-    }
-    else {
-        return _low;
-    }
-}
+// double Gradient::at(const Depth depth) const
+// {
+//     if (_slope.has_value()) {
+//         return _slope.value() * depth() + _low;
+//     }
+//     else {
+//         return _low;
+//     }
+// }
 
 } // namespace bungee::deco::buhlmann
