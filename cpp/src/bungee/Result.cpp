@@ -92,7 +92,8 @@ Eigen::VectorXd Result::GetCeiling(const Plan& plan, Eigen::Ref<const Eigen::Vec
     // tank name to mix
 
     deco::buhlmann::Buhlmann model(deco::buhlmann::Model::ZHL_16A, 0.3, 0.7);
-    model.init();
+    // assume infinite surface interval preceding this dive.
+    model.equilibrium(AIR.partialPressure(0_m, plan.water()));
 
     // set initial value in the 0th position
     ceiling[0] = model.ceiling(plan.water())();

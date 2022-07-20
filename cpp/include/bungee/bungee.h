@@ -10,6 +10,5 @@
 #include <bungee/custom_units.h>
 #include <bungee/deco/buhlmann/Buhlmann.h>
 #include <bungee/deco/buhlmann/Compartment.h>
-#include <bungee/deco/buhlmann/CompartmentManager.h>
 #include <bungee/deco/buhlmann/Models.h>
 #include <bungee/ensure.h>
