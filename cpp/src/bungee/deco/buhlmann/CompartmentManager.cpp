@@ -1,17 +1,17 @@
 #include <bungee/deco/buhlmann/CompartmentManager.h>
 
-#include <cassert>
+#include <bungee/ensure.h>
 
 namespace bungee::deco::buhlmann {
 
-CompartmentManager::CompartmentManager(const Model model)
+CompartmentManager::CompartmentManager(const Model model, const double gf_low, const double gf_high)
 {
-    const ModelParams *modelParams = GetModelParams(model);
-    _compartments.reserve(modelParams->size());
-    for (const auto& compartmentParams : *modelParams) {
-        _compartments.push_back(Compartment(compartmentParams));
+    const CompartmentList* compartmentList = GetCompartmentList(model);
+    _compartments.reserve(compartmentList->size());
+    for (const units::time::minute_t halfLife : *compartmentList) {
+        _compartments.emplace_back(Compartment::Params(halfLife, gf_low, gf_high));
     }
-    assert(_compartments.size() == modelParams->size());
+    ensure(_compartments.size() == compartmentList->size(), "mismatch");
 }
 
 void CompartmentManager::equilibrium(const Mix::PartialPressure& partialPressure)

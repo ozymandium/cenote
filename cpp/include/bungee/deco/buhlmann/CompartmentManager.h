@@ -8,7 +8,7 @@ namespace bungee::deco::buhlmann {
 
 class CompartmentManager {
 public:
-    CompartmentManager(Model model);
+    CompartmentManager(Model model, double gf_low, double gf_high);
 
     /// \brief Initialize the compartments to a state where they are at equilibrium with the ambient
     /// environment.

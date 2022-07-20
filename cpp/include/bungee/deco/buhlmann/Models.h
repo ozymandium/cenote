@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Compartment.h"
+#include <bungee/custom_units.h>
 
 #include <map>
 #include <vector>
@@ -10,19 +11,14 @@ namespace bungee::deco::buhlmann {
 enum class Model {
     /// Original 16 compartment model from 1990 with 4 minute fastest compartment (1)
     ZHL_16A,
-    /// Original 16 compartment model from 1990 with 5 minute fastest compartment (1b)
-    ZHL_16A_1b
 };
 
-using ModelParams = std::vector<Compartment::Params>;
+using CompartmentList = std::vector<Time>;
+using CompartmentListLookup = std::map<Model, const CompartmentList*>;
 
-extern const ModelParams ZHL_16A_MODEL_PARAMS;
-extern const ModelParams ZHL_16A_1b_MODEL_PARAMS;
+extern const CompartmentList ZHL_16A_COMPARTMENT_LIST;
+extern const CompartmentListLookup COMPARTMENT_LIST_LOOKUP;
 
-using ModelParamsLookup = std::map<Model, const ModelParams *>;
-
-extern const ModelParamsLookup MODEL_PARAMS_LOOKUP;
-
-const ModelParams *GetModelParams(Model model);
+const CompartmentList* GetCompartmentList(Model model);
 
 } // namespace bungee::deco::buhlmann

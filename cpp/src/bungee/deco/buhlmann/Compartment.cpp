@@ -2,29 +2,37 @@
 #include <bungee/deco/buhlmann/Compartment.h>
 #include <bungee/ensure.h>
 
-#include <cassert>
 #include <cmath>
 
 namespace bungee::deco::buhlmann {
 
-Compartment::Params Compartment::Params::Create(const Time t)
+Compartment::Params::Params(const units::time::minute_t t, const double lo, const double hi)
 {
-    return Params{.halfLife = t,
-                  .a = units::pressure::bar_t(2. / std::cbrt(t.value())),
-                  .b = 1.005 - 1.0 / std::sqrt(t.value())};
+    // ensure(low <= high, "gf low larger than gf high");
+    ensure(0 < lo, "gf low must be >0");
+    ensure(lo <= 1, "gf low must be at most 100%");
+    ensure(0 < hi, "gf high must be >0");
+    ensure(hi <= 1, "gf high must be at most 100%");
+
+    halfLife = t;
+    a = units::pressure::bar_t(2. / std::cbrt(t()));
+    b = 1.005 - 1.0 / std::sqrt(t());
+    gf_low = lo;
+    gf_high = hi;
 }
 
 Compartment::Compartment(const Params& params) : _params(params) {}
 
 void Compartment::set(const units::pressure::bar_t pressure) { _pressure = pressure; }
 
-void Compartment::update(const units::pressure::bar_t ambientPressure, const Time duration)
+void Compartment::update(const units::pressure::bar_t ambientPressure,
+                         const units::time::minute_t duration)
 {
     ensure(_pressure.has_value(), "Compartment::update: pressure not initialized.");
     const units::pressure::bar_t pressureDiff =
         ambientPressure - WATER_VAPOR_PRESSURE - _pressure.value();
     const Scalar timeRatio = duration / _params.halfLife;
-    _pressure.value() += pressureDiff * (1 - std::pow(2, -timeRatio.value()));
+    _pressure.value() += pressureDiff * (1 - std::pow(2, -timeRatio()));
 }
 
 units::pressure::bar_t Compartment::M0() const

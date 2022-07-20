@@ -1,6 +1,6 @@
 #pragma once
 
-#include <units.h>
+#include <bungee/custom_units.h>
 
 #include <optional>
 
@@ -24,15 +24,22 @@ public:
         ///
         /// \param[in] t Half time of the gas for the given tissue compartment [min].
         ///
+        /// \param[in] lo Gradient factor low, 0.0 - 1.0
+        ///
+        /// \param[in] hi Gradient factor high, 0.0 - 1.0
+        ///
         /// \return All necessary parameters for the tissue compartment.
-        static Params Create(units::time::minute_t t);
+        Params(units::time::minute_t t, double lo, double hi);
 
         /// Half life
         units::time::minute_t halfLife;
         /// Coefficient `a` is the y-intercept of the M-value line
         units::pressure::bar_t a;
         /// Coefficient `b` is the reciprocal of the slope of the M-value line
-        units::dimensionless::dimensionless_t b;
+        Scalar b;
+        ///
+        Scalar gf_low;
+        Scalar gf_high;
     };
 
     /// \brief Construct compartment with params already set.

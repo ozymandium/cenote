@@ -4,7 +4,10 @@
 
 namespace bungee::deco::buhlmann {
 
-Buhlmann::Buhlmann(const Model model, const Gradient& gf) : _gf(gf), _compartments(model) {}
+Buhlmann::Buhlmann(const Model model, const double gf_low, const double gf_high)
+    : _compartments(model, gf_low, gf_high)
+{
+}
 
 void Buhlmann::init() { _compartments.equilibrium(SURFACE_AIR_PP); }
 
