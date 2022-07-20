@@ -2,6 +2,8 @@
 #include <bungee/deco/buhlmann/Compartment.h>
 #include <bungee/ensure.h>
 
+#include <fmt/format.h>
+
 #include <cmath>
 
 namespace bungee::deco::buhlmann {
@@ -19,6 +21,8 @@ Compartment::Params::Params(const units::time::minute_t t, const double lo, cons
     b = 1.005 - 1.0 / std::sqrt(t());
     gf_low = lo;
     gf_high = hi;
+
+    fmt::print("{:5.1f} min: a = {:06.4f}, b = {:06.4f}\n", halfLife(), a(), b());
 }
 
 Compartment::Compartment(const Params& params) : _params(params) {}

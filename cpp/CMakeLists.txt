@@ -106,3 +106,8 @@ add_test(test-plan test_plan)
 add_executable(test_result test/test_Result.cpp)
 target_link_libraries(test_result bungee_core ${GTest_LIBRARIES})
 add_test(test-result test_result)
+
+# Models.cpp
+add_executable(test_models test/test_Models.cpp)
+target_link_libraries(test_models bungee_core ${GTest_LIBRARIES})
+add_test(test-models test_models)
