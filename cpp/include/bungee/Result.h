@@ -8,6 +8,13 @@
 namespace bungee {
 
 struct Result {
+    struct Deco {
+        /// Minimum depth for decompression model
+        Eigen::VectorXd ceiling;
+        /// the gradient (0-1)
+        Eigen::VectorXd gradient;
+    };
+
     // must be clean divisor of 60
     static constexpr Time TIME_INCREMENT = units::time::second_t(1);
 
@@ -22,7 +29,7 @@ struct Result {
     /// FIXME: this assumes that the model units are the same as the units in the rest of bungee,
     /// whereas the model stuff was left explicit instead of typedef'd explicitly to allow them
     /// to potentially be different in the future.
-    static Eigen::VectorXd GetCeiling(const Plan& plan, Eigen::Ref<const Eigen::VectorXd> time,
+    static Deco GetDeco(const Plan& plan, Eigen::Ref<const Eigen::VectorXd> time,
                                       Eigen::Ref<const Eigen::VectorXd> depth);
 
     /// time in minutes
@@ -33,8 +40,8 @@ struct Result {
     Eigen::VectorXd depth;
     /// tank pressure by tank name
     std::map<std::string, Eigen::VectorXd> pressure;
-    /// Minimum depth for decompression model
-    Eigen::VectorXd ceiling;
+
+    Deco deco;
 };
 
 /// \brief 1d interpolation

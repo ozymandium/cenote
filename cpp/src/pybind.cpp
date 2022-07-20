@@ -94,12 +94,16 @@ PYBIND11_MODULE(bungee, mod) {
         .value("SALT", Water::SALT)
     ;
     // Result.h
+    py::class_<Result::Deco>(mod, "Deco")
+        .def_readonly("ceiling", &Result::Deco::ceiling)
+        .def_readonly("gradient", &Result::Deco::gradient)
+    ;
     py::class_<Result>(mod, "Result")
         .def(py::init<const Plan&>())
         .def_readonly("time", &Result::time)
         .def_readonly("depth", &Result::depth)
         .def_readonly("pressure", &Result::pressure)
-        .def_readonly("ceiling", &Result::ceiling)
+        .def_readonly("deco", &Result::deco)
     ;
 
 }

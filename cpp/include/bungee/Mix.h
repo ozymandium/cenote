@@ -45,8 +45,6 @@ private:
     double _fN2;
 };
 
-// bool operator==(const Mix& lhs, const Mix& rhs);
-
 /// Atmospheric Air
 extern const Mix AIR;
 /// Partial pressures of air at the surface

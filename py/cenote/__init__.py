@@ -1,7 +1,9 @@
+from copy import copy
 import cenote
 import bungee
 import pint
 import yaml
+import copy
 
 
 UREG = pint.UnitRegistry()
@@ -59,6 +61,11 @@ def get_plan(path: str):
     return plan
 
 
+class Deco:
+    def __init__(self, bungee_deco: bungee.Deco):
+        self.ceiling = (bungee_deco.ceiling * DEPTH_UNIT).to(DEPTH_DISPLAY_UNIT)
+        self.gradient = bungee_deco.gradient # unitless
+
 class Result:
     def __init__(self, bungee_result: bungee.Result):
         self.depth = (bungee_result.depth * DEPTH_UNIT).to(DEPTH_DISPLAY_UNIT)
@@ -67,8 +74,7 @@ class Result:
             tank: (pressure * PRESSURE_UNIT).to(PRESSURE_DISPLAY_UNIT)
             for tank, pressure in bungee_result.pressure.items()
         }
-        self.ceiling = (bungee_result.ceiling * DEPTH_UNIT).to(DEPTH_DISPLAY_UNIT)
-
+        self.deco = Deco(bungee_result.deco)
 
 def get_result(plan: bungee.Plan):
     bungee_result = bungee.Result(plan)

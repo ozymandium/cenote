@@ -41,7 +41,7 @@ Result::Result(const Plan& plan)
     // linearly interpolate from plan to get depths at high resolution
     depth = Interpolate(plan.time(), plan.depth(), time);
     pressure = GetPressure(plan, time, depth);
-    ceiling = GetCeiling(plan, time, depth);
+    deco = GetDeco(plan, time, depth);
 }
 
 std::map<std::string, Eigen::VectorXd> Result::GetPressure(const Plan& plan,
@@ -85,18 +85,20 @@ std::map<std::string, Eigen::VectorXd> Result::GetPressure(const Plan& plan,
     return pressure;
 }
 
-Eigen::VectorXd Result::GetCeiling(const Plan& plan, Eigen::Ref<const Eigen::VectorXd> time,
+Result::Deco Result::GetDeco(const Plan& plan, Eigen::Ref<const Eigen::VectorXd> time,
                                    Eigen::Ref<const Eigen::VectorXd> depth)
 {
-    Eigen::VectorXd ceiling = Eigen::VectorXd::Zero(time.size());
-    // tank name to mix
+    Deco data;
+    data.ceiling = Eigen::VectorXd::Zero(time.size());
+    data.gradient = Eigen::VectorXd::Zero(time.size());
 
-    deco::buhlmann::Buhlmann model(deco::buhlmann::Model::ZHL_16A, 0.3, 0.7);
+    deco::buhlmann::Buhlmann model(plan.water(), deco::buhlmann::Model::ZHL_16A, 0.3, 0.7);
     // assume infinite surface interval preceding this dive.
-    model.equilibrium(AIR.partialPressure(0_m, plan.water()));
+    model.equilibrium(SURFACE_AIR_PP);
 
     // set initial value in the 0th position
-    ceiling[0] = model.ceiling(plan.water())();
+    data.ceiling[0] = model.ceiling()();
+    // data.gradient[0] = 0;
 
     // iterate over increments
     for (size_t i = 1; i < time.size(); ++i) {
@@ -109,10 +111,11 @@ Eigen::VectorXd Result::GetCeiling(const Plan& plan, Eigen::Ref<const Eigen::Vec
         const Mix& mix = plan.tanks().at(activeTank).mix;
         const Mix::PartialPressure partialPressure = mix.partialPressure(avgDepth, plan.water());
         model.update(partialPressure, duration);
-        ceiling[i] = model.ceiling(plan.water())();
+        data.ceiling[i] = model.ceiling()();
+        data.gradient[i] = model.gf(Depth(depth[i]));
     }
 
-    return ceiling;
+    return data;
 }
 
 Volume Usage(const Time duration, const Depth depth, const VolumeRate scr, const Water water)
