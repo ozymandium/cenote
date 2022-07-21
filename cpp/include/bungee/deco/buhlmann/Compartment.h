@@ -52,6 +52,8 @@ public:
     /// \param[in] pressure Partial pressure of the gas in the compartment[bar].
     void set(units::pressure::bar_t pressure);
 
+    Pressure pressure() const { return _pressure.value(); }
+
     /// \brief Update the pressure in the compartment by exposing it to a certain inert gas partial
     /// pressure for a period of time.
     ///

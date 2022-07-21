@@ -57,6 +57,7 @@ Pressure Buhlmann::maxM0() const
             maxM0 = thisCeiling;
         }
     }
+    return maxM0;
 }
 
 } // namespace bungee::deco::buhlmann

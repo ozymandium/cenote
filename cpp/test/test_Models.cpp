@@ -2,6 +2,7 @@
 #include <bungee/deco/buhlmann/Models.h>
 
 using namespace bungee::deco::buhlmann;
+using namespace units::literals;
 
 TEST(Models, ZHL_16A) {
     struct Vals {size_t idx; double t, a, b;};
@@ -33,4 +34,13 @@ TEST(Models, ZHL_16A) {
         EXPECT_NEAR(params.a(), expected.a, 5e-5);
         EXPECT_NEAR(params.b(), expected.b, 5e-5);
     }
+}
+
+TEST(Models, HalfLife) {
+    const Compartment::Params params(10_min, 1.0, 1.0);
+    Compartment compartment(params);
+    compartment.set(0_bar);
+    // for (size_t time = 0_min; time < params.halfLife; time += 0.)
+    compartment.update(10_bar, 10_min);
+    EXPECT_UNIT_NEAR(compartment.pressure(), 5_bar, 0.01_bar);
 }
