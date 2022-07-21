@@ -4,8 +4,12 @@
 using namespace bungee::deco::buhlmann;
 using namespace units::literals;
 
-TEST(Models, ZHL_16A) {
-    struct Vals {size_t idx; double t, a, b;};
+TEST(Models, ZHL_16A)
+{
+    struct Vals {
+        size_t idx;
+        double t, a, b;
+    };
     // https://en.wikipedia.org/wiki/B%C3%BChlmann_decompression_algorithm
     // clang-format off
     const std::vector<Vals> TABLE {
@@ -36,11 +40,11 @@ TEST(Models, ZHL_16A) {
     }
 }
 
-TEST(Models, HalfLife) {
+TEST(Models, HalfLife)
+{
     const Compartment::Params params(10_min, 1.0, 1.0);
     Compartment compartment(params);
     compartment.set(0_bar);
-    // for (size_t time = 0_min; time < params.halfLife; time += 0.)
     compartment.update(10_bar, 10_min);
-    EXPECT_UNIT_NEAR(compartment.pressure(), 5_bar, 0.01_bar);
+    EXPECT_UNIT_NEAR(compartment.pressure(), 5_bar, 0.05_bar);
 }

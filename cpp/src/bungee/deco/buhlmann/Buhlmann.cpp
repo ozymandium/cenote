@@ -6,7 +6,7 @@
 namespace bungee::deco::buhlmann {
 
 Buhlmann::Buhlmann(const Water water, const Model model, const double gf_low, const double gf_high)
-: _water(water)
+    : _water(water)
 
 {
     const CompartmentList* compartmentList = GetCompartmentList(model);
@@ -31,11 +31,10 @@ void Buhlmann::update(const Mix::PartialPressure& partialPressure, Time duration
     }
 }
 
-Depth Buhlmann::ceiling() const {
-    return DepthFromPressure(maxM0(), _water);
-}
+Depth Buhlmann::ceiling() const { return DepthFromPressure(maxM0(), _water); }
 
-Scalar Buhlmann::gf(const Depth depth) const {
+Scalar Buhlmann::gf(const Depth depth) const
+{
     Scalar maxGf = 0;
     const Pressure ambientPressure = PressureFromDepth(depth, _water);
     for (const auto& compartment : _compartments) {

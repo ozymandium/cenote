@@ -30,7 +30,7 @@ struct Result {
     /// whereas the model stuff was left explicit instead of typedef'd explicitly to allow them
     /// to potentially be different in the future.
     static Deco GetDeco(const Plan& plan, Eigen::Ref<const Eigen::VectorXd> time,
-                                      Eigen::Ref<const Eigen::VectorXd> depth);
+                        Eigen::Ref<const Eigen::VectorXd> depth);
 
     /// time in minutes
     ///

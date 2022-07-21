@@ -64,7 +64,8 @@ def get_plan(path: str):
 class Deco:
     def __init__(self, bungee_deco: bungee.Deco):
         self.ceiling = (bungee_deco.ceiling * DEPTH_UNIT).to(DEPTH_DISPLAY_UNIT)
-        self.gradient = bungee_deco.gradient # unitless
+        self.gradient = bungee_deco.gradient  # unitless
+
 
 class Result:
     def __init__(self, bungee_result: bungee.Result):
@@ -75,6 +76,7 @@ class Result:
             for tank, pressure in bungee_result.pressure.items()
         }
         self.deco = Deco(bungee_result.deco)
+
 
 def get_result(plan: bungee.Plan):
     bungee_result = bungee.Result(plan)

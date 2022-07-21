@@ -86,7 +86,7 @@ std::map<std::string, Eigen::VectorXd> Result::GetPressure(const Plan& plan,
 }
 
 Result::Deco Result::GetDeco(const Plan& plan, Eigen::Ref<const Eigen::VectorXd> time,
-                                   Eigen::Ref<const Eigen::VectorXd> depth)
+                             Eigen::Ref<const Eigen::VectorXd> depth)
 {
     Deco data;
     data.ceiling = Eigen::VectorXd::Zero(time.size());

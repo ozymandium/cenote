@@ -73,9 +73,9 @@ public:
     units::pressure::bar_t M0() const;
 
     /// Get the gradient factor if the compartment were instantaneously placed into an environment
-    /// with the given ambient absolute pressure. A return value of 1.0 means the compartment would be at
-    /// its M value. A return value of 0 means that the compartment would be at equilibrium with 
-    /// the environment.
+    /// with the given ambient absolute pressure. A return value of 1.0 means the compartment would
+    /// be at its M value. A return value of 0 means that the compartment would be at equilibrium
+    /// with the environment.
     Scalar gf(units::pressure::bar_t ambientPressure) const;
 
 private:
