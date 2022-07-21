@@ -8,7 +8,8 @@ class TestGetters : public ::testing::Test {
 public:
     void SetUp()
     {
-        buhlmann = std::make_shared<Buhlmann>(Water::SALT, Model::ZHL_16A, 1.0, 1.0);
+        buhlmann =
+            std::make_shared<Buhlmann>(Buhlmann::Params{Water::SALT, Model::ZHL_16A, 1.0, 1.0});
         std::vector<Pressure> pressures(buhlmann->compartmentCount());
         for (size_t i = 0; i < pressures.size(); ++i) {
             pressures[i] = units::pressure::bar_t(i);

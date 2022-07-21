@@ -7,14 +7,12 @@
 
 namespace bungee::deco::buhlmann {
 
-Buhlmann::Buhlmann(const Water water, const Model model, const double gf_low, const double gf_high)
-    : _water(water)
-
+Buhlmann::Buhlmann(const Params& params) : _params(params)
 {
-    const CompartmentList* compartmentList = GetCompartmentList(model);
+    const CompartmentList* compartmentList = GetCompartmentList(_params.model);
     _compartments.reserve(compartmentList->size());
     for (const units::time::minute_t halfLife : *compartmentList) {
-        _compartments.emplace_back(Compartment::Params(halfLife, gf_low, gf_high));
+        _compartments.emplace_back(Compartment::Params(halfLife, _params.gf_low, _params.gf_high));
     }
     ensure(_compartments.size() == compartmentList->size(), "mismatch");
 }
@@ -42,14 +40,14 @@ void Buhlmann::update(const Mix::PartialPressure& partialPressure, Time duration
     }
 }
 
-Depth Buhlmann::ceiling() const { return DepthFromPressure(M0(), _water); }
+Depth Buhlmann::ceiling() const { return DepthFromPressure(M0(), _params.water); }
 
 std::vector<Depth> Buhlmann::ceilings() const
 {
     const std::vector<Pressure> m0s = M0s();
     std::vector<Depth> vec(m0s.size());
     for (size_t i = 0; i < vec.size(); ++i) {
-        vec[i] = DepthFromPressure(m0s[i], _water);
+        vec[i] = DepthFromPressure(m0s[i], _params.water);
     }
     return vec;
 }
@@ -63,7 +61,7 @@ Scalar Buhlmann::gf(const Depth depth) const
 std::vector<Scalar> Buhlmann::gfs(const Depth depth) const
 {
     std::vector<Scalar> vec(compartmentCount());
-    const Pressure ambientPressure = PressureFromDepth(depth, _water);
+    const Pressure ambientPressure = PressureFromDepth(depth, _params.water);
     for (size_t i = 0; i < vec.size(); ++i) {
         vec[i] = _compartments[i].gf(ambientPressure);
     }

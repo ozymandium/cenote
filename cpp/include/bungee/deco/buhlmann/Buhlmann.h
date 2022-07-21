@@ -9,7 +9,13 @@ namespace bungee::deco::buhlmann {
 
 class Buhlmann {
 public:
-    Buhlmann(Water water, Model model, double gf_low, double gf_high);
+    struct Params {
+        Water water;
+        Model model;
+        double gf_low;
+        double gf_high;
+    };
+    Buhlmann(const Params& params);
 
     size_t compartmentCount() const { return _compartments.size(); }
 
@@ -40,7 +46,7 @@ public:
     std::vector<Scalar> gfs(Depth depth) const;
 
 private:
-    const Water _water;
+    const Params _params;
 
     /// Nitrogen compartments.
     ///

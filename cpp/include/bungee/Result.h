@@ -29,8 +29,7 @@ struct Result {
     /// \param[in} N number of points to allocate for all arrays (will be same sized)
     Result(const Plan& plan);
 
-    Eigen::VectorXd GetAmbientPressure(const Plan& plan,
-                                               Eigen::Ref<const Eigen::VectorXd> depth);
+    Eigen::VectorXd GetAmbientPressure(const Plan& plan, Eigen::Ref<const Eigen::VectorXd> depth);
 
     /// FIXME: need to select working vs deco scr.
     static std::map<std::string, Eigen::VectorXd>

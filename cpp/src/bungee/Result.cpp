@@ -42,7 +42,7 @@ void Result::Deco::resize(size_t timeCount, size_t compartmentCount)
 {
     ceiling = Eigen::VectorXd::Zero(timeCount);
     gradient = Eigen::VectorXd::Zero(timeCount);
-    
+
     M0s = Eigen::MatrixXd::Zero(compartmentCount, timeCount);
     tissuePressures = Eigen::MatrixXd::Zero(compartmentCount, timeCount);
     ceilings = Eigen::MatrixXd::Zero(compartmentCount, timeCount);
@@ -119,7 +119,9 @@ Result::GetTankPressure(const Plan& plan, Eigen::Ref<const Eigen::VectorXd> time
 Result::Deco Result::GetDeco(const Plan& plan, Eigen::Ref<const Eigen::VectorXd> time,
                              Eigen::Ref<const Eigen::VectorXd> depth)
 {
-    deco::buhlmann::Buhlmann model(plan.water(), deco::buhlmann::Model::ZHL_16A, 0.3, 0.7);
+    using namespace deco::buhlmann;
+    Buhlmann model(Buhlmann::Params{
+        .water = plan.water(), .model = Model::ZHL_16A, .gf_low = 0.3, .gf_high = 0.7});
     // assume infinite surface interval preceding this dive.
     model.equilibrium(SURFACE_AIR_PP);
 

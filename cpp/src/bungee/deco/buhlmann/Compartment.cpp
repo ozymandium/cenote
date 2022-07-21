@@ -60,7 +60,7 @@ Scalar Compartment::gf(units::pressure::bar_t ambientPressure) const
 {
     ensure(_pressure.has_value(), "Compartment::gf: pressure not initialized.");
     // http://scubatechphilippines.com/scuba_blog/gradient-factors-dummies/
-    return (_pressure.value() - ambientPressure) / (ambientPressure - M0());
+    return (_pressure.value() - ambientPressure) / (_pressure.value() - M0());
 }
 
 } // namespace bungee::deco::buhlmann
