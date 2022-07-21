@@ -9,10 +9,18 @@ namespace bungee {
 
 struct Result {
     struct Deco {
+        /// FIXME this is trashy
+        void resize(size_t timeCount, size_t compartmentCount);
+
         /// Minimum depth for decompression model
         Eigen::VectorXd ceiling;
         /// the gradient (0-1)
         Eigen::VectorXd gradient;
+
+        Eigen::MatrixXd M0s;
+        Eigen::MatrixXd tissuePressures;
+        Eigen::MatrixXd ceilings;
+        Eigen::MatrixXd gradients;
     };
 
     // must be clean divisor of 60
@@ -21,10 +29,13 @@ struct Result {
     /// \param[in} N number of points to allocate for all arrays (will be same sized)
     Result(const Plan& plan);
 
+    Eigen::VectorXd GetAmbientPressure(const Plan& plan,
+                                               Eigen::Ref<const Eigen::VectorXd> depth);
+
     /// FIXME: need to select working vs deco scr.
     static std::map<std::string, Eigen::VectorXd>
-    GetPressure(const Plan& plan, Eigen::Ref<const Eigen::VectorXd> time,
-                Eigen::Ref<const Eigen::VectorXd> depth);
+    GetTankPressure(const Plan& plan, Eigen::Ref<const Eigen::VectorXd> time,
+                    Eigen::Ref<const Eigen::VectorXd> depth);
 
     /// FIXME: this assumes that the model units are the same as the units in the rest of bungee,
     /// whereas the model stuff was left explicit instead of typedef'd explicitly to allow them
@@ -38,8 +49,10 @@ struct Result {
     Eigen::VectorXd time;
     /// depth in meters
     Eigen::VectorXd depth;
+    /// in bar
+    Eigen::VectorXd ambientPressure;
     /// tank pressure by tank name
-    std::map<std::string, Eigen::VectorXd> pressure;
+    std::map<std::string, Eigen::VectorXd> tankPressure;
 
     Deco deco;
 };

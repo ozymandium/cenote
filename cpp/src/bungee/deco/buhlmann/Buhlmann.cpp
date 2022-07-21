@@ -3,6 +3,8 @@
 #include <bungee/deco/buhlmann/Buhlmann.h>
 #include <bungee/ensure.h>
 
+#include <fmt/format.h>
+
 namespace bungee::deco::buhlmann {
 
 Buhlmann::Buhlmann(const Water water, const Model model, const double gf_low, const double gf_high)
@@ -24,6 +26,15 @@ void Buhlmann::equilibrium(const Mix::PartialPressure& partialPressure)
     }
 }
 
+void Buhlmann::setCompartmentPressures(const std::vector<Pressure> compartmentPressures)
+{
+    ensure(compartmentPressures.size() == compartmentCount(),
+           "Buhlmann::setCompartmentPressures: wrong size");
+    for (size_t i = 0; i < compartmentPressures.size(); ++i) {
+        _compartments[i].set(compartmentPressures[i]);
+    }
+}
+
 void Buhlmann::update(const Mix::PartialPressure& partialPressure, Time duration)
 {
     for (auto& compartment : _compartments) {
@@ -31,32 +42,56 @@ void Buhlmann::update(const Mix::PartialPressure& partialPressure, Time duration
     }
 }
 
-Depth Buhlmann::ceiling() const { return DepthFromPressure(maxM0(), _water); }
+Depth Buhlmann::ceiling() const { return DepthFromPressure(M0(), _water); }
+
+std::vector<Depth> Buhlmann::ceilings() const
+{
+    const std::vector<Pressure> m0s = M0s();
+    std::vector<Depth> vec(m0s.size());
+    for (size_t i = 0; i < vec.size(); ++i) {
+        vec[i] = DepthFromPressure(m0s[i], _water);
+    }
+    return vec;
+}
 
 Scalar Buhlmann::gf(const Depth depth) const
 {
-    Scalar maxGf = 0;
-    const Pressure ambientPressure = PressureFromDepth(depth, _water);
-    for (const auto& compartment : _compartments) {
-        const Scalar compartmentGf = compartment.gf(ambientPressure);
-        if (compartmentGf > maxGf) {
-            maxGf = compartmentGf;
-        }
-    }
-    ensure(maxGf >= 0, "should not have gf return lower than zero");
-    return maxGf;
+    const std::vector<Scalar> vec = gfs(depth);
+    return *std::max_element(vec.begin(), vec.end());
 }
 
-Pressure Buhlmann::maxM0() const
+std::vector<Scalar> Buhlmann::gfs(const Depth depth) const
 {
-    Pressure maxM0(0);
-    for (const auto& compartment : _compartments) {
-        const auto thisCeiling = compartment.M0();
-        if (thisCeiling > maxM0) {
-            maxM0 = thisCeiling;
-        }
+    std::vector<Scalar> vec(compartmentCount());
+    const Pressure ambientPressure = PressureFromDepth(depth, _water);
+    for (size_t i = 0; i < vec.size(); ++i) {
+        vec[i] = _compartments[i].gf(ambientPressure);
     }
-    return maxM0;
+    return vec;
+}
+
+std::vector<Pressure> Buhlmann::M0s() const
+{
+    std::vector<Pressure> vec(compartmentCount());
+    for (size_t i = 0; i < vec.size(); ++i) {
+        vec[i] = _compartments[i].M0();
+    }
+    return vec;
+}
+
+Pressure Buhlmann::M0() const
+{
+    const std::vector<Pressure> vec = M0s();
+    return *std::max_element(vec.begin(), vec.end());
+}
+
+std::vector<Pressure> Buhlmann::pressures() const
+{
+    std::vector<Pressure> vec(compartmentCount());
+    for (size_t i = 0; i < vec.size(); ++i) {
+        vec[i] = _compartments[i].pressure();
+    }
+    return vec;
 }
 
 } // namespace bungee::deco::buhlmann

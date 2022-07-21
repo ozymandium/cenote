@@ -1,9 +1,8 @@
-from copy import copy
-import cenote
 import bungee
+
 import pint
 import yaml
-import copy
+import numpy as np
 
 
 UREG = pint.UnitRegistry()
@@ -19,7 +18,7 @@ TIME_DISPLAY_UNIT = UREG.minute
 VOLUME_RATE_DISPLAY_UNIT = UREG.ft**3 / UREG.minute
 
 
-def get_plan(path: str):
+def get_plan(path: str) -> bungee.Plan:
     with open(path, "r") as f:
         data = yaml.load(f, Loader=yaml.FullLoader)
 
@@ -27,8 +26,8 @@ def get_plan(path: str):
     water = getattr(bungee.Water, data["water"])
 
     # SCR
-    working_scr_pint = UREG.parse_expression(data["scr"]["work"]).to(cenote.VOLUME_RATE_UNIT)
-    deco_scr_pint = UREG.parse_expression(data["scr"]["deco"]).to(cenote.VOLUME_RATE_UNIT)
+    working_scr_pint = UREG.parse_expression(data["scr"]["work"]).to(VOLUME_RATE_UNIT)
+    deco_scr_pint = UREG.parse_expression(data["scr"]["deco"]).to(VOLUME_RATE_UNIT)
     scr = bungee.Scr(
         bungee.VolumeRate(working_scr_pint.m),
         bungee.VolumeRate(deco_scr_pint.m),
@@ -38,7 +37,7 @@ def get_plan(path: str):
     tanks = {}
     for name, info in data["tanks"].items():
         enum = getattr(bungee.Tank, info["type"])
-        pressure_pint = UREG.parse_expression(info["pressure"]).to(cenote.PRESSURE_UNIT)
+        pressure_pint = UREG.parse_expression(info["pressure"]).to(PRESSURE_UNIT)
         pressure = bungee.Pressure(pressure_pint.m)
         mix = bungee.Mix(info["mix"]["fO2"])
         tanks[name] = bungee.TankConfig(enum, pressure, mix)
@@ -50,9 +49,9 @@ def get_plan(path: str):
     for segment_data in data["profile"]:
         if "tank" in segment_data:
             plan.set_tank(segment_data["tank"])
-        depth_pint = UREG.parse_expression(segment_data["depth"]).to(cenote.DEPTH_UNIT)
+        depth_pint = UREG.parse_expression(segment_data["depth"]).to(DEPTH_UNIT)
         depth = bungee.Depth(depth_pint.m)
-        duration_pint = UREG.parse_expression(segment_data["duration"]).to(cenote.TIME_UNIT)
+        duration_pint = UREG.parse_expression(segment_data["duration"]).to(TIME_UNIT)
         duration = bungee.Time(duration_pint.m)
         plan.add_segment(duration, depth)
 
@@ -65,15 +64,20 @@ class Deco:
     def __init__(self, bungee_deco: bungee.Deco):
         self.ceiling = (bungee_deco.ceiling * DEPTH_UNIT).to(DEPTH_DISPLAY_UNIT)
         self.gradient = bungee_deco.gradient  # unitless
+        self.M0s = (bungee_deco.M0s * PRESSURE_UNIT).to(UREG.atm)
+        self.tissue_pressures = (bungee_deco.tissue_pressures * PRESSURE_UNIT).to(UREG.atm)
+        self.ceilings = (bungee_deco.ceilings * DEPTH_UNIT).to(DEPTH_DISPLAY_UNIT)
+        self.gradients = bungee_deco.gradients  # unitless
 
 
 class Result:
     def __init__(self, bungee_result: bungee.Result):
-        self.depth = (bungee_result.depth * DEPTH_UNIT).to(DEPTH_DISPLAY_UNIT)
         self.time = (bungee_result.time * TIME_UNIT).to(TIME_DISPLAY_UNIT)
-        self.pressure = {
+        self.depth = (bungee_result.depth * DEPTH_UNIT).to(DEPTH_DISPLAY_UNIT)
+        self.ambient_pressure = (bungee_result.ambient_pressure * PRESSURE_UNIT).to(UREG.atm)
+        self.tank_pressure = {
             tank: (pressure * PRESSURE_UNIT).to(PRESSURE_DISPLAY_UNIT)
-            for tank, pressure in bungee_result.pressure.items()
+            for tank, pressure in bungee_result.tank_pressure.items()
         }
         self.deco = Deco(bungee_result.deco)
 

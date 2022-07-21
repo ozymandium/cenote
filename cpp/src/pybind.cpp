@@ -13,7 +13,7 @@ namespace py = pybind11;
 
 #define WRAP_UNIT(mod, cls)                                                                        \
     {                                                                                              \
-        py::class_<cls>(mod, #cls).def(py::init<double>());                                        \
+        py::class_<cls>(mod, #cls).def(py::init<double>()).def("value", &cls::value);              \
     }
 
 namespace {
@@ -84,6 +84,7 @@ PYBIND11_MODULE(bungee, mod) {
         .def("set_tank", &Plan::setTank)
         .def("add_segment", &Plan::addSegment)
         .def("finalize", &Plan::finalize)
+        .def("water", &Plan::water)
         .def("time", &Plan::time)
         .def("depth", &Plan::depth)
         .def("profile", &Plan::profile)
@@ -97,12 +98,17 @@ PYBIND11_MODULE(bungee, mod) {
     py::class_<Result::Deco>(mod, "Deco")
         .def_readonly("ceiling", &Result::Deco::ceiling)
         .def_readonly("gradient", &Result::Deco::gradient)
+        .def_readonly("M0s", &Result::Deco::M0s)
+        .def_readonly("tissue_pressures", &Result::Deco::tissuePressures)
+        .def_readonly("ceilings", &Result::Deco::ceilings)
+        .def_readonly("gradients", &Result::Deco::gradients)
     ;
     py::class_<Result>(mod, "Result")
         .def(py::init<const Plan&>())
         .def_readonly("time", &Result::time)
         .def_readonly("depth", &Result::depth)
-        .def_readonly("pressure", &Result::pressure)
+        .def_readonly("ambient_pressure", &Result::ambientPressure)
+        .def_readonly("tank_pressure", &Result::tankPressure)
         .def_readonly("deco", &Result::deco)
     ;
 

@@ -3,11 +3,12 @@ import unittest
 import os
 
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
+PROFILE1 = os.path.join(DATA_DIR, "profile1.yaml")
 
 
 class TestGetPlan(unittest.TestCase):
     def test_profile1_tanks(self):
-        plan = cenote.get_plan(os.path.join(DATA_DIR, "profile1.yaml"))
+        plan = cenote.get_plan(PROFILE1)
         tanks = [point.tank for point in plan.profile()]
         self.assertEqual(
             tanks,
@@ -23,3 +24,7 @@ class TestGetPlan(unittest.TestCase):
                 "deco100",  # 0
             ],
         )
+
+    def test_profile1_get_result(self):
+        plan = cenote.get_plan(PROFILE1)
+        result = cenote.get_result(plan)

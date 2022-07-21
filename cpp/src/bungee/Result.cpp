@@ -27,7 +27,27 @@ size_t GetNumPoints(Time duration)
 /// STL abs is not constexpr
 template <typename T> constexpr auto Abs(T const& x) noexcept { return x < 0 ? -x : x; }
 
+template <typename Unit> Eigen::VectorXd UnitsVecToEigen(const std::vector<Unit>& vec)
+{
+    Eigen::VectorXd eigen(vec.size());
+    for (size_t i = 0; i < vec.size(); ++i) {
+        eigen(i) = vec[i]();
+    }
+    return eigen;
+}
+
 } // namespace
+
+void Result::Deco::resize(size_t timeCount, size_t compartmentCount)
+{
+    ceiling = Eigen::VectorXd::Zero(timeCount);
+    gradient = Eigen::VectorXd::Zero(timeCount);
+    
+    M0s = Eigen::MatrixXd::Zero(compartmentCount, timeCount);
+    tissuePressures = Eigen::MatrixXd::Zero(compartmentCount, timeCount);
+    ceilings = Eigen::MatrixXd::Zero(compartmentCount, timeCount);
+    gradients = Eigen::MatrixXd::Zero(compartmentCount, timeCount);
+}
 
 Result::Result(const Plan& plan)
 {
@@ -40,13 +60,24 @@ Result::Result(const Plan& plan)
     time = Eigen::VectorXd::LinSpaced(N, 0, plan.profile().back().time());
     // linearly interpolate from plan to get depths at high resolution
     depth = Interpolate(plan.time(), plan.depth(), time);
-    pressure = GetPressure(plan, time, depth);
+    ambientPressure = GetAmbientPressure(plan, depth);
+    tankPressure = GetTankPressure(plan, time, depth);
     deco = GetDeco(plan, time, depth);
 }
 
-std::map<std::string, Eigen::VectorXd> Result::GetPressure(const Plan& plan,
-                                                           Eigen::Ref<const Eigen::VectorXd> time,
-                                                           Eigen::Ref<const Eigen::VectorXd> depth)
+Eigen::VectorXd Result::GetAmbientPressure(const Plan& plan,
+                                           Eigen::Ref<const Eigen::VectorXd> depth)
+{
+    Eigen::VectorXd ret(depth.rows());
+    for (size_t i = 0; i < ret.rows(); ++i) {
+        ret[i] = PressureFromDepth(Depth(depth[i]), plan.water())();
+    }
+    return ret;
+}
+
+std::map<std::string, Eigen::VectorXd>
+Result::GetTankPressure(const Plan& plan, Eigen::Ref<const Eigen::VectorXd> time,
+                        Eigen::Ref<const Eigen::VectorXd> depth)
 {
     std::map<std::string, Eigen::VectorXd> pressure;
     // get tank pressures
@@ -88,17 +119,21 @@ std::map<std::string, Eigen::VectorXd> Result::GetPressure(const Plan& plan,
 Result::Deco Result::GetDeco(const Plan& plan, Eigen::Ref<const Eigen::VectorXd> time,
                              Eigen::Ref<const Eigen::VectorXd> depth)
 {
-    Deco data;
-    data.ceiling = Eigen::VectorXd::Zero(time.size());
-    data.gradient = Eigen::VectorXd::Zero(time.size());
-
     deco::buhlmann::Buhlmann model(plan.water(), deco::buhlmann::Model::ZHL_16A, 0.3, 0.7);
     // assume infinite surface interval preceding this dive.
     model.equilibrium(SURFACE_AIR_PP);
 
+    Deco data;
+    data.resize(time.size(), model.compartmentCount());
+
     // set initial value in the 0th position
     data.ceiling[0] = model.ceiling()();
-    // data.gradient[0] = 0;
+    data.gradient[0] = model.gf(Depth(depth[0]));
+
+    data.M0s.col(0) = UnitsVecToEigen(model.M0s());
+    data.tissuePressures.col(0) = UnitsVecToEigen(model.pressures());
+    data.ceilings.col(0) = UnitsVecToEigen(model.ceilings());
+    data.gradients.col(0) = UnitsVecToEigen(model.gfs(Depth(depth[0])));
 
     // iterate over increments
     for (size_t i = 1; i < time.size(); ++i) {
@@ -113,6 +148,10 @@ Result::Deco Result::GetDeco(const Plan& plan, Eigen::Ref<const Eigen::VectorXd>
         model.update(partialPressure, duration);
         data.ceiling[i] = model.ceiling()();
         data.gradient[i] = model.gf(Depth(depth[i]));
+        data.M0s.col(i) = UnitsVecToEigen(model.M0s());
+        data.tissuePressures.col(i) = UnitsVecToEigen(model.pressures());
+        data.ceilings.col(i) = UnitsVecToEigen(model.ceilings());
+        data.gradients.col(i) = UnitsVecToEigen(model.gfs(Depth(depth[i])));
     }
 
     return data;

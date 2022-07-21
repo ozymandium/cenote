@@ -111,3 +111,13 @@ add_test(test-result test_result)
 add_executable(test_models test/test_Models.cpp)
 target_link_libraries(test_models bungee_core ${GTest_LIBRARIES})
 add_test(test-models test_models)
+
+# Compartment.cpp
+add_executable(test_compartment test/test_Compartment.cpp)
+target_link_libraries(test_compartment bungee_core ${GTest_LIBRARIES})
+add_test(test-compartment test_compartment)
+
+# Buhlmann.cpp
+add_executable(test_buhlmann test/test_Buhlmann.cpp)
+target_link_libraries(test_buhlmann bungee_core ${GTest_LIBRARIES})
+add_test(test-buhlmann test_buhlmann)

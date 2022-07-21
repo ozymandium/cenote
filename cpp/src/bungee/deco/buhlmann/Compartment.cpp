@@ -21,8 +21,6 @@ Compartment::Params::Params(const units::time::minute_t t, const double lo, cons
     b = 1.005 - 1.0 / std::sqrt(t());
     gf_low = lo;
     gf_high = hi;
-
-    fmt::print("{:5.1f} min: a = {:06.4f}, b = {:06.4f}\n", halfLife(), a(), b());
 }
 
 Compartment::Compartment(const Params& params) : _params(params) {}
@@ -62,7 +60,7 @@ Scalar Compartment::gf(units::pressure::bar_t ambientPressure) const
 {
     ensure(_pressure.has_value(), "Compartment::gf: pressure not initialized.");
     // http://scubatechphilippines.com/scuba_blog/gradient-factors-dummies/
-    return (_pressure.value() - ambientPressure) / (M0() - ambientPressure);
+    return (_pressure.value() - ambientPressure) / (ambientPressure - M0());
 }
 
 } // namespace bungee::deco::buhlmann
