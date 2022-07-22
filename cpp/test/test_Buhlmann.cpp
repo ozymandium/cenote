@@ -16,6 +16,7 @@ public:
         }
         buhlmann->setCompartmentPressures(pressures);
     }
+
     std::shared_ptr<Buhlmann> buhlmann;
 };
 

@@ -60,6 +60,13 @@ public:
     ///
     Plan(Water water, const Scr& scr, const TankLoadout& tanks);
 
+    // just for Planner to use
+    void setProfile(const Profile& profile)
+    {
+        _profile = profile;
+        _currentTank = _profile.back().tank;
+    }
+
     /*
      * Builders
      */
