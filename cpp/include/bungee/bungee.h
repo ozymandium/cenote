@@ -3,6 +3,7 @@
 #include <bungee/Constants.h>
 #include <bungee/Mix.h>
 #include <bungee/Plan.h>
+#include <bungee/Planner.h>
 #include <bungee/Result.h>
 #include <bungee/Scr.h>
 #include <bungee/Tank.h>

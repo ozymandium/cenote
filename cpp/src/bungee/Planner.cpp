@@ -9,6 +9,7 @@ yes the whole repo is prototype code that's god awful, but this is like, real ba
 #include <bungee/Result.h> // for Interpolate. move that
 #include <bungee/deco/buhlmann/Buhlmann.h>
 #include <bungee/ensure.h>
+#include <fmt/format.h>
 
 using namespace units::literals;
 using namespace bungee::deco::buhlmann;
@@ -56,6 +57,9 @@ std::string BestMix(const Plan::TankLoadout& tanks, const Depth depth, const Wat
     return safeNames[size_t(it - safePpN2s.begin())];
 }
 
+std::string str(Depth unit) { return fmt::format("{}", units::length::to_string(unit)); }
+std::string str(Time unit) { return fmt::format("{}", units::time::to_string(unit)); }
+
 } // namespace
 
 Plan Replan(const Plan& input)
@@ -79,13 +83,20 @@ Plan Replan(const Plan& input)
         .water = output.water(), .model = Model::ZHL_16A, .gf_low = 0.3, .gf_high = 0.7});
     // assume infinite surface interval preceding this dive.
     model.equilibrium(SURFACE_AIR_PP);
+
+    fmt::print("running over user supplied plan\n");
     {
+        // this bit is copied from Result.cpp
         const size_t N = GetNumPoints(output.profile().back().time);
         const Eigen::VectorXd timeVec =
             Eigen::VectorXd::LinSpaced(N, 0, output.profile().back().time());
         const Eigen::VectorXd depthVec = Interpolate(output.time(), output.depth(), timeVec);
         for (size_t i = 1; i < timeVec.size(); ++i) {
-            ensure(Time(timeVec[i] - timeVec[i - 1]) == MODEL_TIME_INC, "time increment wongggggg");
+            const Time duration(timeVec[i] - timeVec[i - 1]);
+            // ensure(duration == MODEL_TIME_INC,
+            //        fmt::format("time increment not expected: {} != {}",
+            //        units::time::to_string(duration),
+            //        units::time::to_string(MODEL_TIME_INC)));
             // This computes pressure at the average depth.
             // dipplanner uses Schreiner equation for segments with non-constant depth, which would
             // allow using large increments
@@ -94,12 +105,17 @@ Plan Replan(const Plan& input)
             const Mix& mix = output.tanks().at(activeTank).mix;
             const Mix::PartialPressure partialPressure =
                 mix.partialPressure(avgDepth, output.water());
-            model.update(partialPressure, Time(timeVec[i] - timeVec[i - 1]));
+            model.update(partialPressure, duration);
         }
     }
+    fmt::print("User supplied plan modeled. Ascending.\n");
 
     Time stopDuration = 0_min;
+    size_t iteration = 0;
     while (output.profile().back().depth != 0_m) {
+        fmt::print("----- Iteration: {}\n", ++iteration);
+        fmt::print("Current depth: {}\n", str(output.profile().back().depth));
+
         // find the best mix for this depth
         // this doesn't need to be done every loop but whatever, it's not hurting anything right
         // now to do it unnecessarily?
@@ -108,6 +124,7 @@ Plan Replan(const Plan& input)
         // figure out what the ceiling is
         // round ceiling up to nearest 10 feet
         const Depth ceiling = units::math::ceil(model.ceiling() / STOP_DEPTH_INC) * STOP_DEPTH_INC;
+        fmt::print("Current ceiling: {}\n", str(ceiling));
 
         // if ceiling is not less than current depth, stay for another minute
         if (ceiling >= output.profile().back().depth) {
@@ -118,21 +135,32 @@ Plan Replan(const Plan& input)
                     .mix.partialPressure(output.profile().back().depth, output.water());
             model.update(partialPressure, STOP_TIME_INC);
             stopDuration += STOP_TIME_INC;
+            fmt::print("Can't ascend yet. Current time at this stop: {}\n", str(stopDuration));
             // but don't record it yet because we don't know how long we'll be here and there's no
             // reason to have a ton of plan points
             continue;
         }
+        fmt::print("Able to ascend.\n");
 
         // add a point to the profile for the end of this stop
-        output.addSegment(stopDuration, output.profile().back().depth);
-        // reset the stop duration so we can start fresh next loop
-        stopDuration = 0_min;
+        if (stopDuration > 0_s) {
+            fmt::print("Recording this stop: {} at {}\n",
+                       str(stopDuration),
+                       str(output.profile().back().depth));
+            output.addSegment(stopDuration, output.profile().back().depth);
+            // reset the stop duration so we can start fresh next loop
+            stopDuration = 0_min;
+        }
 
         // ceiling is shallower than current depth. time to ascend!
         const Depth ascentDistance = output.profile().back().depth - ceiling;
         // round ascent time up to the nearest minute
         const Time ascentDuration =
             units::math::ceil(ascentDistance / ASCENT_RATE / STOP_TIME_INC) * STOP_TIME_INC;
+        fmt::print("Ascent: {} elapsed, {} distance to {}\n",
+                   str(ascentDuration),
+                   str(ascentDistance),
+                   str(ceiling));
 
         // ascend the model
         {
@@ -146,8 +174,8 @@ Plan Replan(const Plan& input)
                             Eigen::Vector2d(output.profile().back().depth(), ceiling()),
                             timeVec);
             for (size_t i = 1; i < timeVec.size(); ++i) {
-                ensure(Time(timeVec[i] - timeVec[i - 1]) == MODEL_TIME_INC,
-                       "time increment wongggggg");
+                // ensure(Time(timeVec[i] - timeVec[i - 1]) == MODEL_TIME_INC,
+                //        "time increment wongggggg");
                 // This computes pressure at the average depth.
                 // dipplanner uses Schreiner equation for segments with non-constant depth, which
                 // would allow using large increments

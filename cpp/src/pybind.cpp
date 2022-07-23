@@ -111,6 +111,8 @@ PYBIND11_MODULE(bungee, mod) {
         .def_readonly("tank_pressure", &Result::tankPressure)
         .def_readonly("deco", &Result::deco)
     ;
+    // Planner.h
+    mod.def("replan", &Replan);
 
 }
 // clang-format on
