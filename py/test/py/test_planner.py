@@ -11,3 +11,5 @@ class TestPlanner(unittest.TestCase):
     def test_basic(self):
         input_plan = cenote.get_plan(PROFILE2)
         output_plan = bungee.replan(input_plan)
+
+    

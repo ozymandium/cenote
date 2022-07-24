@@ -162,6 +162,13 @@ Plan Replan(const Plan& input)
                    str(ascentDistance),
                    str(ceiling));
 
+        // TODO: swap to deco SCR from working SCR here.
+
+        // TODO: this waits to ascend to a stop until it is already safe to be at that stop.
+        //       other planners ascend to a stop planning to arrive right when it becomes safe to 
+        //       be at the stop, resulting in a steeper gradient and shorter dive. this approach 
+        //       below adds extra conservatism that was not requested.
+
         // ascend the model
         {
             const size_t N = GetNumPoints(ascentDuration);
@@ -174,6 +181,8 @@ Plan Replan(const Plan& input)
                             Eigen::Vector2d(output.profile().back().depth(), ceiling()),
                             timeVec);
             for (size_t i = 1; i < timeVec.size(); ++i) {
+                // FIXME:  there are time increment problems. it doesn't matter so much for the 
+                //         version of this above but might matter here.
                 // ensure(Time(timeVec[i] - timeVec[i - 1]) == MODEL_TIME_INC,
                 //        "time increment wongggggg");
                 // This computes pressure at the average depth.
