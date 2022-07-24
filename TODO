@@ -2,11 +2,11 @@
 
 ## Bungee
 - [ ] Revisit water vapor pressure computation
+- [ ] coverage and unit tests
+- [ ] clean up replanner
 
 ## Cenote
 - [ ] schema validator for dive profile YAMLs
-- [ ] handle ceilings above zero
-- [ ] add unit tests to cross check profiles
 
-## App
-- [ ] make it work
+## Notebook
+- [ ] do a 3d plot with compartment time as the z dimension

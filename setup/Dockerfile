@@ -32,7 +32,9 @@ RUN apt update -qq > /dev/null \
     wget \
     libgtest-dev \
     g++-10 \
-    plocate
+    plocate \
+    ninja-build \
+    lcov 
 
 # prepares non root env
 RUN useradd --create-home --shell /bin/zsh ${USER}
@@ -60,6 +62,9 @@ COPY --chown=${USER}:${USER} conanfile.txt /tmp/conanfile.txt
 RUN conan install gtest/1.10.0@ -r conancenter --build gtest
 RUN conan install fmt/9.0.0@ -r conancenter --build fmt
 RUN cd ${BUILD_DIR} && conan install /tmp/conanfile.txt -pr:b=default
+
+# download the cmake gcov module to build directory
+RUN wget https://raw.githubusercontent.com/bilke/cmake-modules/master/CodeCoverage.cmake -O ${BUILD_DIR}/CodeCoverage.cmake
 
 # allow git from inside container
 RUN git config --global --add safe.directory ${SRC_DIR}
