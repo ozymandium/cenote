@@ -33,7 +33,7 @@ TEST(Models, ZHL_16A)
     // clang-format on
     const CompartmentList& compartmentList = *GetCompartmentList(Model::ZHL_16A);
     for (const auto& expected : TABLE) {
-        Compartment::Params params = Compartment::Params(compartmentList[expected.idx], 0.3, 0.7);
+        Compartment::Params params = Compartment::Params(compartmentList[expected.idx]);
         EXPECT_EQ(params.halfLife(), expected.t);
         EXPECT_NEAR(params.a(), expected.a, 5e-5);
         EXPECT_NEAR(params.b(), expected.b, 5e-5);

@@ -8,19 +8,11 @@
 
 namespace bungee::deco::buhlmann {
 
-Compartment::Params::Params(const units::time::minute_t t, const double lo, const double hi)
+Compartment::Params::Params(const units::time::minute_t t)
 {
-    // ensure(low <= high, "gf low larger than gf high");
-    ensure(0 < lo, "gf low must be >0");
-    ensure(lo <= 1, "gf low must be at most 100%");
-    ensure(0 < hi, "gf high must be >0");
-    ensure(hi <= 1, "gf high must be at most 100%");
-
     halfLife = t;
     a = units::pressure::bar_t(2. / std::cbrt(t()));
     b = 1.005 - 1.0 / std::sqrt(t());
-    gf_low = lo;
-    gf_high = hi;
 }
 
 Compartment::Compartment(const Params& params) : _params(params) {}

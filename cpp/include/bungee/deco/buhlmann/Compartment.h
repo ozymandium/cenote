@@ -29,7 +29,7 @@ public:
         /// \param[in] hi Gradient factor high, 0.0 - 1.0
         ///
         /// \return All necessary parameters for the tissue compartment.
-        Params(units::time::minute_t t, double lo, double hi);
+        Params(units::time::minute_t t);
 
         /// Half life
         units::time::minute_t halfLife;
@@ -37,9 +37,6 @@ public:
         units::pressure::bar_t a;
         /// Coefficient `b` is the reciprocal of the slope of the M-value line
         Scalar b;
-        ///
-        Scalar gf_low;
-        Scalar gf_high;
     };
 
     /// \brief Construct compartment with params already set.

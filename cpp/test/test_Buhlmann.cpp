@@ -8,8 +8,7 @@ class TestGetters : public ::testing::Test {
 public:
     void SetUp()
     {
-        buhlmann =
-            std::make_shared<Buhlmann>(Buhlmann::Params{Water::SALT, Model::ZHL_16A, 1.0, 1.0});
+        buhlmann = std::make_shared<Buhlmann>(Buhlmann::Params{Water::SALT, Model::ZHL_16A});
         std::vector<Pressure> pressures(buhlmann->compartmentCount());
         for (size_t i = 0; i < pressures.size(); ++i) {
             pressures[i] = units::pressure::bar_t(i);
@@ -25,7 +24,7 @@ TEST_F(TestGetters, M0s)
     const std::vector<Pressure> m0s = buhlmann->M0s();
     ASSERT_EQ(m0s.size(), buhlmann->compartmentCount());
     for (size_t i = 0; i < buhlmann->compartmentCount(); ++i) {
-        const Compartment::Params params(GetCompartmentList(Model::ZHL_16A)->at(i), 1.0, 1.0);
+        const Compartment::Params params(GetCompartmentList(Model::ZHL_16A)->at(i));
         const Pressure expectedM0 = (Pressure(i) - params.a) * params.b;
         EXPECT_EQ(m0s[i], expectedM0);
     }

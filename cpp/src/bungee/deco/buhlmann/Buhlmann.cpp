@@ -9,10 +9,16 @@ namespace bungee::deco::buhlmann {
 
 Buhlmann::Buhlmann(const Params& params) : _params(params)
 {
+    // ensure(low <= high, "gf low larger than gf high");
+    ensure(0 < _params.gf_low, "gf low must be >0");
+    ensure(_params.gf_low <= 1, "gf low must be at most 100%");
+    ensure(0 < _params.gf_high, "gf high must be >0");
+    ensure(_params.gf_high <= 1, "gf high must be at most 100%");
+
     const CompartmentList* compartmentList = GetCompartmentList(_params.model);
     _compartments.reserve(compartmentList->size());
     for (const units::time::minute_t halfLife : *compartmentList) {
-        _compartments.emplace_back(Compartment::Params(halfLife, _params.gf_low, _params.gf_high));
+        _compartments.emplace_back(Compartment::Params(halfLife));
     }
     ensure(_compartments.size() == compartmentList->size(), "mismatch");
 }
