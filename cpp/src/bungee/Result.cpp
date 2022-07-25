@@ -110,7 +110,7 @@ Result::Deco Result::GetDeco(const Plan& plan, Eigen::Ref<const Eigen::VectorXd>
 {
     using namespace deco::buhlmann;
     Buhlmann model(Buhlmann::Params{
-        .water = plan.water(), .model = Model::ZHL_16A, .gf_low = 0.3, .gf_high = 0.7});
+        .water = plan.water(), .model = Model::ZHL_16A});
     // assume infinite surface interval preceding this dive.
     model.equilibrium(SURFACE_AIR_PP);
 
@@ -118,13 +118,13 @@ Result::Deco Result::GetDeco(const Plan& plan, Eigen::Ref<const Eigen::VectorXd>
     data.resize(time.size(), model.compartmentCount());
 
     // set initial value in the 0th position
-    data.ceiling[0] = model.ceiling()();
-    data.gradient[0] = model.gf(Depth(depth[0]));
+    data.ceiling[0] = model.ceiling(GF)();
+    data.gradient[0] = model.gradientAtDepth(Depth(depth[0]));
 
     data.M0s.col(0) = UnitsVecToEigen(model.M0s());
     data.tissuePressures.col(0) = UnitsVecToEigen(model.pressures());
-    data.ceilings.col(0) = UnitsVecToEigen(model.ceilings());
-    data.gradients.col(0) = UnitsVecToEigen(model.gfs(Depth(depth[0])));
+    data.ceilings.col(0) = UnitsVecToEigen(model.ceilings(GF));
+    data.gradients.col(0) = UnitsVecToEigen(model.gradientsAtDepth(Depth(depth[0])));
 
     // iterate over increments
     for (size_t i = 1; i < time.size(); ++i) {
@@ -137,12 +137,12 @@ Result::Deco Result::GetDeco(const Plan& plan, Eigen::Ref<const Eigen::VectorXd>
         const Mix& mix = plan.tanks().at(activeTank).mix;
         const Mix::PartialPressure partialPressure = mix.partialPressure(avgDepth, plan.water());
         model.update(partialPressure, duration);
-        data.ceiling[i] = model.ceiling()();
-        data.gradient[i] = model.gf(Depth(depth[i]));
+        data.ceiling[i] = model.ceiling(GF)();
+        data.gradient[i] = model.gradientAtDepth(Depth(depth[i]));
         data.M0s.col(i) = UnitsVecToEigen(model.M0s());
         data.tissuePressures.col(i) = UnitsVecToEigen(model.pressures());
-        data.ceilings.col(i) = UnitsVecToEigen(model.ceilings());
-        data.gradients.col(i) = UnitsVecToEigen(model.gfs(Depth(depth[i])));
+        data.ceilings.col(i) = UnitsVecToEigen(model.ceilings(GF));
+        data.gradients.col(i) = UnitsVecToEigen(model.gradientsAtDepth(Depth(depth[i])));
     }
 
     return data;

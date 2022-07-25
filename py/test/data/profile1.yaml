@@ -1,4 +1,7 @@
 water: FRESH
+gf:
+  low: 1.0
+  high: 1.0
 tanks:
   bottom:
     type: LP108

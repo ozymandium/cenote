@@ -5,16 +5,12 @@
 
 #include <fmt/format.h>
 
+using namespace units::literals;
+
 namespace bungee::deco::buhlmann {
 
 Buhlmann::Buhlmann(const Params& params) : _params(params)
 {
-    // ensure(low <= high, "gf low larger than gf high");
-    ensure(0 < _params.gf_low, "gf low must be >0");
-    ensure(_params.gf_low <= 1, "gf low must be at most 100%");
-    ensure(0 < _params.gf_high, "gf high must be >0");
-    ensure(_params.gf_high <= 1, "gf high must be at most 100%");
-
     const CompartmentList* compartmentList = GetCompartmentList(_params.model);
     _compartments.reserve(compartmentList->size());
     for (const units::time::minute_t halfLife : *compartmentList) {
@@ -46,25 +42,35 @@ void Buhlmann::update(const Mix::PartialPressure& partialPressure, Time duration
     }
 }
 
-Depth Buhlmann::ceiling() const { return DepthFromPressure(M0(), _params.water); }
-
-std::vector<Depth> Buhlmann::ceilings() const
-{
-    const std::vector<Pressure> m0s = M0s();
-    std::vector<Depth> vec(m0s.size());
-    for (size_t i = 0; i < vec.size(); ++i) {
-        vec[i] = DepthFromPressure(m0s[i], _params.water);
-    }
-    return vec;
-}
-
-Scalar Buhlmann::gf(const Depth depth) const
-{
-    const std::vector<Scalar> vec = gfs(depth);
+Depth Buhlmann::ceiling(const double gf) const { 
+    const std::vector<Depth> vec = ceilings(gf);
     return *std::max_element(vec.begin(), vec.end());
 }
 
-std::vector<Scalar> Buhlmann::gfs(const Depth depth) const
+std::vector<Depth> Buhlmann::ceilings(const double gf) const
+{
+    ensure(gf >= 0.0, "Buhlmann::ceilings: gf must be at least 0");
+    ensure(gf <= 1.0, "Buhlmann::ceilings: gf must be at most 1");
+    const std::vector<Pressure> m0s = M0s();
+    const std::vector<Pressure> ps = pressures();
+    std::vector<Depth> ret(m0s.size());
+    for (size_t i = 0; i < ret.size(); ++i) {
+        const Depth tolerableDepth = DepthFromPressure(m0s[i], _params.water);
+        const Depth tissueDepth = DepthFromPressure(ps[i], _params.water);
+        ensure(tissueDepth > tolerableDepth, "what the absolute fuck");
+        const Depth ceil = tissueDepth - (tissueDepth - tolerableDepth) * gf;
+        ret[i] = ceil > 0_m ? ceil : 0_m;
+    }
+    return ret;
+}
+
+Scalar Buhlmann::gradientAtDepth(const Depth depth) const
+{
+    const std::vector<Scalar> vec = gradientsAtDepth(depth);
+    return *std::max_element(vec.begin(), vec.end());
+}
+
+std::vector<Scalar> Buhlmann::gradientsAtDepth(const Depth depth) const
 {
     std::vector<Scalar> vec(compartmentCount());
     const Pressure ambientPressure = PressureFromDepth(depth, _params.water);

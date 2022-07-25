@@ -12,8 +12,6 @@ public:
     struct Params {
         Water water;
         Model model;
-        double gf_low;
-        double gf_high;
     };
     Buhlmann(const Params& params);
 
@@ -29,8 +27,11 @@ public:
     /// TODO: temperature consideration
     void update(const Mix::PartialPressure& partialPressure, Time duration);
 
-    Depth ceiling() const;
-    std::vector<Depth> ceilings() const;
+    /// \param[in] gf Gradient factor, [0.0, 1.0]. Pass 1 to get the depth at the M value. Pass 0
+    /// to get the current pressure. But don't do either of those things because there's more efficient
+    /// ways.
+    Depth ceiling(double gf) const;
+    std::vector<Depth> ceilings(double gf) const;
 
     std::vector<Pressure> M0s() const;
     Pressure M0() const;
@@ -42,8 +43,8 @@ public:
     /// compartment would be at its M value. A return value of 0 means that all compartments would
     /// be on-gassing or at equilibrium. while on-gassing, GF's may reach very large negative
     /// values, so 0 is the lowest return value.
-    Scalar gf(Depth depth) const;
-    std::vector<Scalar> gfs(Depth depth) const;
+    Scalar gradientAtDepth(Depth depth) const;
+    std::vector<Scalar> gradientsAtDepth(Depth depth) const;
 
 private:
     const Params _params;

@@ -62,6 +62,11 @@ PYBIND11_MODULE(bungee, mod) {
         .def(py::init<double>())
     ;
     // Plan.h
+    py::class_<Plan::GradientFactor>(mod, "GradientFactor")
+        .def(py::init<double, double>())
+        .def_readwrite("low", &Plan::GradientFactor::low)
+        .def_readwrite("high", &Plan::GradientFactor::high)
+    ;
     py::class_<Plan::Scr>(mod, "Scr")
         .def(py::init<VolumeRate, VolumeRate>())
         .def_readwrite("work", &Plan::Scr::work)
@@ -80,7 +85,7 @@ PYBIND11_MODULE(bungee, mod) {
         .def_readonly("tank", &Plan::Point::tank)
     ;
     py::class_<Plan>(mod, "Plan")
-        .def(py::init<Water, const Plan::Scr&, const Plan::TankLoadout&>())
+        .def(py::init<Water, const Plan::GradientFactor&, const Plan::Scr&, const Plan::TankLoadout&>())
         .def("set_tank", &Plan::setTank)
         .def("add_segment", &Plan::addSegment)
         .def("finalize", &Plan::finalize)

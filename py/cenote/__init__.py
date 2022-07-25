@@ -25,6 +25,9 @@ def get_plan(path: str) -> bungee.Plan:
     # Water type
     water = getattr(bungee.Water, data["water"])
 
+    # Gradient Factors
+    gf = bungee.GradientFactor(data["gf"]["low"], data["gf"]["high"])
+
     # SCR
     working_scr_pint = UREG.parse_expression(data["scr"]["work"]).to(VOLUME_RATE_UNIT)
     deco_scr_pint = UREG.parse_expression(data["scr"]["deco"]).to(VOLUME_RATE_UNIT)
@@ -43,7 +46,7 @@ def get_plan(path: str) -> bungee.Plan:
         tanks[name] = bungee.TankConfig(enum, pressure, mix)
 
     # Plan
-    plan = bungee.Plan(water, scr, tanks)
+    plan = bungee.Plan(water, gf, scr, tanks)
 
     # Profile
     for segment_data in data["profile"]:

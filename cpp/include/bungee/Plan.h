@@ -17,6 +17,11 @@ namespace bungee {
 /// This may or may not include the final ascent.
 class Plan {
 public:
+    struct GradientFactor {
+        double low;
+        double high;
+    };
+
     struct Scr {
         /// SCR during the bottom portion of the dive, i.e., everything until the final ascent.
         VolumeRate work;
@@ -58,7 +63,7 @@ public:
     /// \brief Construct without providing point, for use when parsing a list that doesn't require
     /// the user to specify a tank every point (only at swaps).
     ///
-    Plan(Water water, const Scr& scr, const TankLoadout& tanks);
+    Plan(Water water, const GradientFactor& gf, const Scr& scr, const TankLoadout& tanks);
 
     // just for Planner to use
     void setProfile(const Profile& profile)
@@ -83,6 +88,7 @@ public:
      */
 
     Water water() const { return _water; }
+    const GradientFactor& gf() const { return _gf; }
     const Scr& scr() const { return _scr; }
     const TankLoadout& tanks() const { return _tanks; }
     const Profile& profile() const { return _profile; }
@@ -103,6 +109,7 @@ public:
 
 private:
     const Water _water;
+    const GradientFactor _gf;
     const Scr _scr;
     /// Store tank configuration by the name the user gives to each tank.
     const TankLoadout _tanks;

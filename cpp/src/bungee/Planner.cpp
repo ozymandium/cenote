@@ -19,7 +19,7 @@ namespace bungee {
 Plan Replan(const Plan& input)
 {
     // start plan with the same configuration
-    Plan output(input.water(), input.scr(), input.tanks());
+    Plan output(input.water(), input.gf(), input.scr(), input.tanks());
     output.setProfile(input.profile());
 
     // tank has to be set to build forward
@@ -34,7 +34,7 @@ Plan Replan(const Plan& input)
     // get the deco model caught up to the last point the user gave us so we know where to start
     // with the ascent
     Buhlmann model(Buhlmann::Params{
-        .water = output.water(), .model = Model::ZHL_16A, .gf_low = 0.3, .gf_high = 0.7});
+        .water = output.water(), .model = Model::ZHL_16A});
     // assume infinite surface interval preceding this dive.
     model.equilibrium(SURFACE_AIR_PP);
 
@@ -73,7 +73,7 @@ Plan Replan(const Plan& input)
 
         // figure out what the ceiling is
         // round ceiling up to nearest 10 feet
-        const Depth ceiling = units::math::ceil(model.ceiling() / STOP_DEPTH_INC) * STOP_DEPTH_INC;
+        const Depth ceiling = units::math::ceil(model.ceiling(output.gf().low) / STOP_DEPTH_INC) * STOP_DEPTH_INC;
 
         // if ceiling is not less than current depth, stay for another minute
         if (ceiling >= output.profile().back().depth) {

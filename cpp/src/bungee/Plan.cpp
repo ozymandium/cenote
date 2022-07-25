@@ -21,9 +21,15 @@ void Plan::Point::validate() const
     ensure(depth.value() >= 0, "negative depth");
 }
 
-Plan::Plan(Water water, const Scr& scr, const TankLoadout& tanks)
-    : _water(water), _scr(scr), _tanks(tanks), _finalized(false)
+Plan::Plan(Water water, const GradientFactor& gf, const Scr& scr, const TankLoadout& tanks)
+    : _water(water), _gf(gf), _scr(scr), _tanks(tanks), _finalized(false)
 {
+    // ensure(low <= high, "gf low larger than gf high");
+    ensure(0 < _gf.low, "gf low must be > 0");
+    ensure(_gf.low <= 1, "gf low must be at most 100%");
+    ensure(0 < _gf.high, "gf high must be > 0");
+    ensure(_gf.high <= 1, "gf high must be at most 100%");
+
     // water doesn't need checking
     // check scr
     _scr.validate();
