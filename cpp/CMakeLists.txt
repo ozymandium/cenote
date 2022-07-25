@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.22)
 
 project(bungee VERSION 0.0.1 LANGUAGES CXX)
 
 # conan
 include(${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
+# gcov/lcov 
+include(CodeCoverage)
 
 # set source/header files
 file(GLOB_RECURSE SRC_FILES ${PROJECT_SOURCE_DIR}/src/bungee/*.cpp)
@@ -17,7 +19,9 @@ find_package(pybind11 CONFIG REQUIRED)
 find_package(Python REQUIRED COMPONENTS Interpreter Development)
 find_package(fmt CONFIG REQUIRED)
 
-## Core library
+## Core library 
+# this is completely redundant, i didn't feel like fixing the linker path for the pybind module
+# it literally compiles everything twice. gross.
 
 add_library(bungee_core SHARED ${SRC_FILES})
 target_link_libraries(bungee_core 
@@ -51,8 +55,10 @@ foreach(INCDIR IN LISTS pybind11_INCLUDE_DIRS)
 endforeach()
 endif()
 
+# put everything in the python binding to avoid linker path problems and simply build flags
+# for testing stuff
 pybind11_add_module(bungee 
-    ${HDR_FILES} # is the necessary
+    ${HDR_FILES} # is this necessary?
     ${SRC_FILES}
     src/pybind.cpp
 )
@@ -60,7 +66,6 @@ target_link_libraries(bungee
     PUBLIC
     units::units # header only, but whatever
     Eigen3::Eigen
-    # pybind11::pybind11
     ${fmt_LIBRARIES}
 )
 target_include_directories(bungee PUBLIC 
@@ -73,6 +78,8 @@ target_include_directories(bungee PUBLIC
 
 ## Installation
 
+# this is done to allow the jupyter notebook to find the module without having to
+# modify the python path
 install(
     TARGETS bungee
     LIBRARY DESTINATION /home/user/.local/lib/python3.10/site-packages #??
@@ -121,3 +128,11 @@ add_test(test-compartment test_compartment)
 add_executable(test_buhlmann test/test_Buhlmann.cpp)
 target_link_libraries(test_buhlmann bungee_core ${GTest_LIBRARIES})
 add_test(test-buhlmann test_buhlmann)
+
+# coverage
+append_coverage_compiler_flags()
+setup_target_for_coverage_gcovr_html(
+    NAME bungee_coverage
+    EXECUTABLE 
+        make test
+)

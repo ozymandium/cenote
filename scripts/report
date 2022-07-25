@@ -1,0 +1,13 @@
+#!/bin/zsh
+
+# mounts a coverage report assuming it has been run, and opens it in browser
+
+set -e 
+set -o pipefail
+
+# get the src directory from the container instead of hardcoding here
+BUILD_DIR=$(docker exec cenote printenv BUILD_DIR)
+docker cp cenote:$BUILD_DIR/bungee_coverage /tmp/bungee_coverage
+
+# macos
+open /tmp/bungee_coverage/index.html

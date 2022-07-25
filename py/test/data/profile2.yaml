@@ -5,19 +5,19 @@ tanks:
     pressure: 3600 psi
     mix: 
       fO2: 0.21
-  # Deco50:
-  #   type: AL40
-  #   pressure: 3000 psi
-  #   mix: 
-  #     fO2: 0.5
+  Deco50:
+    type: AL40
+    pressure: 3000 psi
+    mix: 
+      fO2: 0.5
   Deco100:
     type: AL40
     pressure: 2200 psi
     mix: 
-      fO2: 0.99
+      fO2: 0.97
 scr: 
   work: 0.75 ft^3 / min
   deco: 0.55 ft^3 / min
 profile:
-  - {depth: 145 ft, duration: 5 min, tank: Sidemount}
-  - {depth: 145 ft, duration: 15 min}
+  - {depth: 150 ft, duration: 5 min, tank: Sidemount}
+  - {depth: 150 ft, duration: 35 min}

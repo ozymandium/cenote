@@ -34,7 +34,8 @@ RUN apt update -qq > /dev/null \
     g++-10 \
     plocate \
     ninja-build \
-    lcov 
+    lcov \
+    gcovr
 
 # prepares non root env
 RUN useradd --create-home --shell /bin/zsh ${USER}

@@ -3,8 +3,17 @@
 set -e 
 set -o pipefail
 
+# c++ tests
 cd $BUILD_DIR
 make test
 
+# python tests
 cd $SRC_DIR/py
 python3 setup.py test
+
+# c++ coverage - reruns tests
+cd $BUILD_DIR
+make bungee_coverage
+
+# python coverage
+# todo, bring back workflow from master branch
