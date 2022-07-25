@@ -24,7 +24,3 @@ class TestGetPlan(unittest.TestCase):
                 "deco100",  # 0
             ],
         )
-
-    def test_profile1_get_result(self):
-        plan = cenote.get_plan(PROFILE1)
-        result = cenote.get_result(plan)
