@@ -1,3 +1,4 @@
+#include <bungee/Constants.h>
 #include <bungee/Plan.h>
 #include <bungee/Scr.h>
 #include <bungee/ensure.h>
@@ -94,6 +95,26 @@ const std::string& Plan::getTankAtTime(const Time time) const
         }
     }
     ensure(false, "couldn't find tank");
+}
+
+std::string Plan::bestMix(const Depth depth) const
+{
+    // select tanks with ppo2 below the threshold
+    std::vector<std::string> safeNames;
+    std::vector<Pressure> safePpN2s;
+    for (const auto& [name, config] : _tanks) {
+        Mix::PartialPressure partialPressure = config.mix.partialPressure(depth, _water);
+        if (partialPressure.O2 <= MAX_DECO_PPO2) {
+            safeNames.push_back(name);
+            safePpN2s.push_back(partialPressure.N2);
+        }
+        // todo: check for hypoxia here also
+    }
+    // pick the remaining tank with the lowest nitrogen content
+    const auto it = std::min_element(safePpN2s.begin(), safePpN2s.end());
+    // todo: pick one with the most remaining pressure to solve for multiple cylinders with the
+    // same mixes
+    return safeNames[size_t(it - safePpN2s.begin())];
 }
 
 } // namespace bungee

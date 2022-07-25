@@ -98,6 +98,9 @@ public:
     /// have to index tanks in an array or something other than using strings.
     const std::string& getTankAtTime(Time time) const;
 
+    /// \return tank name within the tank loadout
+    std::string bestMix(const Depth depth) const;
+
 private:
     const Water _water;
     const Scr _scr;

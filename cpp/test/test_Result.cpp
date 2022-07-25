@@ -1,9 +1,11 @@
 #include "utils.h"
 #include <bungee/Result.h>
+#include <bungee/utils.h>
 
 using namespace bungee;
 using namespace units::literals;
 
+// move this
 TEST(Interpolate, Basic)
 {
     Eigen::VectorXd xp(3), yp(3), x(5), expected(5);

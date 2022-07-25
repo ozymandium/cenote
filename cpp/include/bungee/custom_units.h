@@ -33,6 +33,12 @@ UNIT_ADD(pressure_rate, bar_per_minute, bar_per_minute, bar_per_min,
          compound_unit<pressure::bar, inverse<time::minutes>>)
 UNIT_ADD_CATEGORY_TRAIT(pressure_rate)
 
+/*
+ * Velocity
+ */
+UNIT_ADD(velocity, feet_per_minute, feet_per_minute, fpm,
+         compound_unit<length::feet, inverse<time::minutes>>)
+
 } // namespace units
 
 namespace bungee {

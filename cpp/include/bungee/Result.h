@@ -23,9 +23,6 @@ struct Result {
         Eigen::MatrixXd gradients;
     };
 
-    // must be clean divisor of 60
-    static constexpr Time TIME_INCREMENT = units::time::second_t(1);
-
     /// \param[in} N number of points to allocate for all arrays (will be same sized)
     Result(const Plan& plan);
 
@@ -55,20 +52,6 @@ struct Result {
 
     Deco deco;
 };
-
-/// \brief 1d interpolation
-///
-/// \param[in] data
-///    [ x1, x2, ..., xM ]
-///    [ y1, y2, ..., yM ]
-///
-/// \param[in] x
-///    [ x1, x2, ..., xN ]
-///
-/// \return interpolated y data corresponding to x
-Eigen::VectorXd Interpolate(Eigen::Ref<const Eigen::VectorXd> xp,
-                            Eigen::Ref<const Eigen::VectorXd> yp,
-                            Eigen::Ref<const Eigen::VectorXd> x);
 
 /// \brief Gas consumption between 2 plan points. Assume that the scr in point 0 applies throughout
 /// and ignore the scr in point 1. Allows times to be equal. For changes in depth, compute at the
