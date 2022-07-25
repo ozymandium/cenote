@@ -16,8 +16,8 @@ public:
         AL80,
         // Faber low pressure 108 cuft / 17 L
         LP108,
-        // // Double / sidemounted LP108
-        // DLP108,
+        // Double / sidemounted LP108
+        D_LP108,
     };
 
     /// Specs of the cylinder that describe capacity and max pressure. Volume is determined

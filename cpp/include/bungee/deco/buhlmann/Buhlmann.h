@@ -28,8 +28,8 @@ public:
     void update(const Mix::PartialPressure& partialPressure, Time duration);
 
     /// \param[in] gf Gradient factor, [0.0, 1.0]. Pass 1 to get the depth at the M value. Pass 0
-    /// to get the current pressure. But don't do either of those things because there's more efficient
-    /// ways.
+    /// to get the current pressure. But don't do either of those things because there's more
+    /// efficient ways.
     Depth ceiling(double gf) const;
     std::vector<Depth> ceilings(double gf) const;
 

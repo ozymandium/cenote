@@ -109,21 +109,24 @@ Result::Deco Result::GetDeco(const Plan& plan, Eigen::Ref<const Eigen::VectorXd>
                              Eigen::Ref<const Eigen::VectorXd> depth)
 {
     using namespace deco::buhlmann;
-    Buhlmann model(Buhlmann::Params{
-        .water = plan.water(), .model = Model::ZHL_16A});
+    Buhlmann model(Buhlmann::Params{.water = plan.water(), .model = Model::ZHL_16A});
     // assume infinite surface interval preceding this dive.
     model.equilibrium(SURFACE_AIR_PP);
 
     Deco data;
     data.resize(time.size(), model.compartmentCount());
 
+    //
+    // TODO: use GF stored in plan point and interpolate
+    //
+
     // set initial value in the 0th position
-    data.ceiling[0] = model.ceiling(GF)();
+    data.ceiling[0] = model.ceiling(1.0)();
     data.gradient[0] = model.gradientAtDepth(Depth(depth[0]));
 
     data.M0s.col(0) = UnitsVecToEigen(model.M0s());
     data.tissuePressures.col(0) = UnitsVecToEigen(model.pressures());
-    data.ceilings.col(0) = UnitsVecToEigen(model.ceilings(GF));
+    data.ceilings.col(0) = UnitsVecToEigen(model.ceilings(1.0));
     data.gradients.col(0) = UnitsVecToEigen(model.gradientsAtDepth(Depth(depth[0])));
 
     // iterate over increments
@@ -137,11 +140,11 @@ Result::Deco Result::GetDeco(const Plan& plan, Eigen::Ref<const Eigen::VectorXd>
         const Mix& mix = plan.tanks().at(activeTank).mix;
         const Mix::PartialPressure partialPressure = mix.partialPressure(avgDepth, plan.water());
         model.update(partialPressure, duration);
-        data.ceiling[i] = model.ceiling(GF)();
+        data.ceiling[i] = model.ceiling(1.0)();
         data.gradient[i] = model.gradientAtDepth(Depth(depth[i]));
         data.M0s.col(i) = UnitsVecToEigen(model.M0s());
         data.tissuePressures.col(i) = UnitsVecToEigen(model.pressures());
-        data.ceilings.col(i) = UnitsVecToEigen(model.ceilings(GF));
+        data.ceilings.col(i) = UnitsVecToEigen(model.ceilings(1.0));
         data.gradients.col(i) = UnitsVecToEigen(model.gradientsAtDepth(Depth(depth[i])));
     }
 

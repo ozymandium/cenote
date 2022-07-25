@@ -42,7 +42,8 @@ void Buhlmann::update(const Mix::PartialPressure& partialPressure, Time duration
     }
 }
 
-Depth Buhlmann::ceiling(const double gf) const { 
+Depth Buhlmann::ceiling(const double gf) const
+{
     const std::vector<Depth> vec = ceilings(gf);
     return *std::max_element(vec.begin(), vec.end());
 }

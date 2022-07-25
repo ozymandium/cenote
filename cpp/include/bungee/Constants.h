@@ -53,6 +53,4 @@ static constexpr Time MODEL_TIME_INC = units::time::second_t(1);
 /// inside the planner.
 static constexpr Pressure MAX_DECO_PPO2 = units::pressure::atmosphere_t(1.6);
 
-static constexpr double GF = 0.5;
-
 } // namespace bungee

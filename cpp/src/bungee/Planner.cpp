@@ -33,8 +33,7 @@ Plan Replan(const Plan& input)
 
     // get the deco model caught up to the last point the user gave us so we know where to start
     // with the ascent
-    Buhlmann model(Buhlmann::Params{
-        .water = output.water(), .model = Model::ZHL_16A});
+    Buhlmann model(Buhlmann::Params{.water = output.water(), .model = Model::ZHL_16A});
     // assume infinite surface interval preceding this dive.
     model.equilibrium(SURFACE_AIR_PP);
 
@@ -62,6 +61,37 @@ Plan Replan(const Plan& input)
         }
     }
 
+    // do the ascent
+
+    // get the gf at a given depth based on the last point, which will be where the gf slop is set.
+    // have to capture by value since we are getting a reference to the last point in the profile
+    //
+    // TODO: make this a class method of Plan after the replan function is moved to Plan. This
+    // requires making the ascentBeginDepth a class member.
+    const Depth ascentBeginDepth = output.profile().back().depth;
+    auto gfLookup = [&](const Depth depth) {
+        const double depthFraction = (depth / ascentBeginDepth)();
+        return (output.gf().low - output.gf().high) * depthFraction + output.gf().high;
+    };
+
+    // iteratively find the ceiling
+    auto ceilingLookup = [&]() {
+        // initialize to just any old depth
+        Depth ceiling = output.profile().back().depth;
+        // FIXME: guard against infinite loops toggling between ceilings. just check on an it counter
+        // and if it gets hit pick the lowest ceiling of the two
+        while (true) {
+            const double requestedGf = gfLookup(ceiling);
+            const Depth newCeiling = units::math::ceil(model.ceiling(requestedGf) / STOP_DEPTH_INC) * STOP_DEPTH_INC;
+            if (newCeiling == ceiling) {
+                break;
+            } else {
+                ceiling = newCeiling;
+            }
+        }
+        return ceiling;
+    };
+
     Time stopDuration = 0_min;
     size_t iteration = 0;
     while (output.profile().back().depth != 0_m) {
@@ -73,7 +103,7 @@ Plan Replan(const Plan& input)
 
         // figure out what the ceiling is
         // round ceiling up to nearest 10 feet
-        const Depth ceiling = units::math::ceil(model.ceiling(output.gf().low) / STOP_DEPTH_INC) * STOP_DEPTH_INC;
+        const Depth ceiling = ceilingLookup();
 
         // if ceiling is not less than current depth, stay for another minute
         if (ceiling >= output.profile().back().depth) {

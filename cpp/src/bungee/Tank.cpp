@@ -42,6 +42,8 @@ static const std::map<Tank::Type, Tank::Params> TANK_PARAMS{
     {Tank::AL40, {.size = 5.8_L, .servicePressure = 3000_psi, .z = 1.045}},
     {Tank::AL80, {.size = 11.1_L, .servicePressure = 3000_psi, .z = 1.0337}},
     {Tank::LP108, {.size = 17_L, .servicePressure = 2640_psi, .z = 1.0}},
+    // FIXME: in unit test check that double versions are exactly twice the single versions
+    {Tank::D_LP108, {.size = 34_L, .servicePressure = 2640_psi, .z = 1.0}},
 };
 
 /*

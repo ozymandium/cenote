@@ -56,6 +56,7 @@ PYBIND11_MODULE(bungee, mod) {
         .value("AL40", Tank::AL40)
         .value("AL80", Tank::AL80)
         .value("LP108", Tank::LP108)
+        .value("D_LP108", Tank::D_LP108)
     ;
     // Mix.h
     py::class_<Mix>(mod, "Mix")

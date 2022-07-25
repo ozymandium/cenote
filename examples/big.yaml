@@ -4,8 +4,8 @@ gf:
   high: 0.7
 tanks:
   Sidemount:
-    type: LP108
-    pressure: 3600 psi
+    type: D_LP108
+    pressure: 3000 psi
     mix: 
       fO2: 0.21
   Deco50:
