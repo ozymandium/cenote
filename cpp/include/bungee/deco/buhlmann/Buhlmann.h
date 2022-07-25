@@ -25,7 +25,9 @@ public:
     void setCompartmentPressures(const std::vector<Pressure> compartmentPressures);
 
     /// TODO: temperature consideration
-    void update(const Mix::PartialPressure& partialPressure, Time duration);
+    void constantPressureUpdate(const Mix::PartialPressure& partialPressure, Time duration);
+    void variablePressureUpdate(const Mix::PartialPressure& partialPressureStart,
+                                const Mix::PartialPressure& partialPressureEnd, Time duration);
 
     /// \param[in] gf Gradient factor, [0.0, 1.0]. Pass 1 to get the depth at the M value. Pass 0
     /// to get the current pressure. But don't do either of those things because there's more

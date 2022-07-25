@@ -59,7 +59,13 @@ public:
     ///
     /// \param[in] duration The amount of time for which the compartment was exposed to pressure
     /// `ambientPressure` [min].
-    void update(units::pressure::bar_t ambientPressure, units::time::minute_t duration);
+    void constantPressureUpdate(units::pressure::bar_t ambientPressure,
+                                units::time::minute_t duration);
+
+    /// Assume ambient pressure changes linearly from start to end.
+    void variablePressureUpdate(units::pressure::bar_t ambientPressureStart,
+                                units::pressure::bar_t ambientPressureEnd,
+                                units::time::minute_t duration);
 
     /// \brief The lowest tolerable pressure.
     ///

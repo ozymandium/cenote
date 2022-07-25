@@ -130,6 +130,9 @@ Result::Deco Result::GetDeco(const Plan& plan, Eigen::Ref<const Eigen::VectorXd>
     data.gradients.col(0) = UnitsVecToEigen(model.gradientsAtDepth(Depth(depth[0])));
 
     // iterate over increments
+    //
+    // TODO: find a way to use the vartiable pressure update in the model instead of re-implementing
+    //       it here simply to capture the state everywhere along the way.
     for (size_t i = 1; i < time.size(); ++i) {
         const Time duration(time[i] - time[i - 1]);
         // This computes pressure at the average depth.
@@ -139,7 +142,9 @@ Result::Deco Result::GetDeco(const Plan& plan, Eigen::Ref<const Eigen::VectorXd>
         const std::string& activeTank = plan.getTankAtTime(Time(time[i - 1]));
         const Mix& mix = plan.tanks().at(activeTank).mix;
         const Mix::PartialPressure partialPressure = mix.partialPressure(avgDepth, plan.water());
-        model.update(partialPressure, duration);
+
+        model.constantPressureUpdate(partialPressure, duration);
+
         data.ceiling[i] = model.ceiling(1.0)();
         data.gradient[i] = model.gradientAtDepth(Depth(depth[i]));
         data.M0s.col(i) = UnitsVecToEigen(model.M0s());

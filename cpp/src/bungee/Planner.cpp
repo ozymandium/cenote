@@ -37,27 +37,23 @@ Plan Replan(const Plan& input)
     // assume infinite surface interval preceding this dive.
     model.equilibrium(SURFACE_AIR_PP);
 
-    {
-        // this bit is copied from Result.cpp
-        const size_t N = GetNumPoints(output.profile().back().time);
-        const Eigen::VectorXd timeVec =
-            Eigen::VectorXd::LinSpaced(N, 0, output.profile().back().time());
-        const Eigen::VectorXd depthVec = Interpolate(output.time(), output.depth(), timeVec);
-        for (size_t i = 1; i < timeVec.size(); ++i) {
-            const Time duration(timeVec[i] - timeVec[i - 1]);
-            // ensure(duration == MODEL_TIME_INC,
-            //        fmt::format("time increment not expected: {} != {}",
-            //        units::time::to_string(duration),
-            //        units::time::to_string(MODEL_TIME_INC)));
-            // This computes pressure at the average depth.
-            // dipplanner uses Schreiner equation for segments with non-constant depth, which would
-            // allow using large increments
-            const Depth avgDepth((depthVec[i - 1] + depthVec[i]) * 0.5);
-            const std::string& activeTank = output.getTankAtTime(Time(timeVec[i - 1]));
-            const Mix& mix = output.tanks().at(activeTank).mix;
-            const Mix::PartialPressure partialPressure =
-                mix.partialPressure(avgDepth, output.water());
-            model.update(partialPressure, duration);
+    for (size_t i = 1; i < output.profile().size(); ++i) {
+        const Plan::Point& start = output.profile()[i - 1];
+        const Plan::Point& end = output.profile()[i];
+
+        const Time duration = end.time - start.time;
+
+        const Mix& mix = output.tanks().at(start.tank).mix;
+        const Mix::PartialPressure partialPressureStart =
+            mix.partialPressure(start.depth, output.water());
+
+        if (start.depth == end.depth) {
+            model.constantPressureUpdate(partialPressureStart, duration);
+        }
+        else {
+            const Mix::PartialPressure partialPressureEnd =
+                mix.partialPressure(end.depth, output.water());
+            model.variablePressureUpdate(partialPressureStart, partialPressureEnd, duration);
         }
     }
 
@@ -78,14 +74,16 @@ Plan Replan(const Plan& input)
     auto ceilingLookup = [&]() {
         // initialize to just any old depth
         Depth ceiling = output.profile().back().depth;
-        // FIXME: guard against infinite loops toggling between ceilings. just check on an it counter
-        // and if it gets hit pick the lowest ceiling of the two
+        // FIXME: guard against infinite loops toggling between ceilings. just check on an it
+        // counter and if it gets hit pick the lowest ceiling of the two
         while (true) {
             const double requestedGf = gfLookup(ceiling);
-            const Depth newCeiling = units::math::ceil(model.ceiling(requestedGf) / STOP_DEPTH_INC) * STOP_DEPTH_INC;
+            const Depth newCeiling =
+                units::math::ceil(model.ceiling(requestedGf) / STOP_DEPTH_INC) * STOP_DEPTH_INC;
             if (newCeiling == ceiling) {
                 break;
-            } else {
+            }
+            else {
                 ceiling = newCeiling;
             }
         }
@@ -112,7 +110,7 @@ Plan Replan(const Plan& input)
                 output.tanks()
                     .at(activeTank)
                     .mix.partialPressure(output.profile().back().depth, output.water());
-            model.update(partialPressure, STOP_TIME_INC);
+            model.constantPressureUpdate(partialPressure, STOP_TIME_INC);
             stopDuration += STOP_TIME_INC;
             // but don't record it yet because we don't know how long we'll be here and there's no
             // reason to have a ton of plan points
@@ -141,30 +139,12 @@ Plan Replan(const Plan& input)
 
         // ascend the model
         {
-            const size_t N = GetNumPoints(ascentDuration);
-            const Eigen::VectorXd timeVec =
-                Eigen::VectorXd::LinSpaced(N,
-                                           output.profile().back().time(),
-                                           output.profile().back().time() + ascentDuration());
-            const Eigen::VectorXd depthVec =
-                Interpolate(Eigen::Vector2d(timeVec[0], timeVec[N - 1]),
-                            Eigen::Vector2d(output.profile().back().depth(), ceiling()),
-                            timeVec);
-            for (size_t i = 1; i < timeVec.size(); ++i) {
-                // FIXME:  there are time increment problems. it doesn't matter so much for the
-                //         version of this above but might matter here.
-                // ensure(Time(timeVec[i] - timeVec[i - 1]) == MODEL_TIME_INC,
-                //        "time increment wongggggg");
-                // This computes pressure at the average depth.
-                // dipplanner uses Schreiner equation for segments with non-constant depth, which
-                // would allow using large increments
-                const Depth avgDepth((depthVec[i - 1] + depthVec[i]) * 0.5);
-                // use tank for last stop as the ascent tank
-                const Mix& mix = output.tanks().at(output.profile().back().tank).mix;
-                const Mix::PartialPressure partialPressure =
-                    mix.partialPressure(avgDepth, output.water());
-                model.update(partialPressure, Time(timeVec[i] - timeVec[i - 1]));
-            }
+            const Mix& mix = output.tanks().at(output.profile().back().tank).mix;
+            const Mix::PartialPressure partialPressureStart =
+                mix.partialPressure(output.profile().back().depth, output.water());
+            const Mix::PartialPressure partialPressureEnd =
+                mix.partialPressure(ceiling, output.water());
+            model.variablePressureUpdate(partialPressureStart, partialPressureEnd, ascentDuration);
         }
 
         // add a point to the profile for the ascent destination

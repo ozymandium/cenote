@@ -9,6 +9,6 @@ TEST(Params, HalfLife)
     const Compartment::Params params(10_min);
     Compartment compartment(params);
     compartment.set(0_bar);
-    compartment.update(10_bar, 10_min);
+    compartment.constantPressureUpdate(10_bar, 10_min);
     EXPECT_UNIT_NEAR(compartment.pressure(), 5_bar, 0.05_bar);
 }

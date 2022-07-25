@@ -35,10 +35,19 @@ void Buhlmann::setCompartmentPressures(const std::vector<Pressure> compartmentPr
     }
 }
 
-void Buhlmann::update(const Mix::PartialPressure& partialPressure, Time duration)
+void Buhlmann::constantPressureUpdate(const Mix::PartialPressure& partialPressure, Time duration)
 {
     for (auto& compartment : _compartments) {
-        compartment.update(partialPressure.N2, duration);
+        compartment.constantPressureUpdate(partialPressure.N2, duration);
+    }
+}
+
+void Buhlmann::variablePressureUpdate(const Mix::PartialPressure& partialPressureStart,
+                                      const Mix::PartialPressure& partialPressureEnd, Time duration)
+{
+    for (auto& compartment : _compartments) {
+        compartment.variablePressureUpdate(
+            partialPressureStart.N2, partialPressureEnd.N2, duration);
     }
 }
 
