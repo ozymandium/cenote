@@ -68,7 +68,7 @@ std::vector<Depth> Buhlmann::ceilings(const double gf) const
         const Depth tolerableDepth = DepthFromPressure(m0s[i], _params.water);
         const Depth tissueDepth = DepthFromPressure(ps[i], _params.water);
         ensure(tissueDepth > tolerableDepth, "what the absolute fuck");
-        ret[i] = tissueDepth - (tissueDepth - tolerableDepth) * gf;       
+        ret[i] = tissueDepth - (tissueDepth - tolerableDepth) * gf;
     }
     return ret;
 }
@@ -84,7 +84,7 @@ std::vector<Scalar> Buhlmann::gradientsAtDepth(const Depth depth) const
     std::vector<Scalar> vec(compartmentCount());
     const Pressure ambientPressure = PressureFromDepth(depth, _params.water);
     for (size_t i = 0; i < vec.size(); ++i) {
-        vec[i] = _compartments[i].gf(ambientPressure);
+        vec[i] = _compartments[i].gradientAtAmbientPressure(ambientPressure);
     }
     return vec;
 }

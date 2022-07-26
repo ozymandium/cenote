@@ -79,7 +79,7 @@ public:
     /// with the given ambient absolute pressure. A return value of 1.0 means the compartment would
     /// be at its M value. A return value of 0 means that the compartment would be at equilibrium
     /// with the environment.
-    Scalar gf(units::pressure::bar_t ambientPressure) const;
+    Scalar gradientAtAmbientPressure(units::pressure::bar_t ambientPressure) const;
 
 private:
     /// Constant coefficients

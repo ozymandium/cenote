@@ -59,40 +59,8 @@ Plan Replan(const Plan& input)
     }
 
     // do the ascent
-
-    // get the gf at a given depth based on the last point, which will be where the gf slop is set.
-    // have to capture by value since we are getting a reference to the last point in the profile
-    //
-    // TODO: make this a class method of Plan after the replan function is moved to Plan. This
-    // requires making the ascentBeginDepth a class member.
-    const Depth ascentBeginDepth = output.profile().back().depth;
-    auto gfLookup = [&](const Depth depth) {
-        const double depthFraction = (depth / ascentBeginDepth)();
-        return (output.gf().low - output.gf().high) * depthFraction + output.gf().high;
-    };
-
-    // // iteratively find the ceiling
-    // auto ceilingLookup = [&]() {
-    //     // initialize to just any old depth
-    //     Depth ceiling = output.profile().back().depth;
-    //     // FIXME: guard against infinite loops toggling between ceilings. just check on an it
-    //     // counter and if it gets hit pick the lowest ceiling of the two
-    //     while (true) {
-    //         const double requestedGf = gfLookup(ceiling);
-    //         const Depth newCeiling =
-    //             units::math::ceil(model.ceiling(requestedGf) / STOP_DEPTH_INC) * STOP_DEPTH_INC;
-    //         if (newCeiling == ceiling) {
-    //             break;
-    //         }
-    //         else {
-    //             ceiling = newCeiling;
-    //         }
-    //     }
-    //     return ceiling;
-    // };
-
+    std::optional<double> gfSlope;
     Time stopDuration = 0_min;
-    size_t iteration = 0;
     while (output.profile().back().depth > 0_m) {
         ensure(output.profile().back().depth >= 0_m, "why are you planning negative depths?");
 
@@ -102,18 +70,17 @@ Plan Replan(const Plan& input)
         output.setTank(output.bestMix(output.profile().back().depth));
 
         // figure out what the ceiling is by "visiting" it with a test model copied from the current
-        // model, and seeing if we're over the desired gradient factor the hypothetical model
+        // model, and seeing if we're over the desired gradient factor when the hypothetical model
         // arrives there.
         Depth ceiling = output.profile().back().depth;
-        // for (size_t ceilingIt = 0; ceilingIt < 3; ++ceilingIt)
-        size_t ceilingIt = 0;
         while (ceiling > 0_m) {
             // This loop will really only run more than twice during the ascent from the bottom
             // to the first stop. When an ascent can be made between successive stops, it will run
             // twice. When no ascent can be made, it will run once.
 
             // see what the ceiling would be if we ascended one step above the current ceiling.
-            const Depth testCeiling = units::math::round((ceiling - STOP_DEPTH_INC)/ STOP_DEPTH_INC) * STOP_DEPTH_INC;
+            const Depth testCeiling =
+                units::math::round((ceiling - STOP_DEPTH_INC) / STOP_DEPTH_INC) * STOP_DEPTH_INC;
             // see how much time it would take to ascend, round up to nearest minute
             const Depth ascentDistance = output.profile().back().depth - testCeiling;
             // round ascent time up to the nearest minute
@@ -131,20 +98,29 @@ Plan Replan(const Plan& input)
                 mix.partialPressure(testCeiling, output.water());
             testModel.variablePressureUpdate(
                 partialPressureCurrentDepth, partialPressureTestCeiling, ascentDuration);
-            // have to look up the gf at the ceiling, not the current place
-            const double gfAtTestCeiling = gfLookup(testCeiling);
-            // once we get there, did we go too far? see what the safe depth is after having
-            // traveled to this theoretical stop
-            const Depth ceilingAtTestCeiling = testModel.ceiling(gfAtTestCeiling);
 
-            if (ceilingAtTestCeiling <= testCeiling) {
+            // find the resultant gradient at this depth upon arrival
+            const double gfAtTestCeiling = testModel.gradientAtDepth(testCeiling);
+
+            // determine the desired gradient at this depth
+            double desiredGradient;
+            if (!gfSlope.has_value()) {
+                // if gf slope is not set, it has not been initialized and we need to start at the
+                // gf low.
+                desiredGradient = output.gf().low;
+            }
+            else {
+                desiredGradient = gfSlope.value() * testCeiling() + output.gf().high;
+            }
+
+            if (gfAtTestCeiling <= desiredGradient) {
                 // once we get there it will be safe to get there.
                 // addition floating point errors require rounding.
                 ceiling = testCeiling;
             }
             else {
-                // we will cross the true ceiling line getting to this stop. don't save the test
-                // ceiling and abort this loop.
+                // we will cross the ceiling line getting to this stop. don't save the test
+                // ceiling and abort this loop so that the previous ceiling will be used.
                 break;
             }
             // FIXME: could just copy values from testCeiling over to ceiling? have a bunch of shit
@@ -174,6 +150,11 @@ Plan Replan(const Plan& input)
         }
 
         // ceiling is shallower than current depth. time to ascend!
+        // but first let's set the GF slope if this happens to be the first stop
+        if (!gfSlope.has_value()) {
+            gfSlope = (output.gf().low - output.gf().high) / ceiling();
+        }
+        // now figure out how long it will take to get to the stop
         const Depth ascentDistance = output.profile().back().depth - ceiling;
         // round ascent time up to the nearest minute
         const Time ascentDuration =
@@ -199,8 +180,9 @@ Plan Replan(const Plan& input)
         // add a point to the profile for the ascent destination
         output.addSegment(ascentDuration, ceiling);
     }
-    ensure(output.profile().back().depth == 0_m, 
-        fmt::format("Replan: stopped somewhere other than the surface {}\n", str(output.profile().back().depth)));
+    ensure(output.profile().back().depth == 0_m,
+           fmt::format("Replan: stopped somewhere other than the surface {}\n",
+                       str(output.profile().back().depth)));
 
     output.finalize();
     return output;

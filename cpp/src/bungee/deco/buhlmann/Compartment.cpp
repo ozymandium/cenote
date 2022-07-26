@@ -66,7 +66,7 @@ units::pressure::bar_t Compartment::M0() const
     return (_pressure.value() - _params.a) * _params.b;
 }
 
-Scalar Compartment::gf(units::pressure::bar_t ambientPressure) const
+Scalar Compartment::gradientAtAmbientPressure(units::pressure::bar_t ambientPressure) const
 {
     ensure(_pressure.has_value(), "Compartment::gf: pressure not initialized.");
     // http://scubatechphilippines.com/scuba_blog/gradient-factors-dummies/
