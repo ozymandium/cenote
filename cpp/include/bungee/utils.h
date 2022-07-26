@@ -20,4 +20,8 @@ Eigen::VectorXd Interpolate(Eigen::Ref<const Eigen::VectorXd> xp,
                             Eigen::Ref<const Eigen::VectorXd> yp,
                             Eigen::Ref<const Eigen::VectorXd> x);
 
+inline std::string str(Depth unit) { return units::length::to_string(unit); }
+inline std::string str(Time unit) { return units::time::to_string(unit); }
+
+
 } // namespace bungee

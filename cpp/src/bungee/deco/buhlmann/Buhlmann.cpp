@@ -68,8 +68,7 @@ std::vector<Depth> Buhlmann::ceilings(const double gf) const
         const Depth tolerableDepth = DepthFromPressure(m0s[i], _params.water);
         const Depth tissueDepth = DepthFromPressure(ps[i], _params.water);
         ensure(tissueDepth > tolerableDepth, "what the absolute fuck");
-        const Depth ceil = tissueDepth - (tissueDepth - tolerableDepth) * gf;
-        ret[i] = ceil > 0_m ? ceil : 0_m;
+        ret[i] = tissueDepth - (tissueDepth - tolerableDepth) * gf;       
     }
     return ret;
 }
