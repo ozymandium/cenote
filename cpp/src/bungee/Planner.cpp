@@ -162,11 +162,6 @@ Plan Replan(const Plan& input)
 
         // TODO: swap to deco SCR from working SCR here.
 
-        // TODO: this waits to ascend to a stop until it is already safe to be at that stop.
-        //       other planners ascend to a stop planning to arrive right when it becomes safe to
-        //       be at the stop, resulting in a steeper gradient and shorter dive. this approach
-        //       below adds extra conservatism that was not requested.
-
         // ascend the model
         {
             const Mix& mix = output.tanks().at(output.profile().back().tank).mix;
