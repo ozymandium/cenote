@@ -6,7 +6,9 @@ FetchContent_Declare(
   GIT_SHALLOW TRUE
   GIT_PROGRESS TRUE
 )
+
 set(EIGEN_BUILD_DOC OFF)
+
 # note: To disable eigen tests,
 # you should put this code in a add_subdirectory to avoid to change
 # BUILD_TESTING for your own project too since variables are directory

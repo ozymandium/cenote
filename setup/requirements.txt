@@ -9,6 +9,5 @@ coverage
 dipplanner @ git+https://github.com/ozymandium/dipplanner.git
 black
 clang-format
-conan
 jupyter
 jupyterthemes

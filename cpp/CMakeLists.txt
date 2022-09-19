@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.22)
 project(bungee VERSION 0.0.1 LANGUAGES CXX)
 
 # # set this once conan removed?
-# set(CMAKE_CXX_STANDARD 20)
-# set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # set(CMAKE_CXX_EXTENSIONS OFF)
 # linker complains about fmt without this
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -13,14 +13,10 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Dependencies
 #
 
-# conan
-include(${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
-
 # gcov/lcov 
-include(CodeCoverage)
+include(${CMAKE_BINARY_DIR}/CodeCoverage.cmake)
 
 ## get dependencies from conan
-find_package(pybind11 CONFIG REQUIRED)
 find_package(Python REQUIRED COMPONENTS Interpreter Development)
 
 add_subdirectory(deps)
@@ -48,22 +44,6 @@ target_link_libraries(bungee_core
 target_include_directories(bungee_core PUBLIC include)
 
 ## Python bindings
-
-# conan fucking sucks
-# https://github.com/conan-io/conan-center-index/issues/9343
-if(NOT COMMAND pybind11_add_module)
-    foreach(INCDIR IN LISTS pybind11_INCLUDE_DIRS)
-        if(EXISTS "${INCDIR}/../lib/cmake/pybind11/pybind11Tools.cmake")
-            include("${INCDIR}/../lib/cmake/pybind11/pybind11Common.cmake")
-            include("${INCDIR}/../lib/cmake/pybind11/pybind11Tools.cmake")
-            break()
-        elseif(EXISTS "${INCDIR}/../../lib/cmake/pybind11/pybind11Tools.cmake")
-            include("${INCDIR}/../../lib/cmake/pybind11/pybind11Common.cmake")
-            include("${INCDIR}/../../lib/cmake/pybind11/pybind11Tools.cmake")
-            break()
-        endif()
-    endforeach()
-endif()
 
 # put everything in the python binding to avoid linker path problems and simply build flags
 # for testing stuff

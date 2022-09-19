@@ -55,10 +55,6 @@ RUN pip3 install --user --upgrade -r /tmp/requirements.txt
 
 ## Conan
 RUN mkdir ${BUILD_DIR}
-# set up conan default profile
-COPY --chown=${USER}:${USER} conan_profile.txt ${HOME_DIR}/.conan/profiles/default
-COPY --chown=${USER}:${USER} conanfile.txt /tmp/conanfile.txt
-RUN cd ${BUILD_DIR} && conan install /tmp/conanfile.txt -pr:b=default
 
 # download the cmake gcov module to build directory
 RUN wget https://raw.githubusercontent.com/bilke/cmake-modules/master/CodeCoverage.cmake -O ${BUILD_DIR}/CodeCoverage.cmake
