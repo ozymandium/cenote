@@ -27,7 +27,6 @@ add_subdirectory(deps)
 # set source/header files
 file(GLOB_RECURSE SRC_FILES ${PROJECT_SOURCE_DIR}/src/bungee/*.cpp)
 file(GLOB_RECURSE HDR_FILES ${PROJECT_SOURCE_DIR}/include/**/*.h)
-file(GLOB_RECURSE TST_FILES ${PROJECT_SOURCE_DIR}/test/test_*.cpp)
 
 # TODO: build and install units as separate library
 
@@ -81,14 +80,12 @@ function(bungee_unit_test test_name test_src)
     add_test(${test_name} ${test_name})
 endfunction()
 
-bungee_unit_test(test_water test/test_Water.cpp)
-bungee_unit_test(test_tank test/test_Tank.cpp)
-bungee_unit_test(test_scr test/test_Scr.cpp)
-bungee_unit_test(test_plan test/test_Plan.cpp)
-bungee_unit_test(test_result test/test_Result.cpp)
-bungee_unit_test(test_models test/test_Models.cpp)
-bungee_unit_test(test_compartment test/test_Compartment.cpp)
-bungee_unit_test(test_buhlmann test/test_Buhlmann.cpp)
+file(GLOB_RECURSE TEST_FILES ${PROJECT_SOURCE_DIR}/test/test_*.cpp)
+foreach(TEST_FILE ${TEST_FILES})
+    get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)
+    message("Found test: ${TEST_NAME}")
+    bungee_unit_test(${TEST_NAME} ${TEST_FILE})
+endforeach()
 
 # coverage
 append_coverage_compiler_flags()
