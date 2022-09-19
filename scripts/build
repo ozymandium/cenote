@@ -14,7 +14,7 @@ echo "BUILD_DIR: $BUILD_DIR"
 cd $BUILD_DIR
 cmake $SRC_DIR/cpp -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug
 cmake --build . -j 4
-make install
+sudo make install
 
 # python
 cd $SRC_DIR/py

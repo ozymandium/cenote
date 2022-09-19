@@ -30,12 +30,12 @@ RUN apt update -qq > /dev/null \
     curl \
     vim \
     wget \
-    libgtest-dev \
     g++-10 \
     plocate \
     ninja-build \
     lcov \
-    gcovr
+    gcovr \
+    file
 
 # prepares non root env
 RUN useradd --create-home --shell /bin/zsh ${USER}
@@ -58,10 +58,6 @@ RUN mkdir ${BUILD_DIR}
 # set up conan default profile
 COPY --chown=${USER}:${USER} conan_profile.txt ${HOME_DIR}/.conan/profiles/default
 COPY --chown=${USER}:${USER} conanfile.txt /tmp/conanfile.txt
-# auto installation of some stuff is broken, have to manually install on occasion
-# https://github.com/conan-io/conan-center-index/issues/7752
-RUN conan install gtest/1.10.0@ -r conancenter --build gtest
-RUN conan install fmt/9.0.0@ -r conancenter --build fmt
 RUN cd ${BUILD_DIR} && conan install /tmp/conanfile.txt -pr:b=default
 
 # download the cmake gcov module to build directory
