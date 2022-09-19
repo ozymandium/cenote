@@ -13,7 +13,7 @@ set(EIGEN_BUILD_DOC OFF)
 # you should put this code in a add_subdirectory to avoid to change
 # BUILD_TESTING for your own project too since variables are directory
 # scoped
-set(BUILD_TESTING OFF)
+# set(BUILD_TESTING OFF)
 set(EIGEN_BUILD_PKGCONFIG OFF)
 # set( OFF)
 FetchContent_MakeAvailable(Eigen)

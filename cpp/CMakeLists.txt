@@ -16,7 +16,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # gcov/lcov 
 include(${CMAKE_BINARY_DIR}/CodeCoverage.cmake)
 
-## get dependencies from conan
 find_package(Python REQUIRED COMPONENTS Interpreter Development)
 
 add_subdirectory(deps)
@@ -28,6 +27,7 @@ add_subdirectory(deps)
 # set source/header files
 file(GLOB_RECURSE SRC_FILES ${PROJECT_SOURCE_DIR}/src/bungee/*.cpp)
 file(GLOB_RECURSE HDR_FILES ${PROJECT_SOURCE_DIR}/include/**/*.h)
+file(GLOB_RECURSE TST_FILES ${PROJECT_SOURCE_DIR}/test/test_*.cpp)
 
 # TODO: build and install units as separate library
 
@@ -75,45 +75,20 @@ install(
 
 enable_testing()
 
-# Water.cpp
-add_executable(test_water test/test_Water.cpp)
-target_link_libraries(test_water bungee_core GTest::gtest_main)
-gtest_discover_tests(test_water)
+function(bungee_unit_test test_name test_src)
+    add_executable(${test_name} ${test_src})
+    target_link_libraries(${test_name} bungee_core GTest::gtest_main)
+    add_test(${test_name} ${test_name})
+endfunction()
 
-# # Tank.cpp
-add_executable(test_tank test/test_Tank.cpp)
-target_link_libraries(test_tank bungee_core GTest::gtest_main)
-gtest_discover_tests(test_tank)
-
-# # Scr.cpp
-add_executable(test_scr test/test_Scr.cpp)
-target_link_libraries(test_scr bungee_core GTest::gtest_main)
-gtest_discover_tests(test_scr)
-
-# # Plan.cpp
-add_executable(test_plan test/test_Plan.cpp)
-target_link_libraries(test_plan bungee_core GTest::gtest_main)
-gtest_discover_tests(test_plan)
-
-# # Result.cpp
-add_executable(test_result test/test_Result.cpp)
-target_link_libraries(test_result bungee_core GTest::gtest_main)
-gtest_discover_tests(test_result)
-
-# # Models.cpp
-add_executable(test_models test/test_Models.cpp)
-target_link_libraries(test_models bungee_core GTest::gtest_main)
-gtest_discover_tests(test_models)
-
-# # Compartment.cpp
-add_executable(test_compartment test/test_Compartment.cpp)
-target_link_libraries(test_compartment bungee_core GTest::gtest_main)
-gtest_discover_tests(test_compartment)
-
-# # Buhlmann.cpp
-add_executable(test_buhlmann test/test_Buhlmann.cpp)
-target_link_libraries(test_buhlmann bungee_core GTest::gtest_main)
-gtest_discover_tests(test_buhlmann)
+bungee_unit_test(test_water test/test_Water.cpp)
+bungee_unit_test(test_tank test/test_Tank.cpp)
+bungee_unit_test(test_scr test/test_Scr.cpp)
+bungee_unit_test(test_plan test/test_Plan.cpp)
+bungee_unit_test(test_result test/test_Result.cpp)
+bungee_unit_test(test_models test/test_Models.cpp)
+bungee_unit_test(test_compartment test/test_Compartment.cpp)
+bungee_unit_test(test_buhlmann test/test_Buhlmann.cpp)
 
 # coverage
 append_coverage_compiler_flags()
