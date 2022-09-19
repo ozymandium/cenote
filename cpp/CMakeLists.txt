@@ -21,15 +21,20 @@ include(CodeCoverage)
 
 ## get dependencies from conan
 find_package(units CONFIG REQUIRED)
-# find_package(GTest CONFIG REQUIRED)
-find_package(Eigen3 CONFIG REQUIRED)
+# find_package(Eigen3 CONFIG REQUIRED)
 find_package(pybind11 CONFIG REQUIRED)
 find_package(Python REQUIRED COMPONENTS Interpreter Development)
-# find_package(fmt CONFIG REQUIRED)
 
 ## FetchContent dependencies
 
 include(FetchContent)
+
+FetchContent_Declare(
+      Eigen
+      GIT_REPOSITORY    https://gitlab.com/libeigen/eigen.git
+      GIT_TAG           3.4.0
+    )
+FetchContent_MakeAvailable(Eigen)
 
 FetchContent_Declare(fmt
   GIT_REPOSITORY https://github.com/fmtlib/fmt.git
@@ -37,7 +42,6 @@ FetchContent_Declare(fmt
 )
 FetchContent_MakeAvailable(fmt)
 
-# go get googletest
 FetchContent_Declare(
   googletest
   GIT_REPOSITORY https://github.com/google/googletest.git
@@ -63,14 +67,11 @@ target_link_libraries(bungee_core
     PUBLIC
     units::units # header only, but whatever
     Eigen3::Eigen
-    # ${fmt_LIBRARIES}
     fmt::fmt
 )
 target_include_directories(bungee_core PUBLIC 
     include 
     ${units_INCLUDE_DIRS}
-    ${Eigen3_INCLUDE_DIRS}
-    # ${fmt_INCLUDE_DIRS}
 )
 
 ## Python bindings
@@ -100,17 +101,14 @@ pybind11_add_module(bungee
 )
 target_link_libraries(bungee 
     PUBLIC
-    units::units # header only, but whatever
+    units::units
     Eigen3::Eigen
-    # ${fmt_LIBRARIES}
     fmt::fmt
 )
 target_include_directories(bungee PUBLIC 
     include 
     ${units_INCLUDE_DIRS}
-    ${Eigen3_INCLUDE_DIRS}
     ${pybind11_INCLUDE_DIRS}
-    # ${fmt_INCLUDE_DIRS}
 )
 
 ## Installation
