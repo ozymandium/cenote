@@ -28,7 +28,7 @@ add_subdirectory(deps)
 file(GLOB_RECURSE SRC_FILES ${PROJECT_SOURCE_DIR}/src/bungee/*.cpp)
 file(GLOB_RECURSE HDR_FILES ${PROJECT_SOURCE_DIR}/include/**/*.h)
 
-# TODO: build and install units as separate library
+# TODO: build and install units as separate library. better yet move it to `deps`
 
 ## Core library 
 # this is completely redundant, i didn't feel like fixing the linker path for the pybind module

@@ -1,8 +1,19 @@
 include(FetchContent)
 
-# because eigen build needs to disable tests with a flag shared by this project, eigen dependency
-# is declared in a subdirectory
-add_subdirectory(eigen)
+# eigen dep pulled in a separate file to prevent eigen tests from running. they are controlled with
+# a global variable and not an eigen-specific variable, so disabling them in the top level cmake
+# also interferes with project tests
+include(FetchContent)
+FetchContent_Declare(
+  Eigen
+  GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+  GIT_TAG 3.4.0
+  GIT_SHALLOW TRUE
+  GIT_PROGRESS TRUE
+)
+set(EIGEN_BUILD_DOC OFF)
+set(EIGEN_BUILD_PKGCONFIG OFF)
+FetchContent_MakeAvailable(Eigen)
 
 FetchContent_Declare(
     fmt
