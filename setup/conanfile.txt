@@ -1,5 +1,4 @@
 [requires]
-units/2.3.1 
 pybind11/2.9.2 
 
 [generators]

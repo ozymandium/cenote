@@ -20,8 +20,6 @@ include(${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
 include(CodeCoverage)
 
 ## get dependencies from conan
-find_package(units CONFIG REQUIRED)
-# find_package(Eigen3 CONFIG REQUIRED)
 find_package(pybind11 CONFIG REQUIRED)
 find_package(Python REQUIRED COMPONENTS Interpreter Development)
 
@@ -29,12 +27,16 @@ find_package(Python REQUIRED COMPONENTS Interpreter Development)
 
 include(FetchContent)
 
-FetchContent_Declare(
-      Eigen
-      GIT_REPOSITORY    https://gitlab.com/libeigen/eigen.git
-      GIT_TAG           3.4.0
-    )
-FetchContent_MakeAvailable(Eigen)
+# because eigen build needs to disable tests with a flag shared by this project, eigen dependency
+# is declared in a subdirectory
+add_subdirectory(deps)
+
+# FetchContent_Declare(
+#       Eigen
+#       GIT_REPOSITORY    https://gitlab.com/libeigen/eigen.git
+#       GIT_TAG           3.4.0
+#     )
+# FetchContent_MakeAvailable(Eigen)
 
 FetchContent_Declare(fmt
   GIT_REPOSITORY https://github.com/fmtlib/fmt.git
@@ -56,7 +58,9 @@ include(GoogleTest)
 
 # set source/header files
 file(GLOB_RECURSE SRC_FILES ${PROJECT_SOURCE_DIR}/src/bungee/*.cpp)
-file(GLOB_RECURSE HDR_FILES ${PROJECT_SOURCE_DIR}/include/bungee/*.h)
+file(GLOB_RECURSE HDR_FILES ${PROJECT_SOURCE_DIR}/include/**/*.h)
+
+# TODO: build and install units as separate library
 
 ## Core library 
 # this is completely redundant, i didn't feel like fixing the linker path for the pybind module
@@ -65,14 +69,10 @@ file(GLOB_RECURSE HDR_FILES ${PROJECT_SOURCE_DIR}/include/bungee/*.h)
 add_library(bungee_core SHARED ${SRC_FILES})
 target_link_libraries(bungee_core 
     PUBLIC
-    units::units # header only, but whatever
     Eigen3::Eigen
     fmt::fmt
 )
-target_include_directories(bungee_core PUBLIC 
-    include 
-    ${units_INCLUDE_DIRS}
-)
+target_include_directories(bungee_core PUBLIC include)
 
 ## Python bindings
 
@@ -101,13 +101,11 @@ pybind11_add_module(bungee
 )
 target_link_libraries(bungee 
     PUBLIC
-    units::units
-    Eigen3::Eigen
-    fmt::fmt
+        Eigen3::Eigen
+        fmt::fmt
 )
 target_include_directories(bungee PUBLIC 
     include 
-    ${units_INCLUDE_DIRS}
     ${pybind11_INCLUDE_DIRS}
 )
 
