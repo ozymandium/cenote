@@ -14,8 +14,6 @@ add_subdirectory(deps)
 
 ## Build
 
-# TODO: build and install units as separate library. better yet move it to `deps`
-
 # Core library 
 file(GLOB_RECURSE SRC_FILES ${PROJECT_SOURCE_DIR}/src/bungee/*.cpp)
 add_library(bungee_core SHARED ${SRC_FILES})
@@ -23,6 +21,7 @@ target_link_libraries(bungee_core
     PUBLIC
     Eigen3::Eigen
     fmt::fmt
+    units
 )
 target_include_directories(bungee_core PUBLIC include)
 
@@ -33,7 +32,8 @@ target_link_libraries(bungee PUBLIC bungee_core pybind11::module)
 ## Installation
 
 # this is done to allow the jupyter notebook to find the module without having to
-# modify the python path
+# modify the python path. for use beyond just the jupyter notebook, it needs to be installed
+# for real.
 install(
     TARGETS bungee
     LIBRARY DESTINATION /home/user/.local/lib/python3.10/site-packages #??

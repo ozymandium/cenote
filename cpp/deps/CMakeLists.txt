@@ -15,6 +15,7 @@ set(EIGEN_BUILD_DOC OFF)
 set(EIGEN_BUILD_PKGCONFIG OFF)
 FetchContent_MakeAvailable(Eigen)
 
+# fmt
 FetchContent_Declare(
     fmt
     GIT_REPOSITORY      https://github.com/fmtlib/fmt.git
@@ -22,6 +23,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(fmt)
 
+# pybind
 FetchContent_Declare(
     pybind11
     GIT_REPOSITORY  https://github.com/pybind/pybind11.git
@@ -29,6 +31,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(pybind11)
 
+# gtest
 FetchContent_Declare(
   googletest
   GIT_REPOSITORY    https://github.com/google/googletest.git
@@ -36,3 +39,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 include(GoogleTest)
+
+# units
+add_subdirectory(units)
