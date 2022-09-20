@@ -65,8 +65,9 @@ RUN git config --global --add safe.directory ${SRC_DIR}
 # jupyter theme setup
 RUN jt -t monokai -cellw 95%
 
-# # add build dir to python path so bungee pybind module can be imported from anywhere
-# ENV PYTHONPATH="${BUILD_DIR}:${PYTHONPATH}"
+# make ranger show hidden files
+RUN mkdir -p ${HOME_DIR}/.config/ranger/
+RUN echo "set show_hidden true" >> ${HOME_DIR}/.config/ranger/rc.conf
 
 # working directory is the script dir for ease of dev since all primary development actions
 # are in scripts

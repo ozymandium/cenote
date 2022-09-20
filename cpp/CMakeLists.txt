@@ -4,7 +4,11 @@ project(bungee VERSION 0.0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON) # linker complains about fmt without this
+# linker complains about fmt without this
+set(CMAKE_POSITION_INDEPENDENT_CODE ON) 
+# the pybind module cannot find the core library without this, as the runtime path is stripped when
+# set to false
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 ## Dependencies
 
@@ -28,6 +32,7 @@ target_include_directories(bungee_core PUBLIC include)
 # Python bindings
 add_library(bungee MODULE src/pybind.cpp)
 target_link_libraries(bungee PUBLIC bungee_core pybind11::module)
+target_link_directories(bungee PUBLIC /usr/local/lib)
 
 ## Installation
 
@@ -36,7 +41,11 @@ target_link_libraries(bungee PUBLIC bungee_core pybind11::module)
 # for real.
 install(
     TARGETS bungee
-    LIBRARY DESTINATION /home/user/.local/lib/python3.10/site-packages #??
+    COMPONENT python
+    LIBRARY DESTINATION /home/user/.local/lib/python3.10/site-packages # TODO set this using the site dir results
+)
+install(
+    TARGETS bungee_core
 )
 
 ## Testing

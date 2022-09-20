@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 #
-# Only run this from inside the docker container. Compiles c++ code.
+# Only run this from inside the docker container. Compiles c++ code and builds python library.
 #
 
 set -e 
@@ -16,7 +16,15 @@ cmake $SRC_DIR/cpp -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug
 cmake --build . -j 4
 sudo make install
 
-# python
-cd $SRC_DIR/py
-# setuptools sucks with artifacts, puts shit in the source tree, just less shit with the -b flag
-python3 setup.py build -b $BUILD_DIR install --user
+# cmake prepends `lib` to module names. just symlink to it.
+PY_INSTALL_DIR="$(python3 -m site --user-site)"
+[ -L $PY_INSTALL_DIR/bungee.so ] || ln -s $PY_INSTALL_DIR/libbungee.so $PY_INSTALL_DIR/bungee.so
+
+# it's fucking annoying that setuptools puts build artifacts in the soure tree. so copy all the
+# python source code to the build directory and build it there.
+mkdir -p $BUILD_DIR/py
+touch $BUILD_DIR/py/tmp
+rm -rf $BUILD_DIR/py/*
+cp -r $SRC_DIR/py/* $BUILD_DIR/py
+cd $BUILD_DIR/py
+python3 setup.py build install --user

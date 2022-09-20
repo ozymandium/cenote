@@ -1,5 +1,4 @@
 from setuptools import setup, find_packages
-import os
 
 setup(
     name = "cenote",
@@ -7,8 +6,6 @@ setup(
     description = "Dive planner",
     packages = find_packages(),
     python_requires = ">=3.10",
-    # build_dir=os.path.join(os.environ["BUILD_DIR"], "py", "build"),
-    # dist_dir=os.path.join(os.environ["BUILD_DIR"], "py", "dist"),
     # entry_points = {
     #     "console_scripts": [
     #         "scr-from-sac = cenote.util.scr_from_sac:main",
