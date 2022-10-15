@@ -1,7 +1,7 @@
 #pragma once
 
-#include <gtest/gtest.h>
 #include <bungee/custom_units.h>
+#include <gtest/gtest.h>
 
 namespace {
 

@@ -179,8 +179,8 @@ Plan Replan(const Plan& input)
            fmt::format("Replan: stopped somewhere other than the surface {}\n",
                        str(output.profile().back().depth)));
 
-    // FIXME: sometimes results in 0 minute stops. when this happens go back through and remove the 
-    //         points so that it does from one stop to the next cleanly. This happens on the initial 
+    // FIXME: sometimes results in 0 minute stops. when this happens go back through and remove the
+    //         points so that it does from one stop to the next cleanly. This happens on the initial
     //          ascent from the bottom to the first stop.
 
     output.finalize();
