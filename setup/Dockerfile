@@ -32,7 +32,6 @@ RUN apt update -qq > /dev/null \
     wget \
     g++-10 \
     plocate \
-    ninja-build \
     lcov \
     gcovr \
     file
@@ -53,10 +52,10 @@ RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/inst
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --user --upgrade -r /tmp/requirements.txt
 
-## Conan
+# c++ build stuff
 RUN mkdir ${BUILD_DIR}
-
 # download the cmake gcov module to build directory
+# this is always the latest version, can break
 RUN wget https://raw.githubusercontent.com/bilke/cmake-modules/master/CodeCoverage.cmake -O ${BUILD_DIR}/CodeCoverage.cmake
 
 # allow git from inside container
