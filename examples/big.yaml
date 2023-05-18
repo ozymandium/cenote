@@ -1,7 +1,7 @@
 water: FRESH
 gf:
-  low: 1.0
-  high: 1.0
+  low: 0.55
+  high: 0.8
 tanks:
   Sidemount:
     type: D_LP108

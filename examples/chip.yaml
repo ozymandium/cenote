@@ -1,0 +1,31 @@
+# chip is doing MTB after 2 dives and wants to know if 1600 ft is cool
+# 70ft 40min
+# 1hr surface interval
+# 50ft 30min
+# 30 min surface interval
+# travel to 1600 ft
+# absolute pressure change from 0 ft to 1600ft elevation is rounded up for conservativity to 6%
+# 0.06 atm = 0.6m water depth change
+water: SALT
+gf:
+  low: 0.1
+  high: 0.1
+tanks:
+  Pretend Massive Tank:
+    type: D_LP108
+    pressure: 3600 psi
+    mix: 
+      fO2: 0.21
+scr: 
+  work: 1.0 ft^3 / min
+  deco: 1.0 ft^3 / min
+profile:
+  - {depth: 70 ft, duration: 1 min, tank: Pretend Massive Tank}
+  - {depth: 70 ft, duration: 39 min}
+  - {depth: 0 ft,  duration: 5 min}
+  - {depth: 0 ft,  duration: 1 hr}
+  - {depth: 50 ft, duration: 1 min}
+  - {depth: 50 ft, duration: 29 min}
+  - {depth: 1 ft,  duration: 5 min}
+  # - {depth: 0 ft,  duration: 30 min}
+  # - {depth: -0.6 m, duration: 5 min}

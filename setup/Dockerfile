@@ -34,7 +34,8 @@ RUN apt update -qq > /dev/null \
     plocate \
     lcov \
     gcovr \
-    file
+    file \
+    htop
 
 # prepares non root env
 RUN useradd --create-home --shell /bin/zsh ${USER}

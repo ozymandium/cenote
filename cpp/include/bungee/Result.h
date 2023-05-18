@@ -7,6 +7,7 @@
 
 namespace bungee {
 
+/// FIXME: make this AoS instead of SoA
 struct Result {
     struct Deco {
         /// FIXME this is trashy

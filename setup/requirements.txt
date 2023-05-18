@@ -3,7 +3,6 @@ pyyaml
 pint
 ipdb
 ipython
-matplotlib
 pytest
 coverage
 dipplanner @ git+https://github.com/ozymandium/dipplanner.git
@@ -11,3 +10,10 @@ black
 clang-format
 jupyter
 jupyterthemes
+ipympl
+
+# trying out plotting libraries
+bokeh
+seaborn
+plotly
+matplotlib
