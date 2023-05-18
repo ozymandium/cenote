@@ -85,6 +85,7 @@ def get_gradient_plot_html(result: cenote.Result) -> str:
 
 def get_compartment_plot_html(result: cenote.Result) -> str:
     # single compartment analysis
+    # FIXME: add dropdown to configure which compartment is displayed
 
     COMPARTMENT = 5
 
@@ -105,7 +106,7 @@ def get_compartment_plot_html(result: cenote.Result) -> str:
     axes[1].legend(loc="best")
     axes[1].grid(alpha=0.2)
     axes[1].invert_yaxis()
-    axes[1].set_title("Tissue Pressures vs Time")
+    axes[1].set_title("Compartment Pressure vs Time")
 
     return mpld3.fig_to_html(fig)
 
