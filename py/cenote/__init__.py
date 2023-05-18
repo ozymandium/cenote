@@ -18,9 +18,18 @@ TIME_DISPLAY_UNIT = UREG.minute
 VOLUME_RATE_DISPLAY_UNIT = UREG.ft**3 / UREG.minute
 
 
-def get_plan(path: str) -> bungee.Plan:
-    with open(path, "r") as f:
-        data = yaml.load(f, Loader=yaml.FullLoader)
+def get_plan(user_input: str, is_path=True) -> bungee.Plan:
+    """
+    user_input : str
+        either a path to a yaml file (is_path = True), 
+        or the contents of a yaml file (is_path = False).
+    """
+    if is_path:
+        with open(user_input, "r") as f:
+            data = yaml.load(f, Loader=yaml.FullLoader)
+    else:
+        # then we have a blob
+        data = yaml.load(user_input, Loader=yaml.FullLoader)
 
     # Water type
     water = getattr(bungee.Water, data["water"])
@@ -85,6 +94,6 @@ class Result:
         self.deco = Deco(bungee_result.deco)
 
 
-def get_result(plan: bungee.Plan):
+def get_result(plan: bungee.Plan) -> Result:
     bungee_result = bungee.Result(plan)
     return Result(bungee_result)

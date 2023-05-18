@@ -35,7 +35,8 @@ RUN apt update -qq > /dev/null \
     lcov \
     gcovr \
     file \
-    htop
+    htop \
+    tmux
 
 # prepares non root env
 RUN useradd --create-home --shell /bin/zsh ${USER}
@@ -72,3 +73,12 @@ RUN echo "set show_hidden true" >> ${HOME_DIR}/.config/ranger/rc.conf
 # working directory is the script dir for ease of dev since all primary development actions
 # are in scripts
 WORKDIR ${SRC_DIR}/scripts
+
+# add nodejs repository for v16 instead of default v12 that comes with ubuntu 22.04
+RUN curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+RUN DEBIAN_FRONTEND=noninteractive sudo apt install -qq --yes --no-install-recommends nodejs
+
+# install https://codemirror.net/
+RUN git clone https://github.com/codemirror/dev.git ${HOME}/codemirror \
+    && cd ${HOME}/codemirror \
+    && node bin/cm.js install

@@ -6,14 +6,20 @@ ipython
 pytest
 coverage
 dipplanner @ git+https://github.com/ozymandium/dipplanner.git
+
 black
 clang-format
+
 jupyter
 jupyterthemes
 ipympl
+
+flask
+pretty-html-table
 
 # trying out plotting libraries
 bokeh
 seaborn
 plotly
 matplotlib
+mpld3
