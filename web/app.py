@@ -16,6 +16,7 @@ import flask_wtf
 import flask_codemirror
 import flask_codemirror.fields
 import wtforms
+import traceback
 
 
 def get_result(input_text: str) -> cenote.Result:
@@ -122,30 +123,55 @@ CODEMIRROR_ADDONS = (("display", "placeholder"),)
 app = flask.Flask(__name__)
 
 
-class MyForm(flask_wtf.FlaskForm):
-    source_code = flask_codemirror.fields.CodeMirrorField(
-        language="yaml", config={"lineNumbers": "true"}
+class Form(flask_wtf.FlaskForm):
+    input_text = flask_codemirror.fields.CodeMirrorField(
+        language="yaml", config={"lineNumbers": "true"},
     )
-    submit = wtforms.fields.SubmitField("Submit")
+    open_button = wtforms.fields.SubmitField(label="Open")
+    plan_button = wtforms.fields.SubmitField(label="Plan")
+    save_button = wtforms.fields.SubmitField(label="Save")
 
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    form = MyForm()
-    input_text = form.source_code.data
-    if input_text is None:
-        return flask.render_template("index.html", form=form)
-    output_plan, result = get_result(input_text)
+    form = Form()
+    
+    input_text = form.input_text.data
+    open_clicked = form.open_button.data
+    plan_clicked = form.plan_button.data
+    save_clicked = form.save_button.data
+
     kwargs = {}
-    kwargs["plan_table"] = get_plan_table_html(output_plan)
-    kwargs["depth_plot"] = get_depth_plot_html(result)
-    kwargs["pressure_plot"] = get_pressure_plot_html(result)
-    kwargs["gradient_plot"] = get_gradient_plot_html(result)
-    kwargs["compartment_plot"] = get_compartment_plot_html(result)
-    return flask.render_template("index.html", form=form, **kwargs)
+    kwargs["form"] = form
+
+    if input_text is None or len(input_text) == 0:
+        return flask.render_template("index.html", **kwargs)
+    
+    if plan_clicked:
+        try:
+            output_plan, result = get_result(input_text)
+        except Exception as exc:
+            flask.flash("There's a problem with your dive plan:\n{}".format(traceback.format_exc()))
+            return flask.render_template("index.html", **kwargs)
+        
+        kwargs["plan_table"] = get_plan_table_html(output_plan)
+        kwargs["depth_plot"] = get_depth_plot_html(result)
+        kwargs["pressure_plot"] = get_pressure_plot_html(result)
+        kwargs["gradient_plot"] = get_gradient_plot_html(result)
+        kwargs["compartment_plot"] = get_compartment_plot_html(result)
+
+        return flask.render_template("index.html", **kwargs)
+
+    elif open_clicked:
+        return flask.render_template("index.html", **kwargs)
+    elif save_clicked:
+        return flask.render_template("index.html", **kwargs)
+    else:
+        flask.flash("unknown")
+        return flask.render_template("index.html", **kwargs)
 
 
-# app = Flask(__name__)
+# pick up config variables
 app.config.from_object(__name__)
 codemirror = flask_codemirror.CodeMirror(app)
 
