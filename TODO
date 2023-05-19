@@ -13,3 +13,4 @@
 
 ## Web
 - [ ] look at moving to [Monaco Editor](https://microsoft.github.io/monaco-editor/docs.html)
+- [ ] adding the codemirror editor in the way that i did it made calculation take a long time
