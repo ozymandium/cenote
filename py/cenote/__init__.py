@@ -21,7 +21,7 @@ VOLUME_RATE_DISPLAY_UNIT = UREG.ft**3 / UREG.minute
 def get_plan(user_input: str, is_path=True) -> bungee.Plan:
     """
     user_input : str
-        either a path to a yaml file (is_path = True), 
+        either a path to a yaml file (is_path = True),
         or the contents of a yaml file (is_path = False).
     """
     if is_path:

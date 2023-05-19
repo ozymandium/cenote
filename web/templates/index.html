@@ -4,31 +4,36 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cenote</title>
+  {{ codemirror.include_codemirror() }}
 </head>
 <body>
   <div>
-    <form method="POST" action="/process">
+    <!-- <form method="POST" action="/process">
       <textarea name="input_text" id="editor"></textarea>
+      <button type="submit">Plan</button>
+    </form> -->
+    <form method="POST">
+      {{ form.source_code }}
       <button type="submit">Plan</button>
     </form>
   </div>
-  <hr/>
+  <!-- <hr/> -->
   <div>
     {{ plan_table|safe }}
   </div>
-  <hr/>
+  <!-- <hr/> -->
   <div>
     {{ depth_plot|safe }}
   </div>
-  <hr/>
+  <!-- <hr/> -->
   <div>
     {{ pressure_plot|safe }}
   </div>
-  <hr/>
+  <!-- <hr/> -->
   <div>
     {{ gradient_plot|safe }}
   </div>
-  <hr/>
+  <!-- <hr/> -->
   <div>
     {{ compartment_plot|safe }}
   </div>

@@ -1,0 +1,14 @@
+#!/bin/zsh
+
+#
+# Only run this from inside the docker container. You must run `./build` first. 
+# launches the web app.
+#
+
+set -e 
+set -o pipefail
+
+echo "SRC_DIR:   $SRC_DIR"
+
+cd $SRC_DIR/web
+python3 app.py

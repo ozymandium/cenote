@@ -17,5 +17,6 @@ find $SRC_DIR/cpp/test -regex '.*\.\(cpp\|h\|inl\)' -exec clang-format -i {} -st
 black \
     $SRC_DIR/py/cenote \
     $SRC_DIR/py/test \
+    $SRC_DIR/web \
     --line-length 100 \
     -t py310

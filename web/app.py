@@ -9,17 +9,13 @@ import numpy as np
 import mpld3
 import matplotlib.pyplot as plt
 import http.server
-import argparse
 import flask
 import pretty_html_table
 import pandas as pd
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--config", default=os.path.join(os.environ["SRC_DIR"], "examples", "big.yaml"), help="Path to YAML config")
-    parser.add_argument("-p", "--port", type=int, default=8000)
-    return parser.parse_args()
+import flask_wtf
+import flask_codemirror
+import flask_codemirror.fields
+import wtforms
 
 
 def get_result(input_text: str) -> cenote.Result:
@@ -34,14 +30,10 @@ def get_plan_table_html(output_plan: bungee.Plan) -> str:
     for point in output_plan.profile():
         depth = (point.depth.value() * cenote.DEPTH_UNIT).to(cenote.DEPTH_DISPLAY_UNIT)
         time = (point.time.value() * cenote.TIME_UNIT).to(cenote.TIME_DISPLAY_UNIT)
-        data.append(
-            [
-                "{:~.0f}".format(time),
-                "{:~.0f}".format(depth),
-                point.tank
-            ]
-        )
-    return pretty_html_table.build_table(pd.DataFrame(data, columns=["Time", "Depth", "Tank"]), "green_dark")
+        data.append(["{:~.0f}".format(time), "{:~.0f}".format(depth), point.tank])
+    return pretty_html_table.build_table(
+        pd.DataFrame(data, columns=["Time", "Depth", "Tank"]), "green_dark"
+    )
 
 
 def get_depth_plot_html(result: cenote.Result) -> str:
@@ -83,6 +75,7 @@ def get_gradient_plot_html(result: cenote.Result) -> str:
     plt.title("Gradient")
     return mpld3.fig_to_html(fig)
 
+
 def get_compartment_plot_html(result: cenote.Result) -> str:
     # single compartment analysis
     # FIXME: add dropdown to configure which compartment is displayed
@@ -93,8 +86,15 @@ def get_compartment_plot_html(result: cenote.Result) -> str:
     fig, axes = plt.subplots(1, 2)
 
     axes[0].plot(result.ambient_pressure, result.ambient_pressure, "b", label="Ambient")
-    axes[0].plot(result.deco.M0s[COMPARTMENT, :], result.deco.tissue_pressures[COMPARTMENT, :], "r", label="M value")
-    axes[0].plot(result.ambient_pressure, result.deco.tissue_pressures[COMPARTMENT, :], "g", label="Tissue")
+    axes[0].plot(
+        result.deco.M0s[COMPARTMENT, :],
+        result.deco.tissue_pressures[COMPARTMENT, :],
+        "r",
+        label="M value",
+    )
+    axes[0].plot(
+        result.ambient_pressure, result.deco.tissue_pressures[COMPARTMENT, :], "g", label="Tissue"
+    )
     axes[0].legend(loc="best")
     axes[0].axis("equal")
     axes[0].grid(alpha=0.2)
@@ -111,17 +111,30 @@ def get_compartment_plot_html(result: cenote.Result) -> str:
     return mpld3.fig_to_html(fig)
 
 
+SECRET_KEY = "secret!"
+# mandatory
+CODEMIRROR_LANGUAGES = ["yaml"]
+# optional
+CODEMIRROR_THEME = "3024-day"
+CODEMIRROR_ADDONS = (("display", "placeholder"),)
+
+
 app = flask.Flask(__name__)
 
 
-@app.route("/")
+class MyForm(flask_wtf.FlaskForm):
+    source_code = flask_codemirror.fields.CodeMirrorField(
+        language="yaml", config={"lineNumbers": "true"}
+    )
+    submit = wtforms.fields.SubmitField("Submit")
+
+
+@app.route("/", methods=["GET", "POST"])
 def index():
-    return flask.render_template("index.html")
-
-
-@app.route("/process", methods=["POST"])
-def process():
-    input_text = flask.request.form["input_text"]
+    form = MyForm()
+    input_text = form.source_code.data
+    if input_text is None:
+        return flask.render_template("index.html", form=form)
     output_plan, result = get_result(input_text)
     kwargs = {}
     kwargs["plan_table"] = get_plan_table_html(output_plan)
@@ -129,8 +142,13 @@ def process():
     kwargs["pressure_plot"] = get_pressure_plot_html(result)
     kwargs["gradient_plot"] = get_gradient_plot_html(result)
     kwargs["compartment_plot"] = get_compartment_plot_html(result)
-    return flask.render_template("index.html", **kwargs)
-    
+    return flask.render_template("index.html", form=form, **kwargs)
+
+
+# app = Flask(__name__)
+app.config.from_object(__name__)
+codemirror = flask_codemirror.CodeMirror(app)
+
 
 if __name__ == "__main__":
     cenote.UREG.setup_matplotlib()

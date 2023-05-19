@@ -16,10 +16,8 @@ ipympl
 
 flask
 pretty-html-table
+flask-codemirror
+flask-wtf
 
-# trying out plotting libraries
-bokeh
-seaborn
-plotly
 matplotlib
 mpld3
