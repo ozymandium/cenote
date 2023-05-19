@@ -125,7 +125,8 @@ app = flask.Flask(__name__)
 
 class Form(flask_wtf.FlaskForm):
     input_text = flask_codemirror.fields.CodeMirrorField(
-        language="yaml", config={"lineNumbers": "true"},
+        language="yaml",
+        config={"lineNumbers": "true"},
     )
     open_button = wtforms.fields.SubmitField(label="Open")
     plan_button = wtforms.fields.SubmitField(label="Plan")
@@ -135,7 +136,7 @@ class Form(flask_wtf.FlaskForm):
 @app.route("/", methods=["GET", "POST"])
 def index():
     form = Form()
-    
+
     input_text = form.input_text.data
     open_clicked = form.open_button.data
     plan_clicked = form.plan_button.data
@@ -145,15 +146,18 @@ def index():
     kwargs["form"] = form
 
     if input_text is None or len(input_text) == 0:
+        # if empty, load a default config with helpful comments
+        with open(os.path.join(os.path.dirname(__file__), "..", "examples", "big.yaml"), "r") as f:
+            form.input_text.data = f.read()
         return flask.render_template("index.html", **kwargs)
-    
+
     if plan_clicked:
         try:
             output_plan, result = get_result(input_text)
         except Exception as exc:
             flask.flash("There's a problem with your dive plan:\n{}".format(traceback.format_exc()))
             return flask.render_template("index.html", **kwargs)
-        
+
         kwargs["plan_table"] = get_plan_table_html(output_plan)
         kwargs["depth_plot"] = get_depth_plot_html(result)
         kwargs["pressure_plot"] = get_pressure_plot_html(result)

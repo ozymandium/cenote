@@ -26,10 +26,10 @@ def get_plan(user_input: str, is_path=True) -> bungee.Plan:
     """
     if is_path:
         with open(user_input, "r") as f:
-            data = yaml.load(f, Loader=yaml.FullLoader)
+            data = yaml.safe_load(f)
     else:
         # then we have a blob
-        data = yaml.load(user_input, Loader=yaml.FullLoader)
+        data = yaml.safe_load(user_input)
 
     # Water type
     water = getattr(bungee.Water, data["water"])
