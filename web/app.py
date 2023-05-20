@@ -21,10 +21,6 @@ CODEMIRROR_LANGUAGES = ["yaml"]
 CODEMIRROR_THEME = "monokai"
 CODEMIRROR_ADDONS = (("display", "placeholder"),)
 
-
-app = flask.Flask(__name__)
-
-
 class Form(flask_wtf.FlaskForm):
     input_text = flask_codemirror.fields.CodeMirrorField(
         language="yaml",
@@ -33,6 +29,9 @@ class Form(flask_wtf.FlaskForm):
     open_button = wtforms.fields.SubmitField(label="Open")
     plan_button = wtforms.fields.SubmitField(label="Plan")
     save_button = wtforms.fields.SubmitField(label="Save")
+
+
+app = flask.Flask(__name__)
 
 
 @app.route("/", methods=["GET", "POST"])

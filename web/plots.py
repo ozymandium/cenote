@@ -36,8 +36,12 @@ def get_plan_table_html(output_plan: bungee.Plan) -> str:
         time = (point.time.value() * cenote.TIME_UNIT).to(cenote.TIME_DISPLAY_UNIT)
         data.append(["{:~.0f}".format(time), "{:~.0f}".format(depth), point.tank])
     df = pd.DataFrame(data, columns=["Time", "Depth", "Tank"])
-    # return df.to_html()
-    return pretty_html_table.build_table(df, "green_dark")
+    return pretty_html_table.build_table(
+        df, 
+        "green_dark",
+        odd_bg_color="#242329", 
+        even_bg_color="#272822", 
+        even_color="white")
 
 
 def get_depth_plot_html(result: cenote.Result) -> str:
