@@ -5,13 +5,13 @@ import os
 from pint.testsuite import helpers
 
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
-PROFILE2 = os.path.join(DATA_DIR, "profile2.yaml")
+PROFILE2 = os.path.join(DATA_DIR, "profile2.json")
 
 
 class TestPlanner(unittest.TestCase):
     def test_basic(self):
         UREG = cenote.UREG
-        input_plan = cenote.get_plan(PROFILE2)
+        input_plan = cenote.load_plan(PROFILE2)
         output_plan = bungee.replan(input_plan)
         profile = output_plan.profile()
         self.assertEqual(len(profile), 12)

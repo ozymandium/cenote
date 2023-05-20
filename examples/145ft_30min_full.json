@@ -1,0 +1,75 @@
+{
+    "gf": {
+        "low": 1.0,
+        "high": 1.0
+    },
+    "profile": [
+        {
+            "depth": "145 ft",
+            "duration": "4 min",
+            "tank": "Sidemount"
+        },
+        {
+            "depth": "145 ft",
+            "duration": "26 min"
+        },
+        {
+            "depth": "50 ft",
+            "duration": "3 min"
+        },
+        {
+            "depth": "50 ft",
+            "duration": "2 min"
+        },
+        {
+            "depth": "40 ft",
+            "duration": "1 min"
+        },
+        {
+            "depth": "40 ft",
+            "duration": "4 min"
+        },
+        {
+            "depth": "30 ft",
+            "duration": "1 min"
+        },
+        {
+            "depth": "30 ft",
+            "duration": "6 min"
+        },
+        {
+            "depth": "20 ft",
+            "duration": "1 min"
+        },
+        {
+            "depth": "20 ft",
+            "duration": "11 min",
+            "tank": "Deco"
+        },
+        {
+            "depth": "0 ft",
+            "duration": "1 min"
+        }
+    ],
+    "scr": {
+        "deco": "0.55 ft^3 / min",
+        "work": "0.75 ft^3 / min"
+    },
+    "tanks": {
+        "Deco": {
+            "mix": {
+                "fO2": 0.97
+            },
+            "pressure": "2200 psi",
+            "type": "AL40"
+        },
+        "Sidemount": {
+            "mix": {
+                "fO2": 0.21
+            },
+            "pressure": "3600 psi",
+            "type": "LP108"
+        }
+    },
+    "water": "FRESH"
+}

@@ -6,12 +6,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cenote</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  
-  {{ codemirror.include_codemirror() }}
+
+  {{ bokeh_resources|safe }}
+  {{ bokeh_script|safe }}
 
 </head>
 
 <body>
+
+  <form method="POST">
+    <input type="button" value="Back to editing plan">
+  </form>  
+  <br>
 
   {% with messages = get_flashed_messages() %}
     {% if messages %}
@@ -23,25 +29,16 @@
     {% endif %}
   {% endwith %}
 
-  <h1>Upload your plan</h1>
-
-  <form method="POST" enctype="multipart/form-data">
-    {{ upload_form.file_picker }}
-    <br>
-    <br>
-    {{ upload_form.upload_button }}
-  </form>
-
-  <h1>Edit your plan</h1>
-
   <div>
-    <form method="POST">
-      {{ editor_form.input_text }}
-      <br>
-      {{ editor_form.plan_button }} {{ editor_form.save_button }}
-    </form>
+    {{ plan_table|safe }}
   </div>
 
+  <div class="embed-wrapper">
+    {% for div in bokeh_divs %}
+      {{ div|safe }}
+      <br>
+    {% endfor %}
+  </div>
 
 </body>
 </html>

@@ -1,0 +1,45 @@
+{
+    "gf": {
+        "high": 0.8,
+        "low": 0.55
+    },
+    "profile": [
+        {
+            "depth": "150 ft",
+            "duration": "5 min",
+            "tank": "Sidemount"
+        },
+        {
+            "depth": "150 ft",
+            "duration": "35 min"
+        }
+    ],
+    "scr": {
+        "deco": "0.55 ft^3 / min",
+        "work": "0.75 ft^3 / min"
+    },
+    "tanks": {
+        "Deco100": {
+            "mix": {
+                "fO2": 0.97
+            },
+            "pressure": "2200 psi",
+            "type": "AL40"
+        },
+        "Deco50": {
+            "mix": {
+                "fO2": 0.5
+            },
+            "pressure": "3000 psi",
+            "type": "AL40"
+        },
+        "Sidemount": {
+            "mix": {
+                "fO2": 0.21
+            },
+            "pressure": "3200 psi",
+            "type": "D_LP108"
+        }
+    },
+    "water": "FRESH"
+}

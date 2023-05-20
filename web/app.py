@@ -23,19 +23,21 @@ import cenote
 
 SECRET_KEY = "secret!"
 # mandatory
-CODEMIRROR_LANGUAGES = ["yaml"]
+CODEMIRROR_LANGUAGES = [
+    "json",
+]
 # optional
 CODEMIRROR_THEME = "monokai"
 CODEMIRROR_ADDONS = (("display", "placeholder"),)
 
 # ermagerd what if more than one person uses it?
 # lol that'll never happen
-USER_PLAN_PATH = "/tmp/user_plan.yaml"
+USER_PLAN_PATH = "/tmp/user_plan.json"
 
 
 class EditorForm(flask_wtf.FlaskForm):
     input_text = flask_codemirror.fields.CodeMirrorField(
-        language="yaml",
+        language="json",
         config={"lineNumbers": "true"},
     )
     plan_button = wtforms.fields.SubmitField(label="Plan")
@@ -46,14 +48,19 @@ class UploadForm(flask_wtf.FlaskForm):
     file_picker = flask_wtf.file.FileField(
         validators=[
             flask_wtf.file.FileRequired(),
-            flask_wtf.file.FileAllowed(["yml", "yaml"], "Only YAML files are supported."),
+            flask_wtf.file.FileAllowed(
+                [
+                    "json",
+                ],
+                "Only JSON files are supported.",
+            ),
         ]
     )
     upload_button = wtforms.fields.SubmitField(label="Upload")
 
 
 app = flask.Flask(__name__)
-
+input_text = None
 
 # def setup_plots() -> None:
 #     cenote.UREG.setup_matplotlib(True)
@@ -68,7 +75,7 @@ def index():
     editor_form = EditorForm()
 
     # harvest information from forms
-    upload_yaml = upload_form.file_picker.data
+    upload_json = upload_form.file_picker.data
     upload_clicked = upload_form.upload_button.data
     input_text = editor_form.input_text.data
     plan_clicked = editor_form.plan_button.data
@@ -81,26 +88,29 @@ def index():
 
     if input_text is None or len(input_text) == 0:
         # if empty, load a default config with helpful comments
-        with open(os.path.join(os.path.dirname(__file__), "..", "examples", "big.yaml"), "r") as f:
+        with open(os.path.join(os.path.dirname(__file__), "..", "examples", "big.json"), "r") as f:
             editor_form.input_text.data = f.read()
         # return flask.render_template("index.html", **kwargs)
 
-    if upload_clicked and upload_yaml is not None:
+    if upload_clicked and upload_json is not None:
         # it will be of type FileStorage
-        # path = werkzeug.utils.secure_filename(upload_yaml.filename)
-        upload_yaml.save(USER_PLAN_PATH)
+        # path = werkzeug.utils.secure_filename(upload_json.filename)
+        upload_json.save(USER_PLAN_PATH)
         with open(USER_PLAN_PATH, "r") as f:
             editor_form.input_text.data = f.read()
         return flask.render_template("index.html", **kwargs)
 
     if plan_clicked:
         try:
-            input_plan = cenote.get_plan(input_text, is_path=False)
+            input_plan = cenote.parse_plan(input_text)
             output_plan = bungee.replan(input_plan)
             result = cenote.get_result(output_plan)
         except Exception as exc:
             flask.flash("There's a problem with your dive plan:\n{}".format(traceback.format_exc()))
             return flask.render_template("index.html", **kwargs)
+
+        # sending a new page so clear the kwargs of the unnecesary forms?
+        # kwargs = {}
 
         plan_table_df = plots.get_plan_df(output_plan)
         kwargs["plan_table"] = pretty_html_table.build_table(
@@ -125,18 +135,21 @@ def index():
         )
         kwargs["bokeh_resources"] = bokeh.resources.INLINE.render()
 
-        return flask.render_template("index.html", **kwargs)
+        return flask.render_template("plot.html", **kwargs)
 
     elif save_clicked:
         with open(USER_PLAN_PATH, "w") as f:
             f.write(editor_form.input_text.data)
         return flask.send_file(
-            USER_PLAN_PATH, as_attachment=True, download_name="there_is_room_in_the_kalousac.yaml"
+            USER_PLAN_PATH, as_attachment=True, download_name="there_is_room_in_the_kalousac.json"
         )
-        return flask.render_template("index.html", **kwargs)
 
     else:
         return flask.render_template("index.html", **kwargs)
+
+
+# @app.route("/plot", methods=["GET"])
+# def plot():
 
 
 # pick up config variables

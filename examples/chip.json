@@ -1,0 +1,51 @@
+{
+    "gf": {
+        "high": 0.1,
+        "low": 0.1
+    },
+    "profile": [
+        {
+            "depth": "70 ft",
+            "duration": "1 min",
+            "tank": "Pretend Massive Tank"
+        },
+        {
+            "depth": "70 ft",
+            "duration": "39 min"
+        },
+        {
+            "depth": "0 ft",
+            "duration": "5 min"
+        },
+        {
+            "depth": "0 ft",
+            "duration": "1 hr"
+        },
+        {
+            "depth": "50 ft",
+            "duration": "1 min"
+        },
+        {
+            "depth": "50 ft",
+            "duration": "29 min"
+        },
+        {
+            "depth": "1 ft",
+            "duration": "5 min"
+        }
+    ],
+    "scr": {
+        "deco": "1.0 ft^3 / min",
+        "work": "1.0 ft^3 / min"
+    },
+    "tanks": {
+        "Pretend Massive Tank": {
+            "mix": {
+                "fO2": 0.21
+            },
+            "pressure": "3600 psi",
+            "type": "D_LP108"
+        }
+    },
+    "water": "SALT"
+}
