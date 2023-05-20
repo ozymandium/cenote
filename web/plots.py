@@ -3,6 +3,9 @@ import pretty_html_table
 import pandas as pd
 import mpld3
 import numpy as np
+import bokeh.plotting
+import bokeh.embed
+import bokeh.resources
 
 import cenote
 import bungee
@@ -37,37 +40,44 @@ def get_plan_table_html(output_plan: bungee.Plan) -> str:
         data.append(["{:~.0f}".format(time), "{:~.0f}".format(depth), point.tank])
     df = pd.DataFrame(data, columns=["Time", "Depth", "Tank"])
     return pretty_html_table.build_table(
-        df, 
-        "green_dark",
-        odd_bg_color="#242329", 
-        even_bg_color="#272822", 
-        even_color="white")
+        df, "green_dark", odd_bg_color="#242329", even_bg_color="#272822", even_color="white"
+    )
 
 
 def get_depth_plot_html(result: cenote.Result) -> str:
-    fig = plt.figure()
-    plt.plot(result.time, result.depth, "g", label="Profile")
-    idxs = np.nonzero(result.deco.ceiling > 0)[0]
-    plt.plot(result.time[idxs], result.deco.ceiling[idxs], "r", label="Ceiling")
-    plt.legend(loc="best")
-    for i in range(result.deco.ceilings.shape[0]):
-        idxs = np.nonzero(result.deco.ceilings[i, :] > 0)[0]
-        if len(idxs):
-            plt.plot(result.time[idxs], result.deco.ceilings[i, idxs], "r", alpha=0.2)
-    plt.gca().invert_yaxis()
-    plt.grid(alpha=0.2)
-    plt.title("Profile")
-    return fig_to_html(fig)
+    # fig = plt.figure()
+    # plt.plot(result.time, result.depth, "g", label="Profile")
+    # idxs = np.nonzero(result.deco.ceiling > 0)[0]
+    # plt.plot(result.time[idxs], result.deco.ceiling[idxs], "r", label="Ceiling")
+    # plt.legend(loc="best")
+    # for i in range(result.deco.ceilings.shape[0]):
+    #     idxs = np.nonzero(result.deco.ceilings[i, :] > 0)[0]
+    #     if len(idxs):
+    #         plt.plot(result.time[idxs], result.deco.ceilings[i, idxs], "r", alpha=0.2)
+    # plt.gca().invert_yaxis()
+    # plt.grid(alpha=0.2)
+    # plt.title("Profile")
+    # return fig_to_html(fig)
+
+    fig = bokeh.plotting.figure()
+    fig.line(result.time.magnitude, result.depth.magnitude)
+
+    return fig
 
 
 def get_pressure_plot_html(result: cenote.Result) -> str:
-    fig = plt.figure()
+    # fig = plt.figure()
+    # for tank in result.tank_pressure:
+    #     plt.plot(result.time, result.tank_pressure[tank], label=tank)
+    # plt.grid(alpha=0.2)
+    # plt.title("Tank Pressure")
+    # plt.legend(loc="best")
+    # return fig_to_html(fig)
+
+    fig = bokeh.plotting.figure()
     for tank in result.tank_pressure:
-        plt.plot(result.time, result.tank_pressure[tank], label=tank)
-    plt.grid(alpha=0.2)
-    plt.title("Tank Pressure")
-    plt.legend(loc="best")
-    return fig_to_html(fig)
+        fig.line(result.time.magnitude, result.tank_pressure[tank].magnitude)
+    return fig
 
 
 def get_gradient_plot_html(result: cenote.Result) -> str:
@@ -117,3 +127,10 @@ def get_compartment_plot_html(result: cenote.Result) -> str:
     axes[1].set_title("Compartment Pressure vs Time")
 
     return fig_to_html(fig)
+
+
+def embed_figs(*figs) -> dict:
+    print(figs)
+    script, divs = bokeh.embed.components(figs)
+    resources = bokeh.resources.INLINE.render()
+    return resources, script, divs

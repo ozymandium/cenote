@@ -12,6 +12,6 @@
 - [ ] look at moving to [Monaco Editor](https://microsoft.github.io/monaco-editor/docs.html)
 - [ ] make axes white
 - [ ] do a 3d plot with compartment time as the z dimension
-- [ ] make table easier to read
+- [x] make table easier to read
 - [ ] open and save files
 - [ ] minify html for production: https://github.com/hamidfzm/Flask-HTMLmin

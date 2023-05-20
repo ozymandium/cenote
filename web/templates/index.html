@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
+
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cenote</title>
   {{ codemirror.include_codemirror() }}
+  {{ bokeh_resources|safe }}
+  {{ bokeh_script|safe }}
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
 </head>
+
 <body>
 
   {% with messages = get_flashed_messages() %}
@@ -20,7 +25,6 @@
   {% endwith %}
 
   <div>
-
     <form method="POST">
       {{ form.open_button }} {{ form.save_button }}
       <br><br>
@@ -31,23 +35,14 @@
   </div>
 
   <div>
-    {{ plan_table|safe }}
-  </div>
-  
-  <div>
-    {{ depth_plot|safe }}
+    {{ plan_table_div|safe }}
   </div>
 
-  <div>
-    {{ pressure_plot|safe }}
-  </div>
-  
-  <div>
-    {{ gradient_plot|safe }}
-  </div>
-  
-  <div>
-    {{ compartment_plot|safe }}
+  <div class="embed-wrapper">
+    {% for div in bokeh_divs %}
+      <br>
+      {{ div|safe }}
+    {% endfor %}
   </div>
 
 </body>

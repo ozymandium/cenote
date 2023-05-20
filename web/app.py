@@ -21,6 +21,7 @@ CODEMIRROR_LANGUAGES = ["yaml"]
 CODEMIRROR_THEME = "monokai"
 CODEMIRROR_ADDONS = (("display", "placeholder"),)
 
+
 class Form(flask_wtf.FlaskForm):
     input_text = flask_codemirror.fields.CodeMirrorField(
         language="yaml",
@@ -62,10 +63,15 @@ def index():
             return flask.render_template("index.html", **kwargs)
 
         kwargs["plan_table"] = plots.get_plan_table_html(output_plan)
-        kwargs["depth_plot"] = plots.get_depth_plot_html(result)
-        kwargs["pressure_plot"] = plots.get_pressure_plot_html(result)
-        kwargs["gradient_plot"] = plots.get_gradient_plot_html(result)
-        kwargs["compartment_plot"] = plots.get_compartment_plot_html(result)
+
+        kwargs["bokeh_resources"], kwargs["bokeh_script"], kwargs["bokeh_divs"] = plots.embed_figs(
+            plots.get_depth_plot_html(result),
+            plots.get_pressure_plot_html(result),
+        )
+        # kwargs["depth_plot"] = plots.get_depth_plot_html(result)
+        # kwargs["pressure_plot"] = plots.get_pressure_plot_html(result)
+        # kwargs["gradient_plot"] = plots.get_gradient_plot_html(result)
+        # kwargs["compartment_plot"] = plots.get_compartment_plot_html(result)
 
         return flask.render_template("index.html", **kwargs)
 
