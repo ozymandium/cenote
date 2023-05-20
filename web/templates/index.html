@@ -35,13 +35,13 @@
   </div>
 
   <div>
-    {{ plan_table_div|safe }}
+    {{ plan_table|safe }}
   </div>
 
   <div class="embed-wrapper">
     {% for div in bokeh_divs %}
-      <br>
       {{ div|safe }}
+      <br>
     {% endfor %}
   </div>
 

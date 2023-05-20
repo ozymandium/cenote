@@ -23,11 +23,11 @@ attrs:
         grid_line_color: "#49483E"
     Legend:
         border_line_color: "#49483E"
-        background_fill_color: "#282828"
+        background_fill_color: "#272822"
         label_text_color: "#888888"
     Plot:
-        background_fill_color: "#282828"
-        border_fill_color: "#282828"
+        background_fill_color: "#272822"
+        border_fill_color: "#272822"
         outline_line_color: "#49483E"
     Title:
         text_color: "#CCCCCC"

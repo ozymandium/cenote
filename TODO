@@ -4,6 +4,7 @@
 - [ ] Revisit water vapor pressure computation
 - [ ] coverage and unit tests
 - [ ] clean up replanner
+- [ ] is the M0 or the gradient ceiling getting plotted?
 
 ## Cenote
 - [ ] schema validator for dive profile YAMLs

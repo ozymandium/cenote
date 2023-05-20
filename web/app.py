@@ -11,6 +11,7 @@ import wtforms
 
 import bokeh.embed
 import bokeh.resources
+import bokeh.themes
 
 import pretty_html_table
 
@@ -78,17 +79,22 @@ def index():
             plan_table_df,
             "green_dark",
             odd_bg_color="#242329",
-            even_bg_color="#272822",
+            even_bg_color="#282828",
             even_color="white",
         )
 
         figs = [
             plots.get_depth_fig(result),
             plots.get_pressure_fig(result),
-            # plots.get_gradient_fig(result)
+            plots.get_gradient_fig(result)
             # plots.get_compartment_fig(result)
         ]
-        kwargs["bokeh_script"], kwargs["bokeh_divs"] = bokeh.embed.components(figs)
+        bokeh_theme = bokeh.themes.Theme(
+            os.path.join(os.path.dirname(__file__), "static", "bokeh_monokai_theme.yaml")
+        )
+        kwargs["bokeh_script"], kwargs["bokeh_divs"] = bokeh.embed.components(
+            figs, theme=bokeh_theme
+        )
         kwargs["bokeh_resources"] = bokeh.resources.INLINE.render()
 
         return flask.render_template("index.html", **kwargs)
