@@ -5,10 +5,11 @@ import traceback
 
 import flask
 import flask_wtf
+import flask_wtf.file
 import flask_codemirror
 import flask_codemirror.fields
 import wtforms
-
+import werkzeug.utils
 import bokeh.embed
 import bokeh.resources
 import bokeh.themes
@@ -27,15 +28,28 @@ CODEMIRROR_LANGUAGES = ["yaml"]
 CODEMIRROR_THEME = "monokai"
 CODEMIRROR_ADDONS = (("display", "placeholder"),)
 
+# ermagerd what if more than one person uses it?
+# lol that'll never happen
+USER_PLAN_PATH = "/tmp/user_plan.yaml"
 
-class Form(flask_wtf.FlaskForm):
+
+class EditorForm(flask_wtf.FlaskForm):
     input_text = flask_codemirror.fields.CodeMirrorField(
         language="yaml",
         config={"lineNumbers": "true"},
     )
-    open_button = wtforms.fields.SubmitField(label="Open")
     plan_button = wtforms.fields.SubmitField(label="Plan")
     save_button = wtforms.fields.SubmitField(label="Save")
+
+
+class UploadForm(flask_wtf.FlaskForm):
+    file_picker = flask_wtf.file.FileField(
+        validators=[
+            flask_wtf.file.FileRequired(),
+            flask_wtf.file.FileAllowed(["yml", "yaml"], "Only YAML files are supported."),
+        ]
+    )
+    upload_button = wtforms.fields.SubmitField(label="Upload")
 
 
 app = flask.Flask(__name__)
@@ -49,20 +63,34 @@ app = flask.Flask(__name__)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    form = Form()
+    # create forms
+    upload_form = UploadForm()
+    editor_form = EditorForm()
 
-    input_text = form.input_text.data
-    open_clicked = form.open_button.data
-    plan_clicked = form.plan_button.data
-    save_clicked = form.save_button.data
+    # harvest information from forms
+    upload_yaml = upload_form.file_picker.data
+    upload_clicked = upload_form.upload_button.data
+    input_text = editor_form.input_text.data
+    plan_clicked = editor_form.plan_button.data
+    save_clicked = editor_form.save_button.data
 
+    # start jinja template args to render
     kwargs = {}
-    kwargs["form"] = form
+    kwargs["editor_form"] = editor_form
+    kwargs["upload_form"] = upload_form
 
     if input_text is None or len(input_text) == 0:
         # if empty, load a default config with helpful comments
         with open(os.path.join(os.path.dirname(__file__), "..", "examples", "big.yaml"), "r") as f:
-            form.input_text.data = f.read()
+            editor_form.input_text.data = f.read()
+        # return flask.render_template("index.html", **kwargs)
+
+    if upload_clicked and upload_yaml is not None:
+        # it will be of type FileStorage
+        # path = werkzeug.utils.secure_filename(upload_yaml.filename)
+        upload_yaml.save(USER_PLAN_PATH)
+        with open(USER_PLAN_PATH, "r") as f:
+            editor_form.input_text.data = f.read()
         return flask.render_template("index.html", **kwargs)
 
     if plan_clicked:
@@ -99,12 +127,15 @@ def index():
 
         return flask.render_template("index.html", **kwargs)
 
-    elif open_clicked:
-        return flask.render_template("index.html", **kwargs)
     elif save_clicked:
+        with open(USER_PLAN_PATH, "w") as f:
+            f.write(editor_form.input_text.data)
+        return flask.send_file(
+            USER_PLAN_PATH, as_attachment=True, download_name="there_is_room_in_the_kalousac.yaml"
+        )
         return flask.render_template("index.html", **kwargs)
+
     else:
-        flask.flash("unknown")
         return flask.render_template("index.html", **kwargs)
 
 

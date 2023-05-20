@@ -24,15 +24,26 @@
     {% endif %}
   {% endwith %}
 
+  <h1>Upload your plan</h1>
+
+  <form method="POST" enctype="multipart/form-data">
+    {{ upload_form.file_picker }}
+    <br>
+    <br>
+    {{ upload_form.upload_button }}
+  </form>
+
+  <h1>Edit your plan</h1>
+
   <div>
     <form method="POST">
-      {{ form.open_button }} {{ form.save_button }}
-      <br><br>
-      {{ form.input_text }}
+      {{ editor_form.input_text }}
       <br>
-      {{ form.plan_button }}
+      {{ editor_form.plan_button }} {{ editor_form.save_button }}
     </form>
   </div>
+
+  <h1>Results will appear here</h1>
 
   <div>
     {{ plan_table|safe }}
