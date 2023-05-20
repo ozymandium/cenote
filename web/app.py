@@ -9,6 +9,11 @@ import flask_codemirror
 import flask_codemirror.fields
 import wtforms
 
+import bokeh.embed
+import bokeh.resources
+
+import pretty_html_table
+
 import plots
 import bungee
 import cenote
@@ -33,6 +38,12 @@ class Form(flask_wtf.FlaskForm):
 
 
 app = flask.Flask(__name__)
+
+
+# def setup_plots() -> None:
+#     cenote.UREG.setup_matplotlib(True)
+#     cenote.UREG.mpl_formatter = "{:~P}"
+#     plt.style.use("dark_background")
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -62,16 +73,23 @@ def index():
             flask.flash("There's a problem with your dive plan:\n{}".format(traceback.format_exc()))
             return flask.render_template("index.html", **kwargs)
 
-        kwargs["plan_table"] = plots.get_plan_table_html(output_plan)
-
-        kwargs["bokeh_resources"], kwargs["bokeh_script"], kwargs["bokeh_divs"] = plots.embed_figs(
-            plots.get_depth_plot_html(result),
-            plots.get_pressure_plot_html(result),
+        plan_table_df = plots.get_plan_df(output_plan)
+        kwargs["plan_table"] = pretty_html_table.build_table(
+            plan_table_df,
+            "green_dark",
+            odd_bg_color="#242329",
+            even_bg_color="#272822",
+            even_color="white",
         )
-        # kwargs["depth_plot"] = plots.get_depth_plot_html(result)
-        # kwargs["pressure_plot"] = plots.get_pressure_plot_html(result)
-        # kwargs["gradient_plot"] = plots.get_gradient_plot_html(result)
-        # kwargs["compartment_plot"] = plots.get_compartment_plot_html(result)
+
+        figs = [
+            plots.get_depth_fig(result),
+            plots.get_pressure_fig(result),
+            # plots.get_gradient_fig(result)
+            # plots.get_compartment_fig(result)
+        ]
+        kwargs["bokeh_script"], kwargs["bokeh_divs"] = bokeh.embed.components(figs)
+        kwargs["bokeh_resources"] = bokeh.resources.INLINE.render()
 
         return flask.render_template("index.html", **kwargs)
 
@@ -90,5 +108,4 @@ codemirror = flask_codemirror.CodeMirror(app)
 
 
 if __name__ == "__main__":
-    plots.setup_plots()
     app.run(host="0.0.0.0", port=8888, debug=True, use_reloader=True)

@@ -1,50 +1,22 @@
 import matplotlib.pyplot as plt
-import pretty_html_table
 import pandas as pd
-import mpld3
 import numpy as np
 import bokeh.plotting
-import bokeh.embed
-import bokeh.resources
 
 import cenote
 import bungee
 
 
-def setup_plots() -> None:
-    cenote.UREG.setup_matplotlib(True)
-    cenote.UREG.mpl_formatter = "{:~P}"
-    plt.style.use("dark_background")
-
-
-def fig_to_html(fig: plt.Figure) -> str:
-    for ax in fig.axes:
-        for spine in ax.spines:
-            ax.spines[spine].set_color("white")
-        ax.xaxis.label.set_color("white")
-        ax.tick_params(axis="x", colors="white")
-        ax.tick_params(axis="y", colors="white")
-
-        [t.set_color("red") for t in ax.xaxis.get_ticklines()]
-        [t.set_color("red") for t in ax.xaxis.get_ticklabels()]
-
-    html = mpld3.fig_to_html(fig)
-    return html
-
-
-def get_plan_table_html(output_plan: bungee.Plan) -> str:
+def get_plan_df(output_plan: bungee.Plan) -> str:
     data = []
     for point in output_plan.profile():
         depth = (point.depth.value() * cenote.DEPTH_UNIT).to(cenote.DEPTH_DISPLAY_UNIT)
         time = (point.time.value() * cenote.TIME_UNIT).to(cenote.TIME_DISPLAY_UNIT)
         data.append(["{:~.0f}".format(time), "{:~.0f}".format(depth), point.tank])
-    df = pd.DataFrame(data, columns=["Time", "Depth", "Tank"])
-    return pretty_html_table.build_table(
-        df, "green_dark", odd_bg_color="#242329", even_bg_color="#272822", even_color="white"
-    )
+    return pd.DataFrame(data, columns=["Time", "Depth", "Tank"])
 
 
-def get_depth_plot_html(result: cenote.Result) -> str:
+def get_depth_fig(result: cenote.Result) -> str:
     # fig = plt.figure()
     # plt.plot(result.time, result.depth, "g", label="Profile")
     # idxs = np.nonzero(result.deco.ceiling > 0)[0]
@@ -65,7 +37,7 @@ def get_depth_plot_html(result: cenote.Result) -> str:
     return fig
 
 
-def get_pressure_plot_html(result: cenote.Result) -> str:
+def get_pressure_fig(result: cenote.Result) -> str:
     # fig = plt.figure()
     # for tank in result.tank_pressure:
     #     plt.plot(result.time, result.tank_pressure[tank], label=tank)
@@ -80,7 +52,7 @@ def get_pressure_plot_html(result: cenote.Result) -> str:
     return fig
 
 
-def get_gradient_plot_html(result: cenote.Result) -> str:
+def get_gradient_fig(result: cenote.Result) -> str:
     fig = plt.figure()
     idxs = np.nonzero(result.deco.gradient >= 0)[0]
     plt.plot(result.time[idxs], result.deco.gradient[idxs] * 100, "g")
@@ -94,13 +66,12 @@ def get_gradient_plot_html(result: cenote.Result) -> str:
     return fig_to_html(fig)
 
 
-def get_compartment_plot_html(result: cenote.Result) -> str:
+def get_compartment_fig(result: cenote.Result) -> str:
     # single compartment analysis
     # FIXME: add dropdown to configure which compartment is displayed
 
     COMPARTMENT = 5
 
-    # ambient_pressure = [cenote.pressure_from_depth(d, plan.water()) for d in result.depth]
     fig, axes = plt.subplots(1, 2)
 
     axes[0].plot(result.ambient_pressure, result.ambient_pressure, "b", label="Ambient")
@@ -127,10 +98,3 @@ def get_compartment_plot_html(result: cenote.Result) -> str:
     axes[1].set_title("Compartment Pressure vs Time")
 
     return fig_to_html(fig)
-
-
-def embed_figs(*figs) -> dict:
-    print(figs)
-    script, divs = bokeh.embed.components(figs)
-    resources = bokeh.resources.INLINE.render()
-    return resources, script, divs
