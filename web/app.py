@@ -2,6 +2,8 @@
 import sys
 import os
 import traceback
+import json
+import base64
 
 import flask
 import flask_wtf
@@ -35,6 +37,22 @@ CODEMIRROR_ADDONS = (("display", "placeholder"),)
 USER_PLAN_PATH = "/tmp/user_plan.json"
 
 
+def minify_json(blob: str) -> str:
+    return json.dumps(json.loads(blob), separators=(",", ":"))
+
+
+def prettify_json(blob: str) -> str:
+    return json.dumps(json.loads(blob), indent=4, sort_keys=True)
+
+
+def base64_from_json(blob: str) -> bytes:
+    return base64.b64encode(minify_json(blob).encode('utf-8'))
+
+
+def json_from_base64(blob: str) -> str:
+    return base64.b64decode(blob)
+
+
 class EditorForm(flask_wtf.FlaskForm):
     input_text = flask_codemirror.fields.CodeMirrorField(
         language="json",
@@ -60,7 +78,6 @@ class UploadForm(flask_wtf.FlaskForm):
 
 
 app = flask.Flask(__name__)
-input_text = None
 
 # def setup_plots() -> None:
 #     cenote.UREG.setup_matplotlib(True)
@@ -101,41 +118,8 @@ def index():
         return flask.render_template("index.html", **kwargs)
 
     if plan_clicked:
-        try:
-            input_plan = cenote.parse_plan(input_text)
-            output_plan = bungee.replan(input_plan)
-            result = cenote.get_result(output_plan)
-        except Exception as exc:
-            flask.flash("There's a problem with your dive plan:\n{}".format(traceback.format_exc()))
-            return flask.render_template("index.html", **kwargs)
-
-        # sending a new page so clear the kwargs of the unnecesary forms?
-        # kwargs = {}
-
-        plan_table_df = plots.get_plan_df(output_plan)
-        kwargs["plan_table"] = pretty_html_table.build_table(
-            plan_table_df,
-            "green_dark",
-            odd_bg_color="#242329",
-            even_bg_color="#282828",
-            even_color="white",
-        )
-
-        figs = [
-            plots.get_depth_fig(result),
-            plots.get_pressure_fig(result),
-            plots.get_gradient_fig(result)
-            # plots.get_compartment_fig(result)
-        ]
-        bokeh_theme = bokeh.themes.Theme(
-            os.path.join(os.path.dirname(__file__), "static", "bokeh_monokai_theme.yaml")
-        )
-        kwargs["bokeh_script"], kwargs["bokeh_divs"] = bokeh.embed.components(
-            figs, theme=bokeh_theme
-        )
-        kwargs["bokeh_resources"] = bokeh.resources.INLINE.render()
-
-        return flask.render_template("plot.html", **kwargs)
+        base64_blob = base64_from_json(input_text)
+        return flask.redirect(flask.url_for('plot', plan_base64_blob=base64_blob))
 
     elif save_clicked:
         with open(USER_PLAN_PATH, "w") as f:
@@ -148,9 +132,51 @@ def index():
         return flask.render_template("index.html", **kwargs)
 
 
-# @app.route("/plot", methods=["GET"])
-# def plot():
+@app.route("/plot/<plan_base64_blob>")
+def plot(plan_base64_blob):
+    
+    if plan_base64_blob is None:
+        return "you didn't send plan data"
 
+    json_blob = json_from_base64(plan_base64_blob)
+
+    kwargs = {}
+
+    try:
+        input_plan = cenote.parse_plan(json_blob)
+        output_plan = bungee.replan(input_plan)
+        result = cenote.get_result(output_plan)
+    except Exception as exc:
+        flask.flash("There's a problem with your dive plan:\n{}".format(traceback.format_exc()))
+        return flask.render_template("index.html", **kwargs)
+
+    # sending a new page so clear the kwargs of the unnecesary forms?
+    # kwargs = {}
+
+    plan_table_df = plots.get_plan_df(output_plan)
+    kwargs["plan_table"] = pretty_html_table.build_table(
+        plan_table_df,
+        "green_dark",
+        odd_bg_color="#242329",
+        even_bg_color="#282828",
+        even_color="white",
+    )
+
+    figs = [
+        plots.get_depth_fig(result),
+        plots.get_pressure_fig(result),
+        plots.get_gradient_fig(result)
+        # plots.get_compartment_fig(result)
+    ]
+    bokeh_theme = bokeh.themes.Theme(
+        os.path.join(os.path.dirname(__file__), "static", "bokeh_monokai_theme.yaml")
+    )
+    kwargs["bokeh_script"], kwargs["bokeh_divs"] = bokeh.embed.components(
+        figs, theme=bokeh_theme
+    )
+    kwargs["bokeh_resources"] = bokeh.resources.INLINE.render()
+
+    return flask.render_template("plot.html", **kwargs)
 
 # pick up config variables
 app.config.from_object(__name__)
