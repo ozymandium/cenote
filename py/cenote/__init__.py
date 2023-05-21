@@ -18,18 +18,18 @@ TIME_DISPLAY_UNIT = UREG.minute
 VOLUME_RATE_DISPLAY_UNIT = UREG.ft**3 / UREG.minute
 
 
-def load_plan(path: str) -> bungee.Plan:
+def plan_from_file(path: str) -> bungee.Plan:
     with open(path, "r") as f:
         blob = f.read()
-    return parse_plan(blob)
+    return plan_from_json_str(blob)
 
 
-def parse_plan(blob: str) -> bungee.Plan:
+def plan_from_json_str(blob: str) -> bungee.Plan:
     data = json.loads(blob)
-    return get_plan(data)
+    return plan_from_dict(data)
 
 
-def get_plan(data: dict) -> bungee.Plan:
+def plan_from_dict(data: dict) -> bungee.Plan:
     """
     user_input : str
         either a path to a yaml file (is_path = True),

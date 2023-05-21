@@ -6,8 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cenote</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  
-  {{ codemirror.include_codemirror() }}
+
 
 </head>
 
@@ -29,19 +28,14 @@
     {{ upload_form.file_picker }}
     <br>
     <br>
-    {{ upload_form.upload_button }}
+    {{ upload_form.upload_button }} 
   </form>
 
-  <h1>Edit your plan</h1>
+  <h1>Build Plan</h1>
 
-  <div>
-    <form method="POST">
-      {{ editor_form.input_text }}
-      <br>
-      {{ editor_form.plan_button }} {{ editor_form.save_button }}
-    </form>
-  </div>
-
+  <form method="POST" enctype="multipart/form-data">
+    {{ plan_form.plot_button }} {{ plan_form.save_button }} 
+  </form>
 
 </body>
 </html>

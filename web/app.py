@@ -53,16 +53,41 @@ def json_from_base64(blob: str) -> str:
     return base64.b64decode(blob)
 
 
-class EditorForm(flask_wtf.FlaskForm):
-    input_text = flask_codemirror.fields.CodeMirrorField(
-        language="json",
-        config={"lineNumbers": "true"},
-    )
-    plan_button = wtforms.fields.SubmitField(label="Plan")
-    save_button = wtforms.fields.SubmitField(label="Save")
+class State:
+    """No bungee/cenote data types, only python builtins.
+
+    Stores everything needed to replicate web app state, including the user plan and app config
+    """
+
+    def __init__(self, plan: dict):
+        self.plan = plan
+
+    @staticmethod
+    def from_dict(data: dict):
+        return State(data["plan"])
+
+    @staticmethod
+    def from_json_str(json_str: str):
+        return State.from_dict(json.loads(json_str))
+
+    @staticmethod
+    def from_b64_str(b64_str: str):
+        return State.from_json_str(json_from_base64(b64_str))
+
+    def to_dict(self) -> dict:
+        return {
+            "plan": self.plan,
+        }
+
+    def to_json_str(self) -> str:
+        # FIXME: json dump/parse/dump can be simplified to be faster
+        return minify_json(json.dumps(self.to_dict()))
+
+    def to_b64_str(self) -> str:
+        return base64_from_json(self.to_json_str())
 
 
-class UploadForm(flask_wtf.FlaskForm):
+class PlanUploadForm(flask_wtf.FlaskForm):
     file_picker = flask_wtf.file.FileField(
         validators=[
             flask_wtf.file.FileRequired(),
@@ -77,6 +102,11 @@ class UploadForm(flask_wtf.FlaskForm):
     upload_button = wtforms.fields.SubmitField(label="Upload")
 
 
+class PlanPlanForm(flask_wtf.FlaskForm):
+    plot_button = wtforms.fields.SubmitField(label="Plot")
+    save_button = wtforms.fields.SubmitField(label="Save")
+
+
 app = flask.Flask(__name__)
 
 # def setup_plots() -> None:
@@ -85,92 +115,75 @@ app = flask.Flask(__name__)
 #     plt.style.use("dark_background")
 
 
-@app.route("/<plan_base64_blob>", methods=["GET", "POST"])
-def index(plan_base64_blob=None):
+@app.route("/plan", methods=["GET", "POST"], defaults={"state_b64": None})
+@app.route("/plan/<state_b64>", methods=["GET", "POST"])
+def plan(state_b64: str):
     # create forms
-    upload_form = UploadForm()
-    editor_form = EditorForm()
+    upload_form = PlanUploadForm()
+    plan_form = PlanPlanForm()
 
     # harvest information from forms
     upload_json = upload_form.file_picker.data
     upload_clicked = upload_form.upload_button.data
-    input_text = editor_form.input_text.data
-    plan_clicked = editor_form.plan_button.data
-    save_clicked = editor_form.save_button.data
+    plot_clicked = plan_form.plot_button.data
+    save_clicked = plan_form.save_button.data
 
-    # start jinja template args to render
-    kwargs = {}
-    kwargs["editor_form"] = editor_form
-    kwargs["upload_form"] = upload_form
+    kwargs = {
+        "upload_form": upload_form,
+        "plan_form": plan_form,
+    }
 
-    empty_editor = (input_text is None) or (len(input_text) == 0)
-
-    if empty_editor:
-        if plan_base64_blob is None:
-            # if empty, load a default config with helpful comments
-            with open(
-                os.path.join(os.path.dirname(__file__), "..", "examples", "big.json"), "r"
-            ) as f:
-                editor_form.input_text.data = f.read()
-        else:
-            # nothing in the text editor but blob in the url
-            json_blob = json_from_base64(plan_base64_blob)
-            editor_form.input_text.data = prettify_json(json_blob)
+    if state_b64 is not None:
+        state = State.from_b64_str(state_b64)
+    else:
+        state = None
 
     if upload_clicked and upload_json is not None:
         # it will be of type FileStorage
         # path = werkzeug.utils.secure_filename(upload_json.filename)
         upload_json.save(USER_PLAN_PATH)
         with open(USER_PLAN_PATH, "r") as f:
-            editor_form.input_text.data = f.read()
-        return flask.render_template("index.html", **kwargs)
+            state = State.from_json_str(f.read())
+        # instead of trying to load everything in a second way here, just redirect back to the same
+        # page using the url parameters so the code path above gets used
+        return flask.redirect(flask.url_for("plan", state_b64=state.to_b64_str()))
 
-    if plan_clicked:
-        base64_blob = base64_from_json(input_text)
-        return flask.redirect(flask.url_for("plot", plan_base64_blob=base64_blob))
+    if plot_clicked:
+        if state is None:
+            raise Exception("no state populated")
+        return flask.redirect(flask.url_for("plot", state_b64=state.to_b64_str()))
 
-    elif save_clicked:
-        with open(USER_PLAN_PATH, "w") as f:
-            f.write(editor_form.input_text.data)
-        return flask.send_file(
-            USER_PLAN_PATH, as_attachment=True, download_name="there_is_room_in_the_kalousac.json"
-        )
-
-    else:
-        return flask.render_template("index.html", **kwargs)
+    return flask.render_template("plan.html", **kwargs)
 
 
-class BackToEditForm(flask_wtf.FlaskForm):
-    edit_button = wtforms.fields.SubmitField(label="Back to Editing")
+class PlotNavForm(flask_wtf.FlaskForm):
+    plan_button = wtforms.fields.SubmitField(label="Back to Planning")
 
 
-@app.route("/plot/<plan_base64_blob>", methods=["POST", "GET"])
-def plot(plan_base64_blob: str):
-    if plan_base64_blob is None:
-        return "you didn't send plan data"
+@app.route("/plot/<state_b64>", methods=["POST", "GET"])
+def plot(state_b64: str):
+    # state must be well formed for this page to work at all
+    state = State.from_b64_str(state_b64)
 
-    json_blob = json_from_base64(plan_base64_blob)
-
-    back_to_edit_form = BackToEditForm()
+    nav_form = PlotNavForm()
 
     kwargs = {
-        "back_to_edit_form": back_to_edit_form,
+        "nav_form": nav_form,
     }
 
-    if back_to_edit_form.edit_button.data:
+    if nav_form.plan_button.data:
         # go back with the current plan in the editor
-        return flask.redirect(flask.url_for("index", plan_base64_blob=plan_base64_blob))
+        # FIXME: if editing functionality ever added, will need to send b64 from state, not
+        # from the original arg
+        return flask.redirect(flask.url_for("plan", state_b64=state_b64))
 
     try:
-        input_plan = cenote.parse_plan(json_blob)
+        input_plan = cenote.plan_from_dict(state.plan)
         output_plan = bungee.replan(input_plan)
         result = cenote.get_result(output_plan)
     except Exception as exc:
         flask.flash("There's a problem with your dive plan:\n{}".format(traceback.format_exc()))
         return flask.render_template("plot.html", **kwargs)
-
-    # sending a new page so clear the kwargs of the unnecesary forms?
-    # kwargs = {}
 
     plan_table_df = plots.get_plan_df(output_plan)
     kwargs["plan_table"] = pretty_html_table.build_table(
