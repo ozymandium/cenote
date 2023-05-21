@@ -85,8 +85,8 @@ app = flask.Flask(__name__)
 #     plt.style.use("dark_background")
 
 
-@app.route("/", methods=["GET", "POST"])
-def index():
+@app.route("/<plan_base64_blob>", methods=["GET", "POST"])
+def index(plan_base64_blob=None):
     # create forms
     upload_form = UploadForm()
     editor_form = EditorForm()
@@ -103,11 +103,18 @@ def index():
     kwargs["editor_form"] = editor_form
     kwargs["upload_form"] = upload_form
 
-    if input_text is None or len(input_text) == 0:
-        # if empty, load a default config with helpful comments
-        with open(os.path.join(os.path.dirname(__file__), "..", "examples", "big.json"), "r") as f:
-            editor_form.input_text.data = f.read()
-        # return flask.render_template("index.html", **kwargs)
+    empty_editor = (input_text is None) or (len(input_text) == 0)
+
+    if empty_editor:
+        if plan_base64_blob is None:
+            # if empty, load a default config with helpful comments
+            with open(os.path.join(os.path.dirname(__file__), "..", "examples", "big.json"), "r") as f:
+                editor_form.input_text.data = f.read()
+        else:
+            # nothing in the text editor but blob in the url
+            json_blob = json_from_base64(plan_base64_blob)
+            editor_form.input_text.data = prettify_json(json_blob)
+                
 
     if upload_clicked and upload_json is not None:
         # it will be of type FileStorage
