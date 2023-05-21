@@ -46,7 +46,7 @@ def prettify_json(blob: str) -> str:
 
 
 def base64_from_json(blob: str) -> bytes:
-    return base64.b64encode(minify_json(blob).encode('utf-8'))
+    return base64.b64encode(minify_json(blob).encode("utf-8"))
 
 
 def json_from_base64(blob: str) -> str:
@@ -108,13 +108,14 @@ def index(plan_base64_blob=None):
     if empty_editor:
         if plan_base64_blob is None:
             # if empty, load a default config with helpful comments
-            with open(os.path.join(os.path.dirname(__file__), "..", "examples", "big.json"), "r") as f:
+            with open(
+                os.path.join(os.path.dirname(__file__), "..", "examples", "big.json"), "r"
+            ) as f:
                 editor_form.input_text.data = f.read()
         else:
             # nothing in the text editor but blob in the url
             json_blob = json_from_base64(plan_base64_blob)
             editor_form.input_text.data = prettify_json(json_blob)
-                
 
     if upload_clicked and upload_json is not None:
         # it will be of type FileStorage
@@ -126,7 +127,7 @@ def index(plan_base64_blob=None):
 
     if plan_clicked:
         base64_blob = base64_from_json(input_text)
-        return flask.redirect(flask.url_for('plot', plan_base64_blob=base64_blob))
+        return flask.redirect(flask.url_for("plot", plan_base64_blob=base64_blob))
 
     elif save_clicked:
         with open(USER_PLAN_PATH, "w") as f:
@@ -139,15 +140,26 @@ def index(plan_base64_blob=None):
         return flask.render_template("index.html", **kwargs)
 
 
-@app.route("/plot/<plan_base64_blob>")
-def plot(plan_base64_blob):
-    
+class BackToEditForm(flask_wtf.FlaskForm):
+    edit_button = wtforms.fields.SubmitField(label="Back to Editing")
+
+
+@app.route("/plot/<plan_base64_blob>", methods=["POST", "GET"])
+def plot(plan_base64_blob: str):
     if plan_base64_blob is None:
         return "you didn't send plan data"
 
     json_blob = json_from_base64(plan_base64_blob)
 
-    kwargs = {}
+    back_to_edit_form = BackToEditForm()
+
+    kwargs = {
+        "back_to_edit_form": back_to_edit_form,
+    }
+
+    if back_to_edit_form.edit_button.data:
+        # go back with the current plan in the editor
+        return flask.redirect(flask.url_for("index", plan_base64_blob=plan_base64_blob))
 
     try:
         input_plan = cenote.parse_plan(json_blob)
@@ -155,7 +167,7 @@ def plot(plan_base64_blob):
         result = cenote.get_result(output_plan)
     except Exception as exc:
         flask.flash("There's a problem with your dive plan:\n{}".format(traceback.format_exc()))
-        return flask.render_template("index.html", **kwargs)
+        return flask.render_template("plot.html", **kwargs)
 
     # sending a new page so clear the kwargs of the unnecesary forms?
     # kwargs = {}
@@ -178,12 +190,11 @@ def plot(plan_base64_blob):
     bokeh_theme = bokeh.themes.Theme(
         os.path.join(os.path.dirname(__file__), "static", "bokeh_monokai_theme.yaml")
     )
-    kwargs["bokeh_script"], kwargs["bokeh_divs"] = bokeh.embed.components(
-        figs, theme=bokeh_theme
-    )
+    kwargs["bokeh_script"], kwargs["bokeh_divs"] = bokeh.embed.components(figs, theme=bokeh_theme)
     kwargs["bokeh_resources"] = bokeh.resources.INLINE.render()
 
     return flask.render_template("plot.html", **kwargs)
+
 
 # pick up config variables
 app.config.from_object(__name__)

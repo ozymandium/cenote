@@ -15,8 +15,8 @@
 <body>
 
   <form method="POST">
-    <input type="button" value="Back to editing plan">
-  </form>  
+    {{ back_to_edit_form.edit_button }}
+  </form>
   <br>
 
   {% with messages = get_flashed_messages() %}
