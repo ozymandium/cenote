@@ -25,6 +25,7 @@
   <h1>Upload your plan</h1>
 
   <form method="POST" enctype="multipart/form-data">
+    {{ upload_form.hidden_tag() }}
     {{ upload_form.file_picker }}
     <br>
     <br>
@@ -34,6 +35,41 @@
   <h1>Build Plan</h1>
 
   <form method="POST" enctype="multipart/form-data">
+    {{ plan_form.hidden_tag() }}
+    <table>
+      <tr>
+        <td>Water type</td>
+        <td></td>
+        <td>{{ plan_form.water }}</td>
+      </tr>
+      <tr>
+        <td>Gradient Factor</td>
+        <td>Low</td>
+        <td>{{ plan_form.gf_lo }}</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>High</td>
+        <td>{{ plan_form.gf_hi }}</td>
+      </tr>
+      <tr>
+        <td>Gas Consumption Rate</td>
+        <td>Working</td>
+        <td>{{ plan_form.scr_work }}</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Decompression</td>
+        <td>{{ plan_form.scr_deco }}</td>
+      </tr>
+    </table>
+
+    {% for tank in plan_form.tanks %}
+      {{ tank }}
+    {% endfor %}
+    {{ plan_form.add_tank }} {{ plan_form.remove_tank }}
+
+    <br>
     {{ plan_form.plot_button }} {{ plan_form.save_button }} 
   </form>
 

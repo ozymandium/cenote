@@ -1,24 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cenote</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
   {{ bokeh_resources|safe }}
   {{ bokeh_script|safe }}
-
 </head>
-
 <body>
-
   <form method="POST">
+    {{ nav_form.hidden_tag() }}
     {{ nav_form.plan_button }}
   </form>
   <br>
-
+  <!-- need to find a better way to display errors, but whatever -->
   {% with messages = get_flashed_messages() %}
     {% if messages %}
       <ul class=flashes>
@@ -28,17 +24,16 @@
       </ul>
     {% endif %}
   {% endwith %}
-
+  <!-- table -->
   <div>
     {{ plan_table|safe }}
   </div>
-
+  <!-- all plots iterated -->
   <div class="embed-wrapper">
     {% for div in bokeh_divs %}
       {{ div|safe }}
       <br>
     {% endfor %}
   </div>
-
 </body>
 </html>

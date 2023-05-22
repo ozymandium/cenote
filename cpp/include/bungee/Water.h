@@ -6,7 +6,7 @@
 
 namespace bungee {
 
-enum class Water { FRESH, SALT };
+enum class Water { FRESH, SALT, COUNT };
 
 /// \brief Look up the density of water.
 ///

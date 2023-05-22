@@ -10,9 +10,8 @@
 - [ ] schema validator for dive profile YAMLs
 
 ## Web
-- [ ] look at moving to [Monaco Editor](https://microsoft.github.io/monaco-editor/docs.html)
-- [ ] make axes white
+- [ ] make axes labels with units smart
 - [ ] do a 3d plot with compartment time as the z dimension
-- [x] make table easier to read
 - [ ] open and save files
 - [ ] minify html for production: https://github.com/hamidfzm/Flask-HTMLmin
+- [ ] full form

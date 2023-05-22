@@ -57,6 +57,8 @@ PYBIND11_MODULE(bungee, mod) {
         .value("AL80", Tank::AL80)
         .value("LP108", Tank::LP108)
         .value("D_LP108", Tank::D_LP108)
+        /// TODO: make test that iterates up to COUNT and ensures all values are wrapped
+        .value("COUNT", Tank::COUNT)
     ;
     // Mix.h
     py::class_<Mix>(mod, "Mix")
@@ -99,6 +101,8 @@ PYBIND11_MODULE(bungee, mod) {
     py::enum_<Water>(mod, "Water")
         .value("FRESH", Water::FRESH)
         .value("SALT", Water::SALT)
+        /// TODO: make test that iterates up to COUNT and ensures all values are wrapped
+        .value("COUNT", Water::COUNT)
     ;
     // Result.h
     py::class_<Result::Deco>(mod, "Deco")

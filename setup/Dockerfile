@@ -70,6 +70,9 @@ RUN jt -t monokai -cellw 95%
 RUN mkdir -p ${HOME_DIR}/.config/ranger/
 RUN echo "set show_hidden true" >> ${HOME_DIR}/.config/ranger/rc.conf
 
+# tmux mouse scrolling
+RUN echo "set -g mouse on" >> /home/${USER}/.tmux.conf
+
 # working directory is the script dir for ease of dev since all primary development actions
 # are in scripts
 WORKDIR ${SRC_DIR}/scripts

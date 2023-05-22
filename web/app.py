@@ -8,8 +8,6 @@ import base64
 import flask
 import flask_wtf
 import flask_wtf.file
-import flask_codemirror
-import flask_codemirror.fields
 import wtforms
 import werkzeug.utils
 import bokeh.embed
@@ -102,10 +100,86 @@ class PlanUploadForm(flask_wtf.FlaskForm):
     upload_button = wtforms.fields.SubmitField(label="Upload")
 
 
+class PlanTankSubform(wtforms.Form):
+    """https://www.rmedgar.com/blog/dynamic-fields-flask-wtf/"""
+
+    name = wtforms.fields.StringField(
+        "Name",
+        default="Primary",
+        validators = [
+            wtforms.validators.DataRequired(),
+        ]
+    )
+    kind = wtforms.fields.SelectField(
+        "Type",
+        default = "AL80",
+        choices=[
+            (bungee.Tank(i).name, bungee.Tank(i).name)
+            for i in range(bungee.Tank.COUNT.value)
+        ]
+    )
+    mix_fO2 = wtforms.fields.FloatField(
+        "O2 Fraction",
+        default=0.21,
+        validators=[
+            wtforms.validators.DataRequired(),
+            wtforms.validators.NumberRange(min=0.0, max=1.0),
+        ],
+    )
+    pressure = wtforms.fields.StringField(
+        "Start Pressure",
+        default = "3000 psi",
+        validators=[
+            # FIXME: custom validator to make sure that pint unit exists
+            wtforms.validators.DataRequired()
+        ],
+    )
+
 class PlanPlanForm(flask_wtf.FlaskForm):
+    water = wtforms.fields.SelectField(
+        "Water type",
+        choices=[
+            (bungee.Water(i).name, bungee.Water(i).name.title())
+            for i in range(bungee.Water.COUNT.value)
+        ],
+    )
+    gf_lo = wtforms.fields.FloatField(
+        default=0.55,
+        validators=[
+            wtforms.validators.DataRequired(),
+            wtforms.validators.NumberRange(min=0.1, max=1.0),
+        ],
+    )
+    gf_hi = wtforms.fields.FloatField(
+        default=0.8,
+        validators=[
+            wtforms.validators.DataRequired(),
+            wtforms.validators.NumberRange(min=0.1, max=1.0),
+        ],
+    )
+    scr_work = wtforms.fields.StringField(
+        default="0.75 cuft / min",
+        validators=[
+            # FIXME: custom validator to make sure that pint unit exists
+            wtforms.validators.DataRequired()
+        ],
+    )
+    scr_deco = wtforms.fields.StringField(
+        default="0.55 cuft /min",
+        validators=[
+            # FIXME: custom validator to make sure that pint unit exists
+            wtforms.validators.DataRequired()
+        ],
+    )
     plot_button = wtforms.fields.SubmitField(label="Plot")
     save_button = wtforms.fields.SubmitField(label="Save")
-
+    tanks = wtforms.FieldList(
+        wtforms.FormField(PlanTankSubform),
+        min_entries=1,
+        max_entries=4
+    )
+    add_tank = wtforms.fields.SubmitField(label="Add Tank")
+    remove_tank = wtforms.fields.SubmitField(label="Remove Tank")
 
 app = flask.Flask(__name__)
 
@@ -122,36 +196,47 @@ def plan(state_b64: str):
     upload_form = PlanUploadForm()
     plan_form = PlanPlanForm()
 
-    # harvest information from forms
-    upload_json = upload_form.file_picker.data
-    upload_clicked = upload_form.upload_button.data
-    plot_clicked = plan_form.plot_button.data
-    save_clicked = plan_form.save_button.data
-
     kwargs = {
         "upload_form": upload_form,
         "plan_form": plan_form,
     }
 
+    # parse url arguments
     if state_b64 is not None:
         state = State.from_b64_str(state_b64)
     else:
         state = None
 
-    if upload_clicked and upload_json is not None:
+    # upload
+    if upload_form.upload_button.data and upload_form.file_picker.data is not None:
         # it will be of type FileStorage
-        # path = werkzeug.utils.secure_filename(upload_json.filename)
-        upload_json.save(USER_PLAN_PATH)
+        # path = werkzeug.utils.secure_filename(upload_form.file_picker.data.filename)
+        upload_form.file_picker.data.save(USER_PLAN_PATH)
         with open(USER_PLAN_PATH, "r") as f:
             state = State.from_json_str(f.read())
         # instead of trying to load everything in a second way here, just redirect back to the same
         # page using the url parameters so the code path above gets used
         return flask.redirect(flask.url_for("plan", state_b64=state.to_b64_str()))
 
-    if plot_clicked:
+    # add/remove tank
+    # FIXME: fieldlist does not support arbitrary item deletion, find a different approach
+    if plan_form.add_tank.data:
+        if len(plan_form.tanks) < plan_form.tanks.max_entries:
+            plan_form.tanks.append_entry()
+    if plan_form.remove_tank.data:
+        if len(plan_form.tanks) > plan_form.tanks.min_entries:
+            plan_form.tanks.pop_entry()
+
+    # plot
+    # FIXME: validate_on_submit???
+    if plan_form.plot_button.data:
         if state is None:
             raise Exception("no state populated")
         return flask.redirect(flask.url_for("plot", state_b64=state.to_b64_str()))
+
+    # save
+    if plan_form.save_button.data:
+        pass
 
     return flask.render_template("plan.html", **kwargs)
 
@@ -211,7 +296,6 @@ def plot(state_b64: str):
 
 # pick up config variables
 app.config.from_object(__name__)
-codemirror = flask_codemirror.CodeMirror(app)
 
 
 if __name__ == "__main__":

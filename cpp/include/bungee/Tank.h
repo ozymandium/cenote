@@ -18,6 +18,7 @@ public:
         LP108,
         // Double / sidemounted LP108
         D_LP108,
+        COUNT,
     };
 
     /// Specs of the cylinder that describe capacity and max pressure. Volume is determined
