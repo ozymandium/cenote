@@ -198,6 +198,7 @@ class State:
         }
         # tanks
         data["plan"]["tanks"] = {
+            # FIXME: name is populated wrong here
             tank.which.data: {
                 "type": tank.kind.data,
                 "pressure": tank.pressure.data,
@@ -205,7 +206,7 @@ class State:
                     "fO2": tank.fO2.data,
                 },
             }
-            for tank in form.tanks
+            for tank in form.tanks.entries
         }
         # profile
         data["plan"]["profile"] = [
@@ -298,7 +299,13 @@ def plan(state_b64: str):
 
     # save
     if plan_form.save_button.data:
-        pass
+        state = State.from_plan_plan_form(plan_form)
+        json_str = prettify_json(state.to_json_str())
+        with open(USER_PLAN_PATH, "w") as f:
+            f.write(json_str)
+        return flask.send_file(
+            USER_PLAN_PATH, as_attachment=True, download_name="kalousac.json"
+        )
 
     return flask.render_template("plan.html", **kwargs)
 
@@ -309,24 +316,18 @@ class PlotNavForm(flask_wtf.FlaskForm):
 
 @app.route("/plot/<state_b64>", methods=["POST", "GET"])
 def plot(state_b64: str):
-    print("here")
     # state must be well formed for this page to work at all
     state = State.from_b64_str(state_b64)
-    print("2")
     nav_form = PlotNavForm()
-    print("3")
     kwargs = {
         "nav_form": nav_form,
     }
-    print("4")
     if nav_form.plan_button.data:
         # go back with the current plan in the editor
         # FIXME: if editing functionality ever added, will need to send b64 from state, not
         # from the original arg
         return flask.redirect(flask.url_for("plan", state_b64=state_b64))
-    print("5")
     try:
-        print("6")
         input_plan = cenote.plan_from_dict(state.plan)
         print("7")
         output_plan = bungee.replan(input_plan)
