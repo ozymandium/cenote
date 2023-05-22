@@ -11,6 +11,7 @@
                 "tank": "Sidemount"
             },
             {
+                "tank": "Sidemount",
                 "depth": "150 ft",
                 "duration": "35 min"
             }

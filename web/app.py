@@ -138,12 +138,12 @@ class PlanPlanForm(flask_wtf.FlaskForm):
     )
     # FIXME: custom validator to make sure that pint unit exists
     scr_work = wtforms.fields.StringField(
-        default="0.75 cuft / min",
+        default="0.75 ft^3 / min",
         validators=[wtforms.validators.DataRequired()],
     )
     # FIXME: custom validator to make sure that pint unit exists
     scr_deco = wtforms.fields.StringField(
-        default="0.55 cuft /min",
+        default="0.55 ft^3 /min",
         validators=[wtforms.validators.DataRequired()],
     )
     plot_button = wtforms.fields.SubmitField(label="Plot")
@@ -217,6 +217,8 @@ class State:
             }
             for segment in form.profile
         ]
+
+        print("State.from_plan_plan_form")
         pprint.pprint(data)
         return State.from_dict(data)
 
@@ -231,6 +233,43 @@ class State:
 
     def to_b64_str(self) -> str:
         return base64_from_json(self.to_json_str())
+
+    def populate_plan_plan_form(self, form: PlanPlanForm):
+        # water
+        form.water.data = self.plan["water"]
+
+        # gf
+        form.gf_lo.data = self.plan["gf"]["low"]
+        form.gf_hi.data = self.plan["gf"]["high"]
+
+        # scr
+        form.scr_work.data = self.plan["scr"]["work"]
+        form.scr_deco.data = self.plan["scr"]["deco"]
+
+        # tanks
+        # first remove all existing tanks
+        while len(form.tanks.entries) > 1:
+            form.tanks.pop_entry()
+        # now populate
+        for name in self.plan["tanks"].keys():
+            form.tanks.entries[-1].which.data = name
+            form.tanks.entries[-1].kind.data = self.plan["tanks"][name]["type"]
+            form.tanks.entries[-1].pressure.data = self.plan["tanks"][name]["pressure"]
+            form.tanks.entries[-1].fO2.data = self.plan["tanks"][name]["mix"]["fO2"]
+            if len(self.plan["tanks"]) > len(form.tanks.entries):
+                form.tanks.append_entry()
+
+        # profile
+        # first remove all existing segments
+        while len(form.profile.entries) > 1:
+            form.profile.pop_entry()
+        # now populate
+        for segment in self.plan["profile"]:
+            form.profile.entries[-1].tank.data = segment["tank"]
+            form.profile.entries[-1].duration.data = segment["duration"]
+            form.profile.entries[-1].depth.data = segment["depth"]
+            if len(self.plan["profile"]) > len(form.profile.entries):
+                form.profile.append_entry()
 
 
 app = flask.Flask(__name__)
@@ -254,11 +293,9 @@ def plan(state_b64: str):
     }
 
     # parse url arguments
-    # FIXME: store state in the form instead
-    # if state_b64 is not None:
-    #     state = State.from_b64_str(state_b64)
-    # else:
-    #     state = None
+    if state_b64 is not None:
+        state = State.from_b64_str(state_b64)
+        state.populate_plan_plan_form(plan_form)
 
     # upload
     if upload_form.upload_button.data and upload_form.file_picker.data is not None:
@@ -303,9 +340,7 @@ def plan(state_b64: str):
         json_str = prettify_json(state.to_json_str())
         with open(USER_PLAN_PATH, "w") as f:
             f.write(json_str)
-        return flask.send_file(
-            USER_PLAN_PATH, as_attachment=True, download_name="kalousac.json"
-        )
+        return flask.send_file(USER_PLAN_PATH, as_attachment=True, download_name="kalousac.json")
 
     return flask.render_template("plan.html", **kwargs)
 
@@ -337,7 +372,7 @@ def plot(state_b64: str):
     except Exception as exc:
         flask.flash("There's a problem with your dive plan:\n{}".format(traceback.format_exc()))
         return flask.render_template("plot.html", **kwargs)
-    
+
     plan_table_df = plots.get_plan_df(output_plan)
     kwargs["plan_table"] = pretty_html_table.build_table(
         plan_table_df,

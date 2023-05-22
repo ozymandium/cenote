@@ -5,6 +5,8 @@
 - [ ] coverage and unit tests
 - [ ] clean up replanner
 - [ ] is the M0 or the gradient ceiling getting plotted?
+- [ ] no deco dives have unnecessary stops
+- [ ] make tanks a list instead of dict
 
 ## Cenote
 - [ ] schema validator for dive profile YAMLs
