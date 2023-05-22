@@ -38,6 +38,11 @@
     {{ plan_form.hidden_tag() }}
     <table>
       <tr>
+        <td><h2>Basics</h2></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
         <td>Water type</td>
         <td></td>
         <td>{{ plan_form.water }}</td>
@@ -62,14 +67,65 @@
         <td>Decompression</td>
         <td>{{ plan_form.scr_deco }}</td>
       </tr>
+      {# tanks #}
+      <tr>
+        <td><h2>Tanks</h2></td>
+        <td></td>
+        <td></td>
+      </tr>
+      {% for tank in plan_form.tanks %}
+        {% set outer_loop = loop %}
+        {% for tank_field in tank %}
+          <tr>
+            <td>
+              {% if loop.index0 == 0 %}
+                Tank {{ outer_loop.index0 + 1 }}
+              {% endif %}
+            </td>
+            <td>{{ tank_field.label }}</td>
+            <td>{{ tank_field }}</td>
+          </tr>
+        {% endfor %}
+      {% endfor %}
+      {# tank add/remove #}
+      <tr>
+        <td></td>
+        <td></td>
+        <td>{{ plan_form.add_tank }} {{ plan_form.remove_tank }}</td>
+      </tr>
+      {# profile #}
+      <tr>
+        <td><h2>Profile</h2></td>
+        <td></td>
+        <td></td>
+      </tr>
+
+      {% for segment in plan_form.profile %}
+        {% set outer_loop = loop %}
+        {% for segment_field in segment %}
+          <tr>
+            <td>
+              {% if loop.index0 == 0 %}
+                Segment {{ outer_loop.index0 + 1 }}
+              {% endif %}
+            </td>
+            <td>{{ segment_field.label }}</td>
+            <td>{{ segment_field }}</td>
+          </tr>
+        {% endfor %}
+      {% endfor %}
+      {# segment add/remove #}
+      <tr>
+        <td></td>
+        <td></td>
+        <td>{{ plan_form.add_segment }} {{ plan_form.remove_segment }}</td>
+      </tr>
+
     </table>
 
-    {% for tank in plan_form.tanks %}
-      {{ tank }}
-    {% endfor %}
-    {{ plan_form.add_tank }} {{ plan_form.remove_tank }}
+    <br/>
+    <br/>
 
-    <br>
     {{ plan_form.plot_button }} {{ plan_form.save_button }} 
   </form>
 

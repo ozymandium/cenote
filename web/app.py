@@ -101,8 +101,6 @@ class PlanUploadForm(flask_wtf.FlaskForm):
 
 
 class PlanTankSubform(wtforms.Form):
-    """https://www.rmedgar.com/blog/dynamic-fields-flask-wtf/"""
-
     name = wtforms.fields.StringField(
         "Name",
         default="Primary",
@@ -133,6 +131,23 @@ class PlanTankSubform(wtforms.Form):
             # FIXME: custom validator to make sure that pint unit exists
             wtforms.validators.DataRequired()
         ],
+    )
+
+class PlanProfileSubform(wtforms.Form):
+    tank = wtforms.fields.StringField(
+        "Tank at Start",
+        default="Primary",
+        validators=[wtforms.validators.Optional()]
+    )
+    duration = wtforms.fields.StringField(
+        "Duration",
+        default="5 min",
+        validators=[wtforms.validators.DataRequired()]
+    )
+    depth = wtforms.fields.StringField(
+        "Final Depth",
+        default="20 ft",
+        validators=[wtforms.validators.DataRequired()]
     )
 
 class PlanPlanForm(flask_wtf.FlaskForm):
@@ -180,6 +195,13 @@ class PlanPlanForm(flask_wtf.FlaskForm):
     )
     add_tank = wtforms.fields.SubmitField(label="Add Tank")
     remove_tank = wtforms.fields.SubmitField(label="Remove Tank")
+    profile = wtforms.FieldList(
+        wtforms.FormField(PlanProfileSubform),
+        min_entries=1,
+        max_entries=20
+    )
+    add_segment = wtforms.fields.SubmitField(label="Add Segment")
+    remove_segment = wtforms.fields.SubmitField(label="Remove Segment")
 
 app = flask.Flask(__name__)
 
@@ -219,13 +241,24 @@ def plan(state_b64: str):
         return flask.redirect(flask.url_for("plan", state_b64=state.to_b64_str()))
 
     # add/remove tank
-    # FIXME: fieldlist does not support arbitrary item deletion, find a different approach
+    # FIXME: fieldlist does not support arbitrary item deletion, find a different approach so
+    # we can delete middle elements
     if plan_form.add_tank.data:
         if len(plan_form.tanks) < plan_form.tanks.max_entries:
             plan_form.tanks.append_entry()
     if plan_form.remove_tank.data:
         if len(plan_form.tanks) > plan_form.tanks.min_entries:
             plan_form.tanks.pop_entry()
+
+    # add/remove segment
+    # FIXME: fieldlist does not support arbitrary item deletion, find a different approach so
+    # we can delete middle elements
+    if plan_form.add_segment.data:
+        if len(plan_form.profile) < plan_form.profile.max_entries:
+            plan_form.profile.append_entry()
+    if plan_form.remove_segment.data:
+        if len(plan_form.profile) > plan_form.profile.min_entries:
+            plan_form.profile.pop_entry()
 
     # plot
     # FIXME: validate_on_submit???
