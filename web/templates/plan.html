@@ -1,17 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cenote</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-
 </head>
 
 <body>
-
+  {# flash errors #}
   {% with messages = get_flashed_messages() %}
     {% if messages %}
       <ul class=flashes>
@@ -22,18 +19,29 @@
     {% endif %}
   {% endwith %}
 
-  <h1>Upload your plan</h1>
-
-  <form method="POST" enctype="multipart/form-data">
-    {{ upload_form.hidden_tag() }}
-    {{ upload_form.file_picker }}
-    <br>
-    <br>
-    {{ upload_form.upload_button }} 
+  <h1>Set default units</h1>
+  <form>
+    <table>
+      <tr>
+        <td>Time</td>
+        <td>{{ config_form.time }}</td>
+      </tr>
+      <tr>
+        <td>Depth</td>
+        <td>{{ config_form.depth }}</td>
+      </tr>
+      <tr>
+        <td>Pressure</td>
+        <td>{{ config_form.pressure }}</td>
+      </tr>
+      <tr>
+        <td>Volume rate</td>
+        <td>{{ config_form.volume_rate }}</td>
+      </tr>
+    </table>
   </form>
 
   <h1>Build Plan</h1>
-
   <form method="POST" enctype="multipart/form-data">
     {{ plan_form.hidden_tag() }}
     <table>
@@ -42,11 +50,15 @@
         <td></td>
         <td></td>
       </tr>
+      {# Water #}
       <tr>
         <td>Water type</td>
         <td></td>
         <td>{{ plan_form.water }}</td>
       </tr>
+      {# little bit of spacing #}
+      <tr><td/><td/><td/><tr/>
+      {# GF #}
       <tr>
         <td>Gradient Factor</td>
         <td>Low</td>
@@ -57,6 +69,9 @@
         <td>High</td>
         <td>{{ plan_form.gf_hi }}</td>
       </tr>
+      {# little bit of spacing #}
+      <tr><td/><td/><td/><tr/>
+      {# SCR #}
       <tr>
         <td>Gas Consumption Rate</td>
         <td>Working</td>
@@ -79,7 +94,7 @@
           <tr>
             <td>
               {% if loop.index0 == 0 %}
-                Tank {{ outer_loop.index0 + 1 }}
+                <h4>Tank {{ outer_loop.index0 + 1 }}</h4>
               {% endif %}
             </td>
             <td>{{ tank_field.label }}</td>
@@ -131,6 +146,16 @@
     <br/>
 
     {{ plan_form.plot_button }} {{ plan_form.save_button }} 
+  </form>
+
+  <h1>Upload a saved plan</h1>
+
+  <form method="POST" enctype="multipart/form-data">
+    {{ upload_form.hidden_tag() }}
+    {{ upload_form.file_picker }}
+    <br>
+    <br>
+    {{ upload_form.upload_button }} 
   </form>
 
 </body>

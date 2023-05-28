@@ -12,11 +12,6 @@ PRESSURE_UNIT = UREG.parse_expression(bungee.get_pressure_unit_str()).units
 TIME_UNIT = UREG.parse_expression(bungee.get_time_unit_str()).units
 VOLUME_RATE_UNIT = UREG.parse_expression(bungee.get_volume_rate_unit_str()).units
 
-DEPTH_DISPLAY_UNIT = UREG.foot
-PRESSURE_DISPLAY_UNIT = UREG.psi
-TIME_DISPLAY_UNIT = UREG.minute
-VOLUME_RATE_DISPLAY_UNIT = UREG.ft**3 / UREG.minute
-
 
 def plan_from_file(path: str) -> bungee.Plan:
     with open(path, "r") as f:

@@ -1,9 +1,14 @@
 import pandas as pd
 import numpy as np
 import bokeh.plotting
+import flask_wtf
+import flask_wtf.file
+import wtforms
+import werkzeug.utils
 
 import cenote
 import bungee
+from state import State
 
 
 COLORS = {
@@ -32,6 +37,21 @@ COLOR_ORDER = [
 ]
 
 
+class PlotUnitHandler:
+    def __init__(self, x_unit: str, y_unit: str):
+        self.x_unit = cenote.UREG.parse_expression(x_unit).units
+        self.y_unit = cenote.UREG.parse_expression(y_unit).units
+
+    def convert(self, x, y) -> tuple:
+        return x.to(self.x_unit).magnitude, y.to(self.y_unit).magnitude
+
+    def x_label(self):
+        return format(self.x_unit, "~")
+
+    def y_label(self):
+        return format(self.y_unit, "~")
+
+
 def get_plan_df(output_plan: bungee.Plan) -> str:
     data = []
     for point in output_plan.profile():
@@ -41,18 +61,18 @@ def get_plan_df(output_plan: bungee.Plan) -> str:
     return pd.DataFrame(data, columns=["Time", "Depth", "Tank"])
 
 
-def get_depth_fig(result: cenote.Result) -> str:
+def get_depth_fig(result: cenote.Result, time_unit: str, depth_unit: str) -> str:
     fig = bokeh.plotting.figure(title="Profile")
+    unit = PlotUnitHandler(time_unit, depth_unit)
 
     # profile
     fig.line(
-        result.time.magnitude, result.depth.magnitude, color=COLORS["green"], legend_label="Profile"
+        *unit.convert(result.time, result.depth), color=COLORS["green"], legend_label="Profile"
     )
     # ceiling
     idxs = np.nonzero(result.deco.ceiling > 0)[0]
     fig.line(
-        result.time[idxs].magnitude,
-        result.deco.ceiling[idxs].magnitude,
+        *unit.convert(result.time[idxs], result.deco.ceiling[idxs]),
         color=COLORS["pink"],
         legend_label="Ceiling",
     )
@@ -60,35 +80,30 @@ def get_depth_fig(result: cenote.Result) -> str:
     for i in range(result.deco.ceilings.shape[0]):
         idxs = np.nonzero(result.deco.ceilings[i, :] > 0)[0]
         if len(idxs):
-            x = result.time[idxs].magnitude
-            y = result.deco.ceilings[i, idxs].magnitude
-            # fig.line(
-            #     x,
-            #     y,
-            #     color=COLORS["pink"],
-            #     line_alpha=0.2,
-            # )
+            x, y = unit.convert(result.time[idxs], result.deco.ceilings[i, idxs])
             fig.varea(x=x, y1=0, y2=y, alpha=0.1, color=COLORS["pink"])
 
     # formatting
     fig.y_range.flipped = True
     fig.legend.location = "bottom_right"
+    fig.xaxis.axis_label = "Time ({})".format(unit.x_label())
+    fig.yaxis.axis_label = "Depth ({})".format(unit.y_label())
 
     return fig
 
 
-def get_pressure_fig(result: cenote.Result) -> str:
+def get_pressure_fig(result: cenote.Result, time_unit: str, pressure_unit: str) -> str:
     # make sure there are not more tanks than distinct colors
     if len(result.tank_pressure) > len(COLOR_ORDER):
         raise Exception("Too many tanks to plot pressure in distinct colors")
 
     fig = bokeh.plotting.figure(title="Tank Pressure")
+    unit = PlotUnitHandler(time_unit, pressure_unit)
 
     for idx, tank in enumerate(result.tank_pressure):
         color = COLORS[COLOR_ORDER[idx]]
         fig.line(
-            result.time.magnitude,
-            result.tank_pressure[tank].magnitude,
+            *unit.convert(result.time, result.tank_pressure[tank]),
             color=color,
             legend_label=tank,
         )
@@ -151,3 +166,7 @@ def get_gradient_fig(result: cenote.Result) -> str:
 #     axes[1].set_title("Compartment Pressure vs Time")
 
 #     return fig_to_html(fig)
+
+
+class NavForm(flask_wtf.FlaskForm):
+    plan_button = wtforms.fields.SubmitField(label="Back to Planning")
