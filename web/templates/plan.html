@@ -19,31 +19,33 @@
     {% endif %}
   {% endwith %}
 
-  <h1>Set default units</h1>
-  <form>
+
+  <form method="POST" enctype="multipart/form-data">
+    {{ plan_form.hidden_tag() }}
+
+    <h1>Set units</h1>
+
     <table>
       <tr>
         <td>Time</td>
-        <td>{{ config_form.time }}</td>
+        <td>{{ plan_form.time_unit }}</td>
       </tr>
       <tr>
         <td>Depth</td>
-        <td>{{ config_form.depth }}</td>
+        <td>{{ plan_form.depth_unit }}</td>
       </tr>
       <tr>
         <td>Pressure</td>
-        <td>{{ config_form.pressure }}</td>
+        <td>{{ plan_form.pressure_unit }}</td>
       </tr>
       <tr>
         <td>Volume rate</td>
-        <td>{{ config_form.volume_rate }}</td>
+        <td>{{ plan_form.volume_rate_unit }}</td>
       </tr>
     </table>
-  </form>
 
-  <h1>Build Plan</h1>
-  <form method="POST" enctype="multipart/form-data">
-    {{ plan_form.hidden_tag() }}
+    <h1>Build Plan</h1>
+
     <table>
       <tr>
         <td><h2>Basics</h2></td>

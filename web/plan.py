@@ -5,44 +5,6 @@ import wtforms
 import bungee
 
 
-class ConfigForm(wtforms.Form):
-    time = wtforms.fields.SelectField(
-        "Time unit",
-        default="minute",
-        choices=[
-            "minute",
-            "second",
-            "hour",
-        ],
-    )
-    depth = wtforms.fields.SelectField(
-        "Depth unit",
-        default="foot",
-        choices=[
-            "foot",
-            "meter",
-            "inch",
-            "yard",
-        ],
-    )
-    pressure = wtforms.fields.SelectField(
-        "Pressure unit",
-        default="psi",
-        choices=[
-            "psi",
-            "bar",
-        ],
-    )
-    volume_rate = wtforms.fields.SelectField(
-        "Volume rate unit",
-        default="cubic foot per minute",
-        choices=[
-            "cubic foot per minute",
-            "liter per minute",
-        ],
-    )
-
-
 class TankSubform(wtforms.Form):
     # "name" field means something else
     which = wtforms.fields.StringField(
@@ -79,6 +41,8 @@ class TankSubform(wtforms.Form):
 
 
 class ProfileSubform(wtforms.Form):
+    # TODO: make this a select field with dynamic choices from tank names
+    # see example here: https://wtforms.readthedocs.io/en/2.3.x/fields/#wtforms.fields.SelectField
     tank = wtforms.fields.StringField(
         "Tank at Start", default="Primary", validators=[wtforms.validators.Optional()]
     )
@@ -91,6 +55,42 @@ class ProfileSubform(wtforms.Form):
 
 
 class PlanForm(flask_wtf.FlaskForm):
+    time_unit = wtforms.fields.SelectField(
+        "Time unit",
+        default="minute",
+        choices=[
+            "minute",
+            "second",
+            "hour",
+        ],
+    )
+    depth_unit = wtforms.fields.SelectField(
+        "Depth unit",
+        default="foot",
+        choices=[
+            "foot",
+            "meter",
+            "inch",
+            "yard",
+        ],
+    )
+    pressure_unit = wtforms.fields.SelectField(
+        "Pressure unit",
+        default="psi",
+        choices=[
+            "psi",
+            "bar",
+        ],
+    )
+    volume_rate_unit = wtforms.fields.SelectField(
+        "Volume rate unit",
+        default="cubic foot per minute",
+        choices=[
+            "cubic foot per minute",
+            "liter per minute",
+        ],
+    )
+
     water = wtforms.fields.SelectField(
         "Water type",
         choices=[
@@ -127,9 +127,7 @@ class PlanForm(flask_wtf.FlaskForm):
     tanks = wtforms.FieldList(wtforms.FormField(TankSubform), min_entries=1, max_entries=4)
     add_tank = wtforms.fields.SubmitField(label="Add Tank")
     remove_tank = wtforms.fields.SubmitField(label="Remove Tank")
-    profile = wtforms.FieldList(
-        wtforms.FormField(ProfileSubform), min_entries=1, max_entries=20
-    )
+    profile = wtforms.FieldList(wtforms.FormField(ProfileSubform), min_entries=1, max_entries=20)
     add_segment = wtforms.fields.SubmitField(label="Add Segment")
     remove_segment = wtforms.fields.SubmitField(label="Remove Segment")
 

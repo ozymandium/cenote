@@ -42,20 +42,21 @@ class Webapp:
     @staticmethod
     def plan(state_b64: str):
         # create forms
-        config_form = plan.ConfigForm()
         upload_form = plan.UploadForm()
         plan_form = plan.PlanForm()
 
-        kwargs = {
-            "config_form": config_form,
-            "upload_form": upload_form,
-            "plan_form": plan_form,
-        }
+        print(plan_form.tanks[0].kind)
+        print(plan_form.tanks[0].kind.data)
 
         # parse url arguments
         if state_b64 is not None:
             state = State.from_b64_str(state_b64)
-            state.to_forms(config_form, plan_form)
+            state.to_forms(plan_form)
+
+        kwargs = {
+            "upload_form": upload_form,
+            "plan_form": plan_form,
+        }
 
         # upload
         if upload_form.upload_button.data and upload_form.file_picker.data is not None:
@@ -91,16 +92,18 @@ class Webapp:
         # plot
         # FIXME: validate_on_submit???
         if plan_form.plot_button.data:
-            state = State.from_forms(config_form, plan_form)
+            state = State.from_forms(plan_form)
             return flask.redirect(flask.url_for("plot", state_b64=state.to_b64_str()))
 
         # save
         if plan_form.save_button.data:
-            state = State.from_forms(config_form, plan_form)
+            state = State.from_forms(plan_form)
             json_str = prettify_json(state.to_json_str())
             with open(USER_PLAN_PATH, "w") as f:
                 f.write(json_str)
-            return flask.send_file(USER_PLAN_PATH, as_attachment=True, download_name="kalousac.json")
+            return flask.send_file(
+                USER_PLAN_PATH, as_attachment=True, download_name="kalousac.json"
+            )
 
         return flask.render_template("plan.html", **kwargs)
 
@@ -127,7 +130,11 @@ class Webapp:
             flask.flash("There's a problem with your dive plan:\n{}".format(traceback.format_exc()))
             return flask.render_template("plot.html", **kwargs)
 
-        plan_table_df = plot.get_plan_df(output_plan)
+        plan_table_df = plot.get_plan_df(
+            output_plan,
+            time_unit=state.config["unit"]["time"],
+            depth_unit=state.config["unit"]["depth"],
+        )
         kwargs["plan_table"] = pretty_html_table.build_table(
             plan_table_df,
             "green_dark",
@@ -146,13 +153,15 @@ class Webapp:
                 time_unit=state.config["unit"]["time"],
                 pressure_unit=state.config["unit"]["pressure"],
             ),
-            plot.get_gradient_fig(result),
+            plot.get_gradient_fig(result, time_unit=state.config["unit"]["time"]),
             # plot.get_compartment_fig(result)
         ]
         bokeh_theme = bokeh.themes.Theme(
             os.path.join(os.path.dirname(__file__), "static", "bokeh_monokai_theme.yaml")
         )
-        kwargs["bokeh_script"], kwargs["bokeh_divs"] = bokeh.embed.components(figs, theme=bokeh_theme)
+        kwargs["bokeh_script"], kwargs["bokeh_divs"] = bokeh.embed.components(
+            figs, theme=bokeh_theme
+        )
         kwargs["bokeh_resources"] = bokeh.resources.INLINE.render()
 
         return flask.render_template("plot.html", **kwargs)

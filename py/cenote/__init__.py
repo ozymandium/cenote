@@ -7,10 +7,10 @@ import numpy as np
 
 UREG = pint.UnitRegistry()
 
-DEPTH_UNIT = UREG.parse_expression(bungee.get_depth_unit_str()).units
-PRESSURE_UNIT = UREG.parse_expression(bungee.get_pressure_unit_str()).units
-TIME_UNIT = UREG.parse_expression(bungee.get_time_unit_str()).units
-VOLUME_RATE_UNIT = UREG.parse_expression(bungee.get_volume_rate_unit_str()).units
+DEPTH_UNIT = UREG.parse_units(bungee.get_depth_unit_str())
+PRESSURE_UNIT = UREG.parse_units(bungee.get_pressure_unit_str())
+TIME_UNIT = UREG.parse_units(bungee.get_time_unit_str())
+VOLUME_RATE_UNIT = UREG.parse_units(bungee.get_volume_rate_unit_str())
 
 
 def plan_from_file(path: str) -> bungee.Plan:
@@ -73,22 +73,21 @@ def plan_from_dict(data: dict) -> bungee.Plan:
 
 class Deco:
     def __init__(self, bungee_deco: bungee.Deco):
-        self.ceiling = (bungee_deco.ceiling * DEPTH_UNIT).to(DEPTH_DISPLAY_UNIT)
-        self.gradient = bungee_deco.gradient  # unitless
-        self.M0s = (bungee_deco.M0s * PRESSURE_UNIT).to(UREG.atm)
-        self.tissue_pressures = (bungee_deco.tissue_pressures * PRESSURE_UNIT).to(UREG.atm)
-        self.ceilings = (bungee_deco.ceilings * DEPTH_UNIT).to(DEPTH_DISPLAY_UNIT)
-        self.gradients = bungee_deco.gradients  # unitless
+        self.ceiling = bungee_deco.ceiling * DEPTH_UNIT
+        self.gradient = (bungee_deco.gradient * UREG.dimensionless).to(UREG.percent)
+        self.M0s = bungee_deco.M0s * PRESSURE_UNIT
+        self.tissue_pressures = bungee_deco.tissue_pressures * PRESSURE_UNIT
+        self.ceilings = bungee_deco.ceilings * DEPTH_UNIT
+        self.gradients = (bungee_deco.gradients * UREG.dimensionless).to(UREG.percent)
 
 
 class Result:
     def __init__(self, bungee_result: bungee.Result):
-        self.time = (bungee_result.time * TIME_UNIT).to(TIME_DISPLAY_UNIT)
-        self.depth = (bungee_result.depth * DEPTH_UNIT).to(DEPTH_DISPLAY_UNIT)
-        self.ambient_pressure = (bungee_result.ambient_pressure * PRESSURE_UNIT).to(UREG.atm)
+        self.time = bungee_result.time * TIME_UNIT
+        self.depth = bungee_result.depth * DEPTH_UNIT
+        self.ambient_pressure = bungee_result.ambient_pressure * PRESSURE_UNIT
         self.tank_pressure = {
-            tank: (pressure * PRESSURE_UNIT).to(PRESSURE_DISPLAY_UNIT)
-            for tank, pressure in bungee_result.tank_pressure.items()
+            tank: pressure * PRESSURE_UNIT for tank, pressure in bungee_result.tank_pressure.items()
         }
         self.deco = Deco(bungee_result.deco)
 

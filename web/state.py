@@ -51,7 +51,7 @@ class State:
         return State.from_json_str(json_from_base64(b64_str))
 
     @staticmethod
-    def from_forms(config_form: plan.ConfigForm, plan_form: plan.PlanForm):
+    def from_forms(plan_form: plan.PlanForm):
         data = {
             "config": {"unit": {}},
             "plan": {},
@@ -60,13 +60,13 @@ class State:
         ## Config
 
         # time
-        data["config"]["unit"]["time"] = config_form.time.data
+        data["config"]["unit"]["time"] = plan_form.time_unit.data
         # depth
-        data["config"]["unit"]["depth"] = config_form.depth.data
+        data["config"]["unit"]["depth"] = plan_form.depth_unit.data
         # pressure
-        data["config"]["unit"]["pressure"] = config_form.pressure.data
+        data["config"]["unit"]["pressure"] = plan_form.pressure_unit.data
         # volume rate
-        data["config"]["unit"]["volume_rate"] = config_form.volume_rate.data
+        data["config"]["unit"]["volume_rate"] = plan_form.volume_rate_unit.data
 
         ## Plan
 
@@ -94,6 +94,7 @@ class State:
             }
             for tank in plan_form.tanks.entries
         }
+
         # profile
         data["plan"]["profile"] = [
             {
@@ -120,53 +121,52 @@ class State:
     def to_b64_str(self) -> str:
         return base64_from_json(self.to_json_str())
 
-    def to_forms(self, config_form: plan.ConfigForm, plan_form: plan.PlanForm):
-
+    def to_forms(self, plan_form: plan.PlanForm):
         ## Config
 
         # time
-        config_form.time.data = self.config["unit"]["time"]
+        plan_form.time_unit.data = self.config["unit"]["time"]
         # depth
-        config_form.depth.data = self.config["unit"]["depth"]
+        plan_form.depth_unit.data = self.config["unit"]["depth"]
         # pressure
-        config_form.pressure.data = self.config["unit"]["pressure"]
+        plan_form.pressure_unit.data = self.config["unit"]["pressure"]
         # volume rate
-        config_form.volume_rate.data = self.config["unit"]["volume_rate"]
+        plan_form.volume_rate_unit.data = self.config["unit"]["volume_rate"]
 
         ## Plan
 
         # water
-        form.water.data = self.plan["water"]
+        plan_form.water.data = self.plan["water"]
 
         # gf
-        form.gf_lo.data = self.plan["gf"]["low"]
-        form.gf_hi.data = self.plan["gf"]["high"]
+        plan_form.gf_lo.data = self.plan["gf"]["low"]
+        plan_form.gf_hi.data = self.plan["gf"]["high"]
 
         # scr
-        form.scr_work.data = self.plan["scr"]["work"]
-        form.scr_deco.data = self.plan["scr"]["deco"]
+        plan_form.scr_work.data = self.plan["scr"]["work"]
+        plan_form.scr_deco.data = self.plan["scr"]["deco"]
 
         # tanks
         # first remove all existing tanks
-        while len(form.tanks.entries) > 1:
-            form.tanks.pop_entry()
+        while len(plan_form.tanks.entries) > 1:
+            plan_form.tanks.pop_entry()
         # now populate
         for name in self.plan["tanks"].keys():
-            form.tanks.entries[-1].which.data = name
-            form.tanks.entries[-1].kind.data = self.plan["tanks"][name]["type"]
-            form.tanks.entries[-1].pressure.data = self.plan["tanks"][name]["pressure"]
-            form.tanks.entries[-1].fO2.data = self.plan["tanks"][name]["mix"]["fO2"]
-            if len(self.plan["tanks"]) > len(form.tanks.entries):
-                form.tanks.append_entry()
+            plan_form.tanks.entries[-1].which.data = name
+            plan_form.tanks.entries[-1].kind.data = self.plan["tanks"][name]["type"]
+            plan_form.tanks.entries[-1].pressure.data = self.plan["tanks"][name]["pressure"]
+            plan_form.tanks.entries[-1].fO2.data = self.plan["tanks"][name]["mix"]["fO2"]
+            if len(self.plan["tanks"]) > len(plan_form.tanks.entries):
+                plan_form.tanks.append_entry()
 
         # profile
         # first remove all existing segments
-        while len(form.profile.entries) > 1:
-            form.profile.pop_entry()
+        while len(plan_form.profile.entries) > 1:
+            plan_form.profile.pop_entry()
         # now populate
         for segment in self.plan["profile"]:
-            form.profile.entries[-1].tank.data = segment["tank"]
-            form.profile.entries[-1].duration.data = segment["duration"]
-            form.profile.entries[-1].depth.data = segment["depth"]
-            if len(self.plan["profile"]) > len(form.profile.entries):
-                form.profile.append_entry()
+            plan_form.profile.entries[-1].tank.data = segment["tank"]
+            plan_form.profile.entries[-1].duration.data = segment["duration"]
+            plan_form.profile.entries[-1].depth.data = segment["depth"]
+            if len(self.plan["profile"]) > len(plan_form.profile.entries):
+                plan_form.profile.append_entry()

@@ -39,11 +39,14 @@ COLOR_ORDER = [
 
 class PlotUnitHandler:
     def __init__(self, x_unit: str, y_unit: str):
-        self.x_unit = cenote.UREG.parse_expression(x_unit).units
-        self.y_unit = cenote.UREG.parse_expression(y_unit).units
+        self.x_unit = cenote.UREG.parse_units(x_unit)
+        self.y_unit = cenote.UREG.parse_units(y_unit)
 
-    def convert(self, x, y) -> tuple:
-        return x.to(self.x_unit).magnitude, y.to(self.y_unit).magnitude
+    def convert(self, x, y, as_pint_type=False) -> tuple:
+        if as_pint_type:
+            return x.to(self.x_unit), y.to(self.y_unit)
+        else:
+            return x.to(self.x_unit).magnitude, y.to(self.y_unit).magnitude
 
     def x_label(self):
         return format(self.x_unit, "~")
@@ -52,11 +55,17 @@ class PlotUnitHandler:
         return format(self.y_unit, "~")
 
 
-def get_plan_df(output_plan: bungee.Plan) -> str:
+def get_plan_df(output_plan: bungee.Plan, time_unit: str, depth_unit: str) -> pd.DataFrame:
+    unit = PlotUnitHandler(time_unit, depth_unit)
     data = []
     for point in output_plan.profile():
-        depth = (point.depth.value() * cenote.DEPTH_UNIT).to(cenote.DEPTH_DISPLAY_UNIT)
-        time = (point.time.value() * cenote.TIME_UNIT).to(cenote.TIME_DISPLAY_UNIT)
+        # Plan is a bungee type, so not units
+        # FIXME: need to fully wrap bungee.Plan so it is never visile outside cenote.
+        time, depth = unit.convert(
+            point.time.value() * cenote.TIME_UNIT,
+            point.depth.value() * cenote.DEPTH_UNIT,
+            as_pint_type=True,
+        )
         data.append(["{:~.0f}".format(time), "{:~.0f}".format(depth), point.tank])
     return pd.DataFrame(data, columns=["Time", "Depth", "Tank"])
 
@@ -111,19 +120,20 @@ def get_pressure_fig(result: cenote.Result, time_unit: str, pressure_unit: str) 
     return fig
 
 
-def get_gradient_fig(result: cenote.Result) -> str:
+def get_gradient_fig(result: cenote.Result, time_unit: str) -> str:
     fig = bokeh.plotting.figure(title="Gradient")
+
+    unit = PlotUnitHandler(time_unit, "percent")
 
     # gradient of controlling compartment
     idxs = np.nonzero(result.deco.gradient >= 0)[0]
-    fig.line(result.time[idxs].magnitude, result.deco.gradient[idxs] * 100, color=COLORS["green"])
+    fig.line(*unit.convert(result.time[idxs], result.deco.gradient[idxs]), color=COLORS["green"])
     # gradient of each compartment
     for i in range(result.deco.gradients.shape[0]):
         idxs = np.nonzero(result.deco.gradients[i, :] > 0)[0]
         if len(idxs):
             fig.line(
-                result.time[idxs].magnitude,
-                result.deco.gradients[i, idxs] * 100,
+                *unit.convert(result.time[idxs].magnitude, result.deco.gradients[i, idxs]),
                 color=COLORS["green"],
                 line_alpha=0.3,
             )
