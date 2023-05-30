@@ -133,7 +133,7 @@ def get_gradient_fig(result: cenote.Result, time_unit: str) -> str:
         idxs = np.nonzero(result.deco.gradients[i, :] > 0)[0]
         if len(idxs):
             fig.line(
-                *unit.convert(result.time[idxs].magnitude, result.deco.gradients[i, idxs]),
+                *unit.convert(result.time[idxs], result.deco.gradients[i, idxs]),
                 color=COLORS["green"],
                 line_alpha=0.3,
             )

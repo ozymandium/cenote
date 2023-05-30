@@ -17,3 +17,4 @@
 - [ ] open and save files
 - [ ] minify html for production: https://github.com/hamidfzm/Flask-HTMLmin
 - [ ] full form
+- [ ] can't change units after hitting replan button from the plot page
