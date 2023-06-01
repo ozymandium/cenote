@@ -10,6 +10,10 @@ set -o pipefail
 echo "SRC_DIR:   $SRC_DIR"
 echo "BUILD_DIR: $BUILD_DIR"
 
+# protobuf
+mkdir -p $BUILD_DIR/proto/{cpp,py}
+protoc -I=$SRC_DIR/proto $SRC_DIR/proto/Quest.proto --cpp_out=$BUILD_DIR/proto/cpp --python_out=$BUILD_DIR/proto/py
+
 # c++
 cd $BUILD_DIR
 cmake $SRC_DIR/cpp -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug

@@ -18,6 +18,16 @@ add_subdirectory(deps)
 
 ## Build
 
+# protobufs
+file(GLOB_RECURSE BUNGEE_PROTO_DEFS ${PROJECT_SOURCE_DIR}/../proto/*.proto)
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${BUNGEE_PROTO_DEFS})
+# protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS EXPORT_MACRO DLL_EXPORT foo.proto)
+# protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS DESCRIPTORS PROTO_DESCS foo.proto)
+protobuf_generate_python(PROTO_PY ${BUNGEE_PROTO_DEFS})
+add_library(bungee_proto SHARED ${PROTO_SRCS} ${PROTO_HDRS})
+# add_executable(bar bar.cc ${PROTO_SRCS} ${PROTO_HDRS})
+target_link_libraries(bungee_proto ${Protobuf_LIBRARIES})
+
 # Core library 
 file(GLOB_RECURSE SRC_FILES ${PROJECT_SOURCE_DIR}/src/bungee/*.cpp)
 add_library(bungee_core SHARED ${SRC_FILES})
