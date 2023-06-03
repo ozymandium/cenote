@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package bungee_proto;
+
+message Units {
+    string time = 1;
+    string depth = 2;
+    string pressure = 3;
+    string volume_rate = 4;
+}
+
+message Config {
+    Units units = 1;
+}
+
+enum Water {
+    FRESH = 0;
+    SALT = 1;
+}
+
+message Gf {
+    float lo = 1;
+    float hi = 2;
+}
+
+message Scr {
+    float work = 1;
+    float deco = 2;
+}
+
+message Mix {
+    float fO2 = 1;
+}
+
+enum TankType {
+    AL40 = 0;
+    AL80 = 1;
+    LP108 = 2;
+    D_LP108 = 3;
+}
+
+message Tank {
+    string name = 1;
+    TankType type = 2;
+    float pressure = 3;
+    Mix mix = 4;
+}
+
+message Segment {
+    string tank = 1;
+    float duration = 2;
+    float depth = 3;
+}
+
+message Plan {
+    Water water = 1;
+    Gf gf = 2;
+    Scr scr = 3;
+    repeated Tank tanks = 4;
+    repeated Segment profile = 5;
+}
+
+message Quest {
+    Config config = 1;
+    Plan plan = 2;
+}

@@ -4,12 +4,13 @@
 - [ ] Revisit water vapor pressure computation
 - [ ] coverage and unit tests
 - [ ] clean up replanner
-- [ ] is the M0 or the gradient ceiling getting plotted?
+- [ ] is the M0 or the gradient ceiling getting plotted? looks like M0 but would like gradient ceiling
 - [ ] no deco dives have unnecessary stops
 - [ ] make tanks a list instead of dict
+- [ ] test case where user input plan requests ascending faster than is allowable
 
 ## Cenote
-- [ ] schema validator for dive profile YAMLs
+- [ ] obfuscate bungee.Plan behind a wrapper, especially for units
 
 ## Web
 - [ ] make axes labels with units smart
@@ -18,3 +19,7 @@
 - [ ] minify html for production: https://github.com/hamidfzm/Flask-HTMLmin
 - [ ] full form
 - [ ] can't change units after hitting replan button from the plot page
+
+## Misc
+- [ ] tank matching app
+- [ ] bring back former small cli tools

@@ -22,3 +22,5 @@ flask-wtf
 matplotlib
 mpld3
 bokeh
+
+protobuf

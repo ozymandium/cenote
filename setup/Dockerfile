@@ -36,7 +36,8 @@ RUN apt update -qq > /dev/null \
     gcovr \
     file \
     htop \
-    tmux
+    tmux \
+    protobuf-compiler
 
 # prepares non root env
 RUN useradd --create-home --shell /bin/zsh ${USER}
