@@ -18,7 +18,10 @@ public:
         LP108,
         // Double / sidemounted LP108
         D_LP108,
-        COUNT,
+        // Faber high pressure 100 cuft
+        HP100,
+        // Double / sidemounted HP100
+        D_HP100,
     };
 
     /// Specs of the cylinder that describe capacity and max pressure. Volume is determined
@@ -32,6 +35,7 @@ public:
 
     Tank() = delete;
 
+
     /// \brief Create tank with specific pressure.
     Tank(const Params& params, Pressure pressure);
 
@@ -40,9 +44,11 @@ public:
 
     /// \brief compute gas volume for a given pressure
     static Volume VolumeAtPressure(const Params& params, Pressure pressure);
+    Volume volumeAtPressure(Pressure pressure);
 
     /// \brief compute gas pressure for a given volume
     static Pressure PressureAtVolume(const Params& params, Volume volume);
+    Pressure pressureAtVolume(Volume volume);
 
     Pressure servicePressure() const { return _params.servicePressure; }
     Volume serviceVolume() const;

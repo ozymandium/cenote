@@ -15,9 +15,19 @@ Volume Tank::VolumeAtPressure(const Params& params, const Pressure pressure)
     return params.size * pressure / (params.z * 1_atm);
 }
 
+Volume Tank::volumeAtPressure(const Pressure pressure)
+{
+    return VolumeAtPressure(_params, pressure);
+}
+
 Pressure Tank::PressureAtVolume(const Params& params, const Volume volume)
 {
     return volume * params.z * 1_atm / params.size;
+}
+
+Pressure Tank::pressureAtVolume(const Volume volume)
+{
+    return PressureAtVolume(_params, volume);
 }
 
 void Tank::setPressure(Pressure pressure)
@@ -42,8 +52,10 @@ static const std::map<Tank::Type, Tank::Params> TANK_PARAMS{
     {Tank::AL40, {.size = 5.8_L, .servicePressure = 3000_psi, .z = 1.045}},
     {Tank::AL80, {.size = 11.1_L, .servicePressure = 3000_psi, .z = 1.0337}},
     {Tank::LP108, {.size = 17_L, .servicePressure = 2640_psi, .z = 1.0}},
+    {Tank::HP100, {.size = 12.9_L, .servicePressure = 3440_psi, .z = 1.0}},
     // FIXME: in unit test check that double versions are exactly twice the single versions
     {Tank::D_LP108, {.size = 34_L, .servicePressure = 2640_psi, .z = 1.0}},
+    {Tank::D_HP100, {.size = 25.8_L, .servicePressure = 3440_psi, .z = 1.0}},
 };
 
 /*

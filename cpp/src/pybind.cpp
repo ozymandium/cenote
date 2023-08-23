@@ -12,9 +12,12 @@ using namespace bungee;
 namespace py = pybind11;
 
 #define WRAP_UNIT(mod, cls)                                                                        \
-    {                                                                                              \
-        py::class_<cls>(mod, #cls).def(py::init<double>()).def("value", &cls::value);              \
-    }
+{                                                                                                  \
+    py::class_<cls>(mod, #cls)                                                                     \
+        .def(py::init<double>())                                                                   \
+        .def_property_readonly("value", &cls::value)                                               \
+    ;                                                                                              \
+}
 
 namespace {
 
@@ -47,19 +50,32 @@ PYBIND11_MODULE(bungee, mod) {
     WRAP_UNIT(mod, Pressure)
     WRAP_UNIT(mod, Time)
     WRAP_UNIT(mod, VolumeRate)
+    WRAP_UNIT(mod, Volume)
     mod.def("get_depth_unit_str", &GetUnitStr<Depth>);
     mod.def("get_pressure_unit_str", &GetUnitStr<Pressure>);
     mod.def("get_time_unit_str", &GetUnitStr<Time>);
     mod.def("get_volume_rate_unit_str", &GetUnitStr<VolumeRate>);
+    mod.def("get_volume_unit_str", &GetUnitStr<Volume>);
     // Tank.h
-    py::enum_<Tank::Type>(mod, "Tank")
+    py::enum_<Tank::Type>(mod, "TankType")
         .value("AL40", Tank::AL40)
         .value("AL80", Tank::AL80)
         .value("LP108", Tank::LP108)
+        .value("HP100", Tank::HP100)
         .value("D_LP108", Tank::D_LP108)
+        .value("D_HP100", Tank::D_HP100)
         /// TODO: make test that iterates up to COUNT and ensures all values are wrapped
-        .value("COUNT", Tank::COUNT)
     ;
+    py::class_<Tank>(mod, "Tank")
+        .def_property("pressure", &Tank::pressure, &Tank::setPressure)
+        .def_property("volume", &Tank::volume, &Tank::setVolume)
+        .def("volume_at_pressure", &Tank::volumeAtPressure)
+        .def("pressure_at_volume", &Tank::pressureAtVolume)
+    ;
+    mod.def("get_empty_tank", &GetEmptyTank);
+    mod.def("get_full_tank", &GetFullTank);
+    mod.def("get_tank_at_pressure", &GetTankAtPressure);
+    mod.def("get_tank_at_volume", &GetTankAtVolume);
     // Mix.h
     py::class_<Mix>(mod, "Mix")
         .def(py::init<double>())

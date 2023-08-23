@@ -11,6 +11,7 @@ DEPTH_UNIT = UREG.parse_units(bungee.get_depth_unit_str())
 PRESSURE_UNIT = UREG.parse_units(bungee.get_pressure_unit_str())
 TIME_UNIT = UREG.parse_units(bungee.get_time_unit_str())
 VOLUME_RATE_UNIT = UREG.parse_units(bungee.get_volume_rate_unit_str())
+VOLUME_UNIT = UREG.parse_units(bungee.get_volume_unit_str())
 
 
 def plan_from_file(path: str) -> bungee.Plan:
@@ -47,7 +48,7 @@ def plan_from_dict(data: dict) -> bungee.Plan:
     # Tank loadout
     tanks = {}
     for name, info in data["tanks"].items():
-        enum = getattr(bungee.Tank, info["type"])
+        enum = getattr(bungee.TankType, info["type"])
         pressure_pint = UREG.parse_expression(info["pressure"]).to(PRESSURE_UNIT)
         pressure = bungee.Pressure(pressure_pint.m)
         mix = bungee.Mix(info["mix"]["fO2"])

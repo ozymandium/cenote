@@ -6,6 +6,8 @@ ipython
 pytest
 coverage
 dipplanner @ git+https://github.com/ozymandium/dipplanner.git
+pandas
+tabulate
 
 black
 clang-format
