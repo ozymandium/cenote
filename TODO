@@ -18,3 +18,4 @@
 - [ ] minify html for production: https://github.com/hamidfzm/Flask-HTMLmin
 - [ ] full form
 - [ ] can't change units after hitting replan button from the plot page
+- [ ] swap to [webui](https://www.webui.me/docs/2.4/#/)
