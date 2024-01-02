@@ -1,6 +1,8 @@
 cenote
 ======
 
+<img src="resources/icons/cenote.png" width=200/>
+
 Scuba decompression model explorer.
 
 This is not good, it's probably not even right, so don't use it to plan your dives.
