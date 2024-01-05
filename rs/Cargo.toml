@@ -4,4 +4,4 @@ version = "0.0.1"
 edition = "2021"
 
 [dependencies]
-backtrace = "0.3"
+dimensioned = "0.8.0"
