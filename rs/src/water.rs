@@ -41,18 +41,23 @@ impl Water {
 
 #[cfg(test)]
 mod test_helpers {
-    use dimensioned::Dimensioned;
     use dimensioned::Abs;
-    use std::ops::Sub;
+    use dimensioned::Dimensioned;
     use std::fmt::Debug;
+    use std::ops::Sub;
 
     pub fn assert_approx<T>(lhs: &T, rhs: &T, tol: &T)
     where
         T: Dimensioned + Sub<Output = T> + Abs + PartialOrd + Debug + Copy,
     {
         let diff = (*lhs - *rhs).abs();
-        assert!(diff <= *tol, "assertion failed: `(left ≈ right)`\n  left: `{:?}`,\n right: `{:?}`", lhs, rhs);
-    }    
+        assert!(
+            diff <= *tol,
+            "assertion failed: `(left ≈ right)`\n  left: `{:?}`,\n right: `{:?}`",
+            lhs,
+            rhs
+        );
+    }
 }
 
 #[test]
@@ -101,7 +106,7 @@ fn test_pressure_and_depth() {
         },
     ];
 
-    let depth_tol: Depth = 1e-3 * M;
+    let depth_tol: Depth = 1e-2 * M;
     let pressure_tol: Pressure = 1e-3 * BAR;
 
     for expectation in expectations {
@@ -109,22 +114,22 @@ fn test_pressure_and_depth() {
         assert_approx(
             &water.rel_pressure_at_depth(expectation.depth),
             &expectation.rel_pressure,
+            &pressure_tol,
+        );
+        assert_approx(
+            &water.abs_pressure_at_depth(expectation.depth),
+            &expectation.abs_pressure(),
             &pressure_tol
         );
-        // assert_approx(
-        //     water.abs_pressure_at_depth(expectation.depth),
-        //     expectation.abs_pressure(),
-        //     pressure_tol
-        // );
-        // assert_approx(
-        //     water.depth_at_rel_pressure(expectation.rel_pressure),
-        //     expectation.depth,
-        //     depth_tol
-        // );
-        // assert_approx(
-        //     water.depth_at_abs_pressure(expectation.abs_pressure()),
-        //     expectation.depth,
-        //     depth_tol
-        // );
+        assert_approx(
+            &water.depth_at_rel_pressure(expectation.rel_pressure),
+            &expectation.depth,
+            &depth_tol
+        );
+        assert_approx(
+            &water.depth_at_abs_pressure(expectation.abs_pressure()),
+            &expectation.depth,
+            &depth_tol
+        );
     }
 }
