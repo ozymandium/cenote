@@ -1,6 +1,7 @@
-use dimensioned::si::{L, PSI, ATM};
+use dimensioned::si::{L, ATM};
+use dimensioned::ucum::PSI;
 use crate::units::{Volume, Pressure};
-use crate::constants::SURFACE_PRESSURE;
+// use crate::constants::SURFACE_PRESSURE;
 
 pub enum TankKind {
     Al40,
