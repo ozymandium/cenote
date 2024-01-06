@@ -7,6 +7,9 @@ pub enum Water {
     Salt,
 }
 
+/// TODO: when implementing variable surface pressure and water temperature, make pressure 
+/// conversion functions part of a class `Environment` that includes Water, temperature, and
+/// surface pressure.
 impl Water {
     /// Water Density
     ///

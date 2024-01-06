@@ -4,4 +4,4 @@ pub mod utils;
 pub mod water;
 
 #[cfg(test)]
-pub mod test_utils;
+pub mod test_helpers;
