@@ -42,20 +42,16 @@ impl Water {
 #[cfg(test)]
 mod test_helpers {
     use dimensioned::Dimensioned;
+    use dimensioned::Abs;
     use std::ops::Sub;
+    use std::fmt::Debug;
 
-    #[cfg(test)]
-    pub fn assert_approx<T>(lhs: T, rhs: T, tol: T)
-        where
-            T: Dimensioned<Value = f64> + Sub<Output = T> + Into<f64>,
-        {
-            // since dimensioned quantities implement each individual unit as a type, we know that all
-            // quantities are of the same type, so we can convert them to f64 without conversion
-            let lhs_val: f64 = lhs.into();
-            let rhs_val: f64 = rhs.into();
-            let tol_val: f64 = tol.into();
-        
-            assert!((lhs_val - rhs_val).abs() <= tol_val);
+    pub fn assert_approx<T>(lhs: &T, rhs: &T, tol: &T)
+    where
+        T: Dimensioned + Sub<Output = T> + Abs + PartialOrd + Debug + Copy,
+    {
+        let diff = (*lhs - *rhs).abs();
+        assert!(diff <= *tol, "assertion failed: `(left ≈ right)`\n  left: `{:?}`,\n right: `{:?}`", lhs, rhs);
     }    
 }
 
@@ -111,9 +107,9 @@ fn test_pressure_and_depth() {
     for expectation in expectations {
         let water: &Water = &expectation.water;
         assert_approx(
-            water.rel_pressure_at_depth(expectation.depth),
-            expectation.rel_pressure,
-            pressure_tol
+            &water.rel_pressure_at_depth(expectation.depth),
+            &expectation.rel_pressure,
+            &pressure_tol
         );
         // assert_approx(
         //     water.abs_pressure_at_depth(expectation.depth),
