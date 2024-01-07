@@ -1,5 +1,5 @@
 use crate::constants::{GRAVITY, SURFACE_PRESSURE};
-use crate::units::{Density, Depth, Pressure, kg_per_m3, bar, meter};
+use crate::units::{kg_per_m3, Density, Depth, Pressure};
 
 /// The type of water
 pub enum Water {
@@ -7,7 +7,7 @@ pub enum Water {
     Salt,
 }
 
-/// TODO: when implementing variable surface pressure and water temperature, make pressure 
+/// TODO: when implementing variable surface pressure and water temperature, make pressure
 /// conversion functions part of a class `Environment` that includes Water, temperature, and
 /// surface pressure.
 impl Water {
@@ -56,7 +56,8 @@ impl Water {
 #[test]
 fn test_pressure_and_depth() {
     use crate::assert_approx;
-    
+    use crate::units::{bar, meter};
+
     struct Expectation {
         water: Water,
         depth: Depth,

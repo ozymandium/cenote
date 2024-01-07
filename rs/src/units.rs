@@ -1,5 +1,4 @@
-pub use uom::si::f64::{Acceleration, MassDensity as Density, Pressure, Length as Depth};
-
+pub use uom::si::f64::{Acceleration, Length as Depth, MassDensity as Density, Pressure};
 
 // use uom::si::pressure::{atmosphere, bar, psi};
 

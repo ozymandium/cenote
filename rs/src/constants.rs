@@ -1,5 +1,5 @@
-use lazy_static::lazy_static;
 use crate::units::*;
+use lazy_static::lazy_static;
 
 // constants are not necessarily defined using the units in which they are stored, so evaluate them at runtime
 lazy_static! {
