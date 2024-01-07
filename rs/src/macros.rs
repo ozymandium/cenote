@@ -9,6 +9,7 @@
 ///
 /// # Panics
 /// Panics if the two values are not approximately equal
+#[macro_export]
 macro_rules! assert_approx {
     ($lhs:expr, $rhs:expr, $tol:expr) => {
         {
@@ -23,5 +24,3 @@ macro_rules! assert_approx {
         }
     };
 }
-
-pub(crate) use assert_approx;
