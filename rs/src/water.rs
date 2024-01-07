@@ -55,8 +55,8 @@ impl Water {
 
 #[test]
 fn test_pressure_and_depth() {
-    use crate::assert_approx;
-    
+    use crate::macros::assert_approx;
+
     struct Expectation {
         water: Water,
         depth: Depth,
