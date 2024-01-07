@@ -53,32 +53,24 @@ impl Water {
     }
 }
 
-#[cfg(test)]
-mod test_helpers {
-    // use uom::si::Quantity;
-    use uom::si::Unit;
-    use std::fmt::Debug;
-
-    pub fn assert_approx<T>(lhs: &T, rhs: &T, tol: &T)
-    where
-        T: Unit + Debug + Copy,
-    {
-        let lhs_val = lhs.get::<T::Unit>();
-        let rhs_val = rhs.get::<T::Unit>();
-        let tol_val = tol.get::<T::Unit>();
-        let diff = (lhs_val - rhs_val).abs();
-        assert!(
-            diff <= tol_val,
-            "assertion failed: `(left ≈ right)`\n  left: `{:?}`,\n right: `{:?}`",
-            lhs,
-            rhs
-        );
-    }
+#[macro_export]
+macro_rules! assert_approx {
+    ($lhs:expr, $rhs:expr, $tol:expr) => {
+        {
+            let diff = (*$lhs - *$rhs).abs();
+            assert!(
+                diff <= *$tol,
+                "assertion failed: `(left ≈ right)`\n  left: `{:?}`,\n  right: `{:?}`,\n  tol: `{:?}`",
+                $lhs,
+                $rhs,
+                $tol
+            );
+        }
+    };
 }
 
 #[test]
 fn test_pressure_and_depth() {
-    use test_helpers::assert_approx;
 
     struct Expectation {
         water: Water,
@@ -119,22 +111,22 @@ fn test_pressure_and_depth() {
 
     for expectation in expectations {
         let water: &Water = &expectation.water;
-        assert_approx(
+        assert_approx!(
             &water.rel_pressure_at_depth(expectation.depth),
             &expectation.rel_pressure,
-            &pressure_tol,
+            &pressure_tol
         );
-        assert_approx(
+        assert_approx!(
             &water.abs_pressure_at_depth(expectation.depth),
             &expectation.abs_pressure(),
             &pressure_tol
         );
-        assert_approx(
+        assert_approx!(
             &water.depth_at_rel_pressure(expectation.rel_pressure),
             &expectation.depth,
             &depth_tol
         );
-        assert_approx(
+        assert_approx!(
             &water.depth_at_abs_pressure(expectation.abs_pressure()),
             &expectation.depth,
             &depth_tol
