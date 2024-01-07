@@ -1,7 +1,4 @@
-use dimensioned::si::{L, ATM};
-use dimensioned::ucum::PSI;
-use crate::units::{Volume, Pressure};
-// use crate::constants::SURFACE_PRESSURE;
+use crate::units::{Volume, Pressure, psi, liter, atm};
 
 pub enum TankKind {
     Al40,
@@ -22,18 +19,18 @@ impl TankSpec {
     fn new(kind: TankKind) -> Self {
         match kind {
             TankKind::Al40 => TankSpec {
-                empty_volume: 5.8 * L,
-                service_pressure: 3_000 * PSI,
+                empty_volume: liter(5.8),
+                service_pressure: psi(3_000.0),
                 z: 1.045,
             },
             TankKind::Al80 => TankSpec {
-                empty_volume: 11.1 * L,
-                service_pressure: 3_000 * PSI,
+                empty_volume: liter(11.1),
+                service_pressure: psi(3_000.0),
                 z: 1.0337,
             },
             TankKind::Lp108 => TankSpec {
-                empty_volume: 17 * L,
-                service_pressure: 2640 * PSI,
+                empty_volume: liter(17.0),
+                service_pressure: psi(2640.0),
                 z: 1.0,
             },
         }
@@ -46,14 +43,14 @@ impl TankSpec {
     /// # FIXME
     /// - should use of 1 atm here be changed to surface pressure?
     fn volume_at_pressure(&self, pressure: Pressure) -> Volume {
-        self.empty_volume * pressure / (self.z * (1 * ATM))
+        self.empty_volume * pressure / (self.z * atm(1.0))
     }
 
     /// The pressure of the gas in the tank at the specified volume. Pressure is relative to
     /// ambient pressure, so the returned pressure does not include the gas at 1 atm which remains
     /// in the tank when the pressure relative to surface conditions is zero.
     fn pressure_at_volume(&self, volume: Volume) -> Pressure {
-        volume / self.empty_volume * self.z * (1 * ATM)
+        volume / self.empty_volume * self.z * atm(1.0)
     }
 
     // fn service_volume(&self) -> Volume {
@@ -82,8 +79,8 @@ impl Tank {
     pub fn new(kind: TankKind) -> Self {
         Tank {
             spec: TankSpec::new(kind),
-            pressure: 0.0 * PSI,
-            volume: 0.0 * L,
+            pressure: psi(0.0),
+            volume: liter(0.0),
         }
     }
 
@@ -122,11 +119,13 @@ impl Tank {
 
 #[test]
 fn test_spec_volume_at_pressure() {
-    use dimensioned::si::{L, PSI};
-    use crate::units::Volume;
-
+    use crate::units::{cuft, CuFt};
+    use crate::assert_approx;
     let spec = TankSpec::new(TankKind::Al80);
-    assert_eq!(spec.volume_at_pressure(0.0 * PSI), 0.0 * L);
-    assert_eq!(spec.volume_at_pressure(1000.0 * PSI), 0.0 * L);
-    assert_eq!(spec.volume_at_pressure(3000.0 * PSI), 11.1 * L);
+    assert_eq!(spec.volume_at_pressure(psi(0.0)), liter(0.0));
+    assert_eq!(spec.pressure_at_volume(liter(0.0)), psi(0.0));
+    assert_approx!(
+        spec.volume_at_pressure(psi(3000.0)),
+        cuft(77.7), 
+        cuft(0.1));
 }

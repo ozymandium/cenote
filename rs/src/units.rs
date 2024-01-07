@@ -1,33 +1,35 @@
-pub use uom::si::f64::{Acceleration, Length as Depth, MassDensity as Density, Pressure};
+pub use uom::si::f64::{Acceleration, Length as Depth, MassDensity as Density, Pressure, Volume};
 
-// use uom::si::pressure::{atmosphere, bar, psi};
+pub type MPerS2 = uom::si::acceleration::meter_per_second_squared;
+pub type KgPerM3 = uom::si::mass_density::kilogram_per_cubic_meter;
+pub type Atm = uom::si::pressure::atmosphere;
+pub type Bar = uom::si::pressure::bar;
+pub type Psi = uom::si::pressure::pound_force_per_square_inch;
+pub type Meter = uom::si::length::meter;
+pub type Liter = uom::si::volume::liter;
+pub type CuFt = uom::si::volume::cubic_foot;
 
 pub fn m_per_s2(value: f64) -> Acceleration {
-    use uom::si::acceleration::meter_per_second_squared;
-    Acceleration::new::<meter_per_second_squared>(value)
+    Acceleration::new::<MPerS2>(value)
 }
-
 pub fn kg_per_m3(value: f64) -> Density {
-    use uom::si::mass_density::kilogram_per_cubic_meter;
-    Density::new::<kilogram_per_cubic_meter>(value)
+    Density::new::<KgPerM3>(value)
 }
-
 pub fn atm(value: f64) -> Pressure {
-    use uom::si::pressure::atmosphere;
-    Pressure::new::<atmosphere>(value)
+    Pressure::new::<Atm>(value)
 }
-
 pub fn bar(value: f64) -> Pressure {
-    use uom::si::pressure::bar;
-    Pressure::new::<bar>(value)
+    Pressure::new::<Bar>(value)
 }
-
 pub fn psi(value: f64) -> Pressure {
-    use uom::si::pressure::pound_force_per_square_inch;
-    Pressure::new::<pound_force_per_square_inch>(value)
+    Pressure::new::<Psi>(value)
 }
-
 pub fn meter(value: f64) -> Depth {
-    use uom::si::length::meter;
-    Depth::new::<meter>(value)
+    Depth::new::<Meter>(value)
+}
+pub fn liter(value: f64) -> Volume {
+    Volume::new::<Liter>(value)
+}
+pub fn cuft(value: f64) -> Volume {
+    Volume::new::<CuFt>(value)
 }
