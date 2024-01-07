@@ -1,4 +1,4 @@
-use crate::units::{Volume, Pressure, psi, liter, atm};
+use crate::units::{atm, liter, psi, Pressure, Volume};
 
 pub enum TankKind {
     Al40,
@@ -120,47 +120,33 @@ impl Tank {
 
 #[test]
 fn test_spec_volume_pressure_round_trip() {
-    use crate::units::{cuft, CuFt};
     use crate::assert_approx_val;
+    use crate::units::cuft;
     let spec = TankSpec::new(TankKind::Al80);
     assert_eq!(spec.volume_at_pressure(psi(0.0)), liter(0.0));
     assert_eq!(spec.pressure_at_volume(liter(0.0)), psi(0.0));
-    assert_approx_val!(
-        spec.volume_at_pressure(psi(3000.0)),
-        cuft(77.4), 
-        cuft(0.1));
-    assert_approx_val!(
-        spec.pressure_at_volume(cuft(77.4)),
-        psi(3000.0),
-        psi(1.0));
+    assert_approx_val!(spec.volume_at_pressure(psi(3000.0)), cuft(77.4), cuft(0.1));
+    assert_approx_val!(spec.pressure_at_volume(cuft(77.4)), psi(3000.0), psi(1.0));
 }
 
 #[test]
 fn test_al40() {
-    use crate::units::{cuft, CuFt};
     use crate::assert_approx_val;
+    use crate::units::cuft;
     let spec = TankSpec::new(TankKind::Al40);
-    assert_approx_val!(
-        spec.service_volume(),
-        cuft(40.0),
-        cuft(0.1));
+    assert_approx_val!(spec.service_volume(), cuft(40.0), cuft(0.1));
 }
 
 #[test]
 fn test_lp_108() {
-    use crate::units::{cuft, CuFt};
     use crate::assert_approx_val;
+    use crate::units::cuft;
     let spec = TankSpec::new(TankKind::Lp108);
-    assert_approx_val!(
-        spec.service_volume(),
-        cuft(108.0),
-        cuft(0.2));
+    assert_approx_val!(spec.service_volume(), cuft(108.0), cuft(0.2));
 }
 
 #[test]
 fn test_tank_new() {
-    use crate::units::{cuft, CuFt};
-    use crate::assert_approx_val;
     let tank = Tank::new(TankKind::Al40);
     assert_eq!(tank.volume, liter(0.0));
     assert_eq!(tank.pressure, psi(0.0));
@@ -168,8 +154,6 @@ fn test_tank_new() {
 
 #[test]
 fn test_tank_new_at_pressure() {
-    use crate::units::{cuft, CuFt};
-    use crate::assert_approx_val;
     let spec = TankSpec::new(TankKind::Al40);
     let tank = Tank::new_at_pressure(TankKind::Al40, spec.service_pressure);
     assert_eq!(tank.volume, spec.service_volume());
@@ -178,10 +162,50 @@ fn test_tank_new_at_pressure() {
 
 #[test]
 fn test_tank_new_at_volume() {
-    use crate::units::{cuft, CuFt};
-    use crate::assert_approx_val;
     let spec = TankSpec::new(TankKind::Al40);
     let tank = Tank::new_at_volume(TankKind::Al40, spec.service_volume());
     assert_eq!(tank.volume, spec.service_volume());
     assert_eq!(tank.pressure, spec.service_pressure);
+}
+
+#[test]
+fn test_tank_set_pressure() {
+    use crate::assert_approx_val;
+    use crate::units::cuft;
+    let mut tank = Tank::new(TankKind::Al40);
+    tank.set_pressure(psi(3000.0));
+    assert_approx_val!(tank.volume, cuft(40.0), cuft(0.1));
+    assert_approx_val!(tank.pressure, psi(3000.0), psi(1.0));
+}
+
+#[test]
+fn test_tank_set_volume() {
+    use crate::assert_approx_val;
+    use crate::units::cuft;
+    let mut tank = Tank::new(TankKind::Al40);
+    tank.set_volume(cuft(40.0));
+    assert_approx_val!(tank.volume, cuft(40.0), cuft(0.1));
+    assert_approx_val!(tank.pressure, psi(3000.0), psi(1.0));
+}
+
+#[test]
+fn test_tank_decrease_volume() {
+    use crate::assert_approx_val;
+    use crate::units::cuft;
+    let mut tank = Tank::new(TankKind::Al40);
+    tank.set_volume(cuft(40.0));
+    tank.decrease_volume(cuft(10.0));
+    assert_approx_val!(tank.volume, cuft(30.0), cuft(0.1));
+    assert_approx_val!(tank.pressure, psi(2250.0), psi(1.0));
+}
+
+#[test]
+fn test_tank_decrease_pressure() {
+    use crate::assert_approx_val;
+    use crate::units::cuft;
+    let mut tank = Tank::new(TankKind::Al40);
+    tank.set_pressure(psi(3000.0));
+    tank.decrease_pressure(psi(1000.0));
+    assert_approx_val!(tank.volume, cuft(26.67), cuft(0.1));
+    assert_approx_val!(tank.pressure, psi(2000.0), psi(1.0));
 }
