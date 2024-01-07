@@ -53,9 +53,10 @@ impl TankSpec {
         volume / self.empty_volume * self.z * atm(1.0)
     }
 
-    // fn service_volume(&self) -> Volume {
-    //     self.empty_volume * self.z
-    // }
+    /// The volume of gas in the tank at the service pressure.
+    fn service_volume(&self) -> Volume {
+        self.volume_at_pressure(self.service_pressure)
+    }
 }
 
 pub struct Tank {
@@ -132,4 +133,55 @@ fn test_spec_volume_pressure_round_trip() {
         spec.pressure_at_volume(cuft(77.4)),
         psi(3000.0),
         psi(1.0));
+}
+
+#[test]
+fn test_al40() {
+    use crate::units::{cuft, CuFt};
+    use crate::assert_approx_val;
+    let spec = TankSpec::new(TankKind::Al40);
+    assert_approx_val!(
+        spec.service_volume(),
+        cuft(40.0),
+        cuft(0.1));
+}
+
+#[test]
+fn test_lp_108() {
+    use crate::units::{cuft, CuFt};
+    use crate::assert_approx_val;
+    let spec = TankSpec::new(TankKind::Lp108);
+    assert_approx_val!(
+        spec.service_volume(),
+        cuft(108.0),
+        cuft(0.2));
+}
+
+#[test]
+fn test_tank_new() {
+    use crate::units::{cuft, CuFt};
+    use crate::assert_approx_val;
+    let tank = Tank::new(TankKind::Al40);
+    assert_eq!(tank.volume, liter(0.0));
+    assert_eq!(tank.pressure, psi(0.0));
+}
+
+#[test]
+fn test_tank_new_at_pressure() {
+    use crate::units::{cuft, CuFt};
+    use crate::assert_approx_val;
+    let spec = TankSpec::new(TankKind::Al40);
+    let tank = Tank::new_at_pressure(TankKind::Al40, spec.service_pressure);
+    assert_eq!(tank.volume, spec.service_volume());
+    assert_eq!(tank.pressure, spec.service_pressure);
+}
+
+#[test]
+fn test_tank_new_at_volume() {
+    use crate::units::{cuft, CuFt};
+    use crate::assert_approx_val;
+    let spec = TankSpec::new(TankKind::Al40);
+    let tank = Tank::new_at_volume(TankKind::Al40, spec.service_volume());
+    assert_eq!(tank.volume, spec.service_volume());
+    assert_eq!(tank.pressure, spec.service_pressure);
 }
