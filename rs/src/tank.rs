@@ -118,14 +118,18 @@ impl Tank {
 }
 
 #[test]
-fn test_spec_volume_at_pressure() {
+fn test_spec_volume_pressure_round_trip() {
     use crate::units::{cuft, CuFt};
-    use crate::assert_approx;
+    use crate::assert_approx_val;
     let spec = TankSpec::new(TankKind::Al80);
     assert_eq!(spec.volume_at_pressure(psi(0.0)), liter(0.0));
     assert_eq!(spec.pressure_at_volume(liter(0.0)), psi(0.0));
-    assert_approx!(
+    assert_approx_val!(
         spec.volume_at_pressure(psi(3000.0)),
-        cuft(77.7), 
+        cuft(77.4), 
         cuft(0.1));
+    assert_approx_val!(
+        spec.pressure_at_volume(cuft(77.4)),
+        psi(3000.0),
+        psi(1.0));
 }

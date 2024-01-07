@@ -55,7 +55,7 @@ impl Water {
 
 #[test]
 fn test_pressure_and_depth() {
-    use crate::assert_approx;
+    use crate::assert_approx_ref;
     use crate::units::{bar, meter};
 
     struct Expectation {
@@ -97,22 +97,22 @@ fn test_pressure_and_depth() {
 
     for expectation in expectations {
         let water: &Water = &expectation.water;
-        assert_approx!(
+        assert_approx_ref!(
             &water.rel_pressure_at_depth(expectation.depth),
             &expectation.rel_pressure,
             &pressure_tol
         );
-        assert_approx!(
+        assert_approx_ref!(
             &water.abs_pressure_at_depth(expectation.depth),
             &expectation.abs_pressure(),
             &pressure_tol
         );
-        assert_approx!(
+        assert_approx_ref!(
             &water.depth_at_rel_pressure(expectation.rel_pressure),
             &expectation.depth,
             &depth_tol
         );
-        assert_approx!(
+        assert_approx_ref!(
             &water.depth_at_abs_pressure(expectation.abs_pressure()),
             &expectation.depth,
             &depth_tol
