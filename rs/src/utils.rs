@@ -11,7 +11,7 @@
 /// * `Some(f64)` - The interpolated y value if the x value is in the range of xs
 /// * `None` - The x value is out of the range of xs
 pub fn interpolate(xs: &[f64], ys: &[f64], x: f64) -> Option<f64> {
-    if xs.len() != ys.len() || xs.is_empty() {
+    if (xs.len() != ys.len()) || (xs.len() < 2) {
         return None; // Vectors must be of the same non-zero length
     }
 
@@ -30,6 +30,8 @@ pub fn interpolate(xs: &[f64], ys: &[f64], x: f64) -> Option<f64> {
 fn test_interpolate() {
     let xs = vec![0.0, 1.0, 2.0, 3.0];
     let ys = vec![0.0, 1.0, 4.0, 9.0];
+    let empty = vec![];
+    let one = vec![0.0];
 
     assert_eq!(interpolate(&xs, &ys, -1.0), None);
     assert_eq!(interpolate(&xs, &ys, 0.0), Some(0.0));
@@ -40,4 +42,6 @@ fn test_interpolate() {
     assert_eq!(interpolate(&xs, &ys, 2.5), Some(6.5));
     assert_eq!(interpolate(&xs, &ys, 3.0), Some(9.0));
     assert_eq!(interpolate(&xs, &ys, 4.0), None);
+    assert_eq!(interpolate(&empty, &empty, 0.0), None);
+    assert_eq!(interpolate(&one, &one, 0.0), None);
 }
