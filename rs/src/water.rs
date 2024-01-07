@@ -1,5 +1,5 @@
-use crate::constants::{FRESH_WATER_DENSITY, GRAVITY, SALT_WATER_DENSITY, SURFACE_PRESSURE};
-use crate::units::{Density, Depth, Pressure};
+use crate::constants::{GRAVITY, SURFACE_PRESSURE};
+use crate::units::{Density, Depth, Pressure, kg_per_m3, bar, meter};
 
 /// The type of water
 pub enum Water {
@@ -14,10 +14,21 @@ impl Water {
     /// Water Density
     ///
     /// https://bluerobotics.com/learn/pressure-depth-calculator/#hydrostatic-water-pressure-formula
+    ///
+    /// # Fresh water density
+    /// water density varies with temperature, being more dense at lower temperatures. pure
+    /// water at 0C is 1000 kg/m3. pick a value of pure water at 25C, since contaminants
+    /// generally decrease the density, and this will offset changes due to colder water.
+    /// https://en.wikipedia.org/wiki/Properties_of_water
+    ///
+    /// # Salt water density
+    /// Deep salt water has higher density (1050 kg/m3) than surface water, which varies from
+    /// 1020-1029 kg/m3. Pick a median value of surface seawater at 25C.
+    /// https://en.wikipedia.org/wiki/Seawater
     pub fn density(&self) -> Density {
         match *self {
-            Water::Fresh => *FRESH_WATER_DENSITY,
-            Water::Salt => *SALT_WATER_DENSITY,
+            Water::Fresh => kg_per_m3(997.0474),
+            Water::Salt => kg_per_m3(1023.6),
         }
     }
 
@@ -44,18 +55,20 @@ impl Water {
 
 #[cfg(test)]
 mod test_helpers {
-    use dimensioned::Abs;
-    use dimensioned::Dimensioned;
+    // use uom::si::Quantity;
+    use uom::si::Unit;
     use std::fmt::Debug;
-    use std::ops::Sub;
 
     pub fn assert_approx<T>(lhs: &T, rhs: &T, tol: &T)
     where
-        T: Dimensioned + Sub<Output = T> + Abs + PartialOrd + Debug + Copy,
+        T: Unit + Debug + Copy,
     {
-        let diff = (*lhs - *rhs).abs();
+        let lhs_val = lhs.get::<T::Unit>();
+        let rhs_val = rhs.get::<T::Unit>();
+        let tol_val = tol.get::<T::Unit>();
+        let diff = (lhs_val - rhs_val).abs();
         assert!(
-            diff <= *tol,
+            diff <= tol_val,
             "assertion failed: `(left ≈ right)`\n  left: `{:?}`,\n right: `{:?}`",
             lhs,
             rhs
@@ -64,15 +77,7 @@ mod test_helpers {
 }
 
 #[test]
-fn test_density() {
-    use dimensioned::si::{KG, M3};
-    assert_eq!(Water::Fresh.density(), 997.0474 * KG / M3);
-    assert_eq!(Water::Salt.density(), 1023.6 * KG / M3);
-}
-
-#[test]
 fn test_pressure_and_depth() {
-    use dimensioned::si::{BAR, M};
     use test_helpers::assert_approx;
 
     struct Expectation {
@@ -89,28 +94,28 @@ fn test_pressure_and_depth() {
     let expectations = vec![
         Expectation {
             water: Water::Fresh,
-            depth: 0.0 * M,
-            rel_pressure: 0.0 * BAR,
+            depth: meter(0.0),
+            rel_pressure: bar(0.0),
         },
         Expectation {
             water: Water::Salt,
-            depth: 0.0 * M,
-            rel_pressure: 0.0 * BAR,
+            depth: meter(0.0),
+            rel_pressure: bar(0.0),
         },
         Expectation {
             water: Water::Fresh,
-            depth: 100.0 * M,
-            rel_pressure: 9.777 * BAR,
+            depth: meter(100.0),
+            rel_pressure: bar(9.777),
         },
         Expectation {
             water: Water::Salt,
-            depth: 100.0 * M,
-            rel_pressure: 10.038 * BAR,
+            depth: meter(100.0),
+            rel_pressure: bar(10.038),
         },
     ];
 
-    let depth_tol: Depth = 1e-2 * M;
-    let pressure_tol: Pressure = 1e-3 * BAR;
+    let depth_tol: Depth = meter(1e-2);
+    let pressure_tol: Pressure = bar(1e-3);
 
     for expectation in expectations {
         let water: &Water = &expectation.water;
