@@ -1,13 +1,15 @@
-// Linear interpolation
-//
-// # Arguments
-// * `xs` - The x values of the data points
-// * `ys` - The y values of the data points
-// * `x` - The x value to interpolate
-//
-// # Returns
-// * `Some(f64)` - The interpolated y value if the x value is in the range of xs
-// * `None` - The x value is out of the range of xs
+/// Utility functions
+
+/// Linear interpolation
+///
+/// # Arguments
+/// * `xs` - The x values of the data points
+/// * `ys` - The y values of the data points
+/// * `x` - The x value to interpolate
+///
+/// # Returns
+/// * `Some(f64)` - The interpolated y value if the x value is in the range of xs
+/// * `None` - The x value is out of the range of xs
 pub fn interpolate(xs: &[f64], ys: &[f64], x: f64) -> Option<f64> {
     if xs.len() != ys.len() || xs.is_empty() {
         return None; // Vectors must be of the same non-zero length

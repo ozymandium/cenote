@@ -53,25 +53,10 @@ impl Water {
     }
 }
 
-#[macro_export]
-macro_rules! assert_approx {
-    ($lhs:expr, $rhs:expr, $tol:expr) => {
-        {
-            let diff = (*$lhs - *$rhs).abs();
-            assert!(
-                diff <= *$tol,
-                "assertion failed: `(left ≈ right)`\n  left: `{:?}`,\n  right: `{:?}`,\n  tol: `{:?}`",
-                $lhs,
-                $rhs,
-                $tol
-            );
-        }
-    };
-}
-
 #[test]
 fn test_pressure_and_depth() {
-
+    use crate::assert_approx;
+    
     struct Expectation {
         water: Water,
         depth: Depth,
