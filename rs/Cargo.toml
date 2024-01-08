@@ -4,5 +4,8 @@ version = "0.0.1"
 edition = "2021"
 
 [dependencies]
-uom = "0.35.0"
+# uom = "0.35.0"
+# my own version of uom with pressure rate support
+# TODO: create pr for this into primary uom repo
+uom = { git = "https://github.com/ozymandium/uom.git" }
 lazy_static = "1.4.0"
