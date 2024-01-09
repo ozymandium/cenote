@@ -1,4 +1,4 @@
-use crate::units::{atm, liter, psi, Pressure, Volume, VolumeRate, PressureRate};
+use crate::units::{atm, liter, psi, Pressure, PressureRate, Volume, VolumeRate};
 
 pub enum TankKind {
     Al40,
@@ -145,6 +145,19 @@ fn test_spec_scr_sac_exact() {
     let scr: VolumeRate = spec.service_volume() / min(1.0);
     assert_eq!(spec.scr_from_sac(sac), scr);
     assert_eq!(spec.sac_from_scr(scr), sac);
+}
+
+#[test]
+fn test_spec_scr_sac_round_trip() {
+    use crate::assert_approx_val;
+    use crate::units::{cuft, cuft_per_min, psi_per_min};
+    let spec = TankSpec::new(TankKind::Al80);
+    let sac: PressureRate = psi_per_min(100.0).into();
+    assert_approx_val!(
+        spec.sac_from_scr(spec.scr_from_sac(sac)),
+        sac,
+        psi_per_min(1E-6)
+    );
 }
 
 #[test]

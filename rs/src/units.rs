@@ -1,5 +1,6 @@
 pub use uom::si::f64::{
-    Time, Acceleration, Length as Depth, MassDensity as Density, Pressure, PressureRate, Volume, VolumeRate,
+    Acceleration, Length as Depth, MassDensity as Density, Pressure, PressureRate, Time, Volume,
+    VolumeRate,
 };
 
 pub type Min = uom::si::time::minute;
