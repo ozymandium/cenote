@@ -1,5 +1,5 @@
 use crate::constants::{GRAVITY, SURFACE_PRESSURE};
-use crate::units::{kg_per_m3, Density, Depth, Pressure};
+use crate::units::{kg_per_m3, Density, Depth, Pressure, VolumeRate};
 
 /// The type of water
 pub enum Water {
@@ -50,6 +50,13 @@ impl Water {
     /// Depth from the surface at a given absolute pressure.
     pub fn depth_at_abs_pressure(&self, pressure: Pressure) -> Depth {
         self.depth_at_rel_pressure(pressure - (*SURFACE_PRESSURE))
+    }
+
+    /// Converts the surface consumption rate to a consumption rate at a given depth.
+    pub fn scr_at_depth(&self, scr: VolumeRate, depth: Depth) -> VolumeRate {
+        let abs_pressure = self.abs_pressure_at_depth(depth);
+        let scaling = abs_pressure / (*SURFACE_PRESSURE);
+        scr * scaling
     }
 }
 
@@ -116,6 +123,64 @@ fn test_pressure_and_depth() {
             &water.depth_at_abs_pressure(expectation.abs_pressure()),
             &expectation.depth,
             &depth_tol
+        );
+    }
+}
+
+#[test]
+fn test_scr_at_depth() {
+    use crate::assert_approx_ref;
+    use crate::units::{cuft_per_min, meter};
+
+    let SCR: VolumeRate = cuft_per_min(0.75);
+    // 1% error (due to depth/pressure approximation below, not in the code)
+    let SCR_TOL: VolumeRate = SCR * 1e-2;
+
+    struct Expectation {
+        water: Water,
+        depth: Depth,
+        scr: VolumeRate,
+    }
+
+    let expectations = vec![
+        Expectation {
+            water: Water::Fresh,
+            depth: meter(0.0),
+            scr: SCR,
+        },
+        Expectation {
+            water: Water::Salt,
+            depth: meter(0.0),
+            scr: SCR,
+        },
+        Expectation {
+            water: Water::Fresh,
+            depth: meter(10.4),
+            scr: SCR * 2.0,
+        },
+        Expectation {
+            water: Water::Salt,
+            depth: meter(10.1),
+            scr: SCR * 2.0,
+        },
+        Expectation {
+            water: Water::Fresh,
+            depth: meter(20.8),
+            scr: SCR * 3.0,
+        },
+        Expectation {
+            water: Water::Salt,
+            depth: meter(20.2),
+            scr: SCR * 3.0,
+        },
+    ];
+
+    for expectation in expectations {
+        let water: &Water = &expectation.water;
+        assert_approx_ref!(
+            &water.scr_at_depth(SCR, expectation.depth),
+            &expectation.scr,
+            &SCR_TOL
         );
     }
 }
