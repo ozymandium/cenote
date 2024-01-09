@@ -1,7 +1,8 @@
 pub use uom::si::f64::{
-    Acceleration, Length as Depth, MassDensity as Density, Pressure, PressureRate, Volume, VolumeRate,
+    Time, Acceleration, Length as Depth, MassDensity as Density, Pressure, PressureRate, Volume, VolumeRate,
 };
 
+pub type Min = uom::si::time::minute;
 pub type MPerS2 = uom::si::acceleration::meter_per_second_squared;
 pub type KgPerM3 = uom::si::mass_density::kilogram_per_cubic_meter;
 pub type Atm = uom::si::pressure::atmosphere;
@@ -14,6 +15,9 @@ pub type Liter = uom::si::volume::liter;
 pub type CuFt = uom::si::volume::cubic_foot;
 pub type CuFtPerMin = uom::si::volume_rate::cubic_foot_per_minute;
 
+pub fn min(value: f64) -> Time {
+    Time::new::<Min>(value)
+}
 pub fn m_per_s2(value: f64) -> Acceleration {
     Acceleration::new::<MPerS2>(value)
 }

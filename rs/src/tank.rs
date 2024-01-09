@@ -1,4 +1,4 @@
-use crate::units::{atm, liter, psi, Pressure, Volume};
+use crate::units::{atm, liter, psi, Pressure, Volume, VolumeRate, PressureRate};
 
 pub enum TankKind {
     Al40,
@@ -56,6 +56,14 @@ impl TankSpec {
     /// The volume of gas in the tank at the service pressure.
     fn service_volume(&self) -> Volume {
         self.volume_at_pressure(self.service_pressure)
+    }
+
+    fn scr_from_sac(&self, sac: PressureRate) -> VolumeRate {
+        sac * self.service_volume() / self.service_pressure
+    }
+
+    fn sac_from_scr(&self, scr: VolumeRate) -> PressureRate {
+        (scr * self.service_pressure / self.service_volume()).into()
     }
 }
 
@@ -127,6 +135,16 @@ fn test_spec_volume_pressure_round_trip() {
     assert_eq!(spec.pressure_at_volume(liter(0.0)), psi(0.0));
     assert_approx_val!(spec.volume_at_pressure(psi(3000.0)), cuft(77.4), cuft(0.1));
     assert_approx_val!(spec.pressure_at_volume(cuft(77.4)), psi(3000.0), psi(1.0));
+}
+
+#[test]
+fn test_spec_scr_sac_exact() {
+    use crate::units::min;
+    let spec = TankSpec::new(TankKind::Al80);
+    let sac: PressureRate = (spec.service_pressure / min(1.0)).into();
+    let scr: VolumeRate = spec.service_volume() / min(1.0);
+    assert_eq!(spec.scr_from_sac(sac), scr);
+    assert_eq!(spec.sac_from_scr(scr), sac);
 }
 
 #[test]
