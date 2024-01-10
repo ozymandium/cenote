@@ -11,6 +11,7 @@ pub struct PartialPressure {
 }
 
 /// A gas mixture. The sum of fo2 and fn2 must be 1.0. Helium is not currently supported.
+#[derive(Debug)]
 pub struct Mix {
     /// The fraction of oxygen in the mix (0.0 - 1.0)
     pub fo2: f64,
@@ -48,14 +49,23 @@ lazy_static! {
 }
 
 #[test]
-fn test_mix() {
+fn test_mix_new() {
+    assert_eq!(
+        Mix::new(1.001).unwrap_err(),
+        "Mix::new: fo2 must be 0. < fo2 <= 1.0"
+    );
+    assert_eq!(
+        Mix::new(0.0).unwrap_err(),
+        "Mix::new: fo2 must be 0. < fo2 <= 1.0"
+    );
+}
+
+#[test]
+fn test_pp() {
     use crate::assert_approx_val;
     use crate::units::{atm, meter};
 
-    let mix = Mix::new(0.1).unwrap();
-    let depth = meter(30.3);
-    let water = Water::Salt;
-    let pp = mix.pp(depth, water);
-    assert_approx_val!(pp.o2, atm(0.4), atm(2e-3));
-    assert_approx_val!(pp.n2, atm(3.6), atm(2e-3));
+    let pp = &AIR.pp(meter(30.3), Water::Salt);
+    assert_approx_val!(pp.o2, atm(0.83784), atm(2e-3));
+    assert_approx_val!(pp.n2, atm(3.16216), atm(2e-3));
 }
