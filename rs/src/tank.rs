@@ -150,7 +150,7 @@ fn test_spec_scr_sac_exact() {
 #[test]
 fn test_spec_scr_sac_round_trip() {
     use crate::assert_approx_val;
-    use crate::units::{cuft, cuft_per_min, psi_per_min};
+    use crate::units::psi_per_min;
     let spec = TankSpec::new(TankKind::Al80);
     let sac: PressureRate = psi_per_min(100.0).into();
     assert_approx_val!(

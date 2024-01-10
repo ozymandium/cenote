@@ -132,9 +132,9 @@ fn test_scr_at_depth() {
     use crate::assert_approx_ref;
     use crate::units::{cuft_per_min, meter};
 
-    let SCR: VolumeRate = cuft_per_min(0.75);
+    let scr: VolumeRate = cuft_per_min(0.75);
     // 1% error (due to depth/pressure approximation below, not in the code)
-    let SCR_TOL: VolumeRate = SCR * 1e-2;
+    let scr_tol: VolumeRate = scr * 1e-2;
 
     struct Expectation {
         water: Water,
@@ -146,41 +146,41 @@ fn test_scr_at_depth() {
         Expectation {
             water: Water::Fresh,
             depth: meter(0.0),
-            scr: SCR,
+            scr: scr,
         },
         Expectation {
             water: Water::Salt,
             depth: meter(0.0),
-            scr: SCR,
+            scr: scr,
         },
         Expectation {
             water: Water::Fresh,
             depth: meter(10.4),
-            scr: SCR * 2.0,
+            scr: scr * 2.0,
         },
         Expectation {
             water: Water::Salt,
             depth: meter(10.1),
-            scr: SCR * 2.0,
+            scr: scr * 2.0,
         },
         Expectation {
             water: Water::Fresh,
             depth: meter(20.8),
-            scr: SCR * 3.0,
+            scr: scr * 3.0,
         },
         Expectation {
             water: Water::Salt,
             depth: meter(20.2),
-            scr: SCR * 3.0,
+            scr: scr * 3.0,
         },
     ];
 
     for expectation in expectations {
         let water: &Water = &expectation.water;
         assert_approx_ref!(
-            &water.scr_at_depth(SCR, expectation.depth),
+            &water.scr_at_depth(scr, expectation.depth),
             &expectation.scr,
-            &SCR_TOL
+            &scr_tol
         );
     }
 }
