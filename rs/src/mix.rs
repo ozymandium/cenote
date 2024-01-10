@@ -1,6 +1,6 @@
-use crate::units::{Pressure, Depth};
-use crate::water::Water;
 use crate::constants::SURFACE_PRESSURE;
+use crate::units::{Depth, Pressure};
+use crate::water::Water;
 use lazy_static::lazy_static;
 
 pub struct PartialPressure {
@@ -22,9 +22,12 @@ impl Mix {
     pub fn new(fo2: f64) -> Result<Self, &'static str> {
         // o2 must be 0. < fo2 <= 1.0
         if fo2 <= 0.0 || 1.0 < fo2 {
-            return Err("Mix::new: fo2 must be 0. < fo2 <= 1.0")
+            return Err("Mix::new: fo2 must be 0. < fo2 <= 1.0");
         }
-        Ok(Mix { fo2, fn2: 1.0 - fo2 })
+        Ok(Mix {
+            fo2,
+            fn2: 1.0 - fo2,
+        })
     }
 
     pub fn pp(&self, depth: Depth, water: Water) -> PartialPressure {
