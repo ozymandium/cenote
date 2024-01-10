@@ -4,4 +4,4 @@ pub mod tank;
 pub mod units;
 pub mod utils;
 pub mod water;
-// pub mod mix;
+pub mod mix;
