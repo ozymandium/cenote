@@ -1,5 +1,5 @@
 use crate::constants::WATER_VAPOR_PRESSURE;
-use crate::units::{bar, min, Bar, Min, Pressure, Time};
+use crate::units::{bar, Bar, Min, Pressure, Time};
 
 #[derive(Debug)]
 pub struct Params {
@@ -194,7 +194,6 @@ fn test_compartment_new_invalid() {
 
 #[test]
 fn test_compartment_pressure_change() {
-    use crate::assert_approx_val;
     let mut compartment = Compartment::new(min(3.0), bar(3.0)).unwrap();
 
     // stays the same when ambient pressure is the same, accounting for water vapor pressure
@@ -215,7 +214,6 @@ fn test_compartment_pressure_change() {
 
 #[test]
 fn test_compartment_constant_pressure_update() {
-    use crate::assert_approx_val;
     let mut compartment = Compartment::new(min(3.0), bar(3.0)).unwrap();
     // TODO: test that the compartment pressure is updated correctly
 }
@@ -236,7 +234,6 @@ fn test_compartment_variable_pressure_update() {
 
 #[test]
 fn test_compartment_gradient_at() {
-    use crate::assert_approx_val;
     let mut compartment = Compartment::new(min(3.0), bar(3.0)).unwrap();
     assert_eq!(compartment.gradient_at(bar(3.0)).unwrap(), 0.0);
     assert_eq!(compartment.gradient_at(compartment.m0).unwrap(), 1.0);
