@@ -1,6 +1,6 @@
-use lazy_static::lazy_static;
 use crate::deco::buhlmann::compartment::Compartment;
 use crate::units::{min, Pressure, Time};
+use lazy_static::lazy_static;
 
 /// A specific set of compartment half lives
 ///
@@ -41,7 +41,7 @@ impl Model {
     pub fn compartments_at(&self, pressure: Pressure) -> Vec<Compartment> {
         let half_lives = self.half_lives();
         let mut compartments = Vec::with_capacity(half_lives.len());
-        for (i, half_life) in half_lives.iter().enumerate() {
+        for half_life in half_lives.iter() {
             compartments.push(Compartment::new(*half_life, pressure).unwrap());
         }
         compartments
@@ -72,7 +72,6 @@ lazy_static! {
 
 #[test]
 fn test_zhl6a_compartments_at() {
-    use crate::assert_approx_ref;
     use crate::units::bar;
 
     let model = Model::Zhl16a;

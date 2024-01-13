@@ -1,4 +1,8 @@
+#[cfg(test)]
+use crate::assert_approx_val;
 use crate::constants::WATER_VAPOR_PRESSURE;
+#[cfg(test)]
+use crate::units::min;
 use crate::units::{bar, Bar, Min, Pressure, Time};
 
 #[derive(Debug)]
@@ -26,29 +30,6 @@ impl Params {
     }
 }
 
-/// Calculate the M0 value for a compartment given the compartment pressure. M0 is the lowest
-/// tolerable ambient gas pressure to which this compartment can be exposed based on the current
-/// value of the compartment gas pressure. M0 corresponds to a gradient of 1.0.
-///
-/// M value plot has ambient pressure on x axis and compartment pressure on y axis
-/// M value forms a line with slope and y intercept forms the tolerable compartment pressure at
-/// the surface.
-///
-/// Ptol = (Pcmp - a) * b
-/// Ptol = 1/b * Pcmp - a/b
-/// slope = 1/b
-/// y-intercept: a/b
-///
-/// # Arguments
-/// * `params` - The compartment parameters
-/// * `pressure` - The compartment pressure
-///
-/// # Returns
-/// The M0 value
-fn calc_m0(params: &Params, pressure: Pressure) -> Pressure {
-    (pressure - params.a) * params.b
-}
-
 /// A single tissue compartment in the Buhlmann decompression model.
 #[derive(Debug)]
 pub struct Compartment {
@@ -74,9 +55,28 @@ impl Compartment {
     }
 
     /// Update the compartment internal pressure and M0 value.
+    /// Calculate the M0 value for a compartment given the compartment pressure. M0 is the lowest
+    /// tolerable ambient gas pressure to which this compartment can be exposed based on the current
+    /// value of the compartment gas pressure. M0 corresponds to a gradient of 1.0.
+    ///
+    /// M value plot has ambient pressure on x axis and compartment pressure on y axis
+    /// M value forms a line with slope and y intercept forms the tolerable compartment pressure at
+    /// the surface.
+    ///
+    /// Ptol = (Pcmp - a) * b
+    /// Ptol = 1/b * Pcmp - a/b
+    /// slope = 1/b
+    /// y-intercept: a/b
+    ///
+    /// # Arguments
+    /// * `params` - The compartment parameters
+    /// * `pressure` - The compartment pressure
+    ///
+    /// # Returns
+    /// The M0 value
     fn set(&mut self, pressure: Pressure) {
         self.pressure = pressure;
-        self.m0 = calc_m0(&self.params, pressure);
+        self.m0 = (pressure - self.params.a) * self.params.b;
     }
 
     /// Calculate the pressure change for the compartment given the ambient pressure and the
@@ -145,9 +145,9 @@ impl Compartment {
     }
 }
 
+#[cfg(test)]
 #[test]
 fn test_params_new_valid() {
-    use crate::assert_approx_val;
     let params = Params::new(min(3.0)).unwrap();
     assert_eq!(params.hl.get::<Min>(), 3.0);
     assert_approx_val!(params.a.get::<Bar>(), 1.3867225487012695, 1e-15);
@@ -163,19 +163,7 @@ fn test_params_new_invalid() {
 }
 
 #[test]
-fn test_calc_m0() {
-    use crate::assert_approx_val;
-    let params = Params::new(min(3.0)).unwrap();
-    assert_approx_val!(
-        calc_m0(&params, bar(3.0)),
-        bar(0.6899176677703485),
-        bar(1e-15)
-    );
-}
-
-#[test]
 fn test_compartment_new_valid() {
-    use crate::assert_approx_val;
     let compartment = Compartment::new(min(3.0), bar(3.0)).unwrap();
     assert_eq!(compartment.params.hl.get::<Min>(), 3.0);
     assert_approx_val!(compartment.params.a.get::<Bar>(), 1.3867225487012695, 1e-15);
@@ -193,9 +181,14 @@ fn test_compartment_new_invalid() {
 }
 
 #[test]
-fn test_compartment_pressure_change() {
-    let mut compartment = Compartment::new(min(3.0), bar(3.0)).unwrap();
+fn test_compartment_set() {
+    let compartment = Compartment::new(min(3.0), bar(3.0)).unwrap();
+    assert_approx_val!(compartment.m0, bar(0.6899176677703485), bar(1e-15));
+}
 
+#[test]
+fn test_compartment_pressure_change() {
+    let compartment = Compartment::new(min(3.0), bar(3.0)).unwrap();
     // stays the same when ambient pressure is the same, accounting for water vapor pressure
     assert_eq!(
         compartment
@@ -203,7 +196,6 @@ fn test_compartment_pressure_change() {
             .get::<Bar>(),
         0.0
     );
-
     assert_eq!(
         compartment
             .pressure_change(bar(4.0) + *WATER_VAPOR_PRESSURE, min(6.0))
@@ -214,13 +206,12 @@ fn test_compartment_pressure_change() {
 
 #[test]
 fn test_compartment_constant_pressure_update() {
-    let mut compartment = Compartment::new(min(3.0), bar(3.0)).unwrap();
+    // let mut compartment = Compartment::new(min(3.0), bar(3.0)).unwrap();
     // TODO: test that the compartment pressure is updated correctly
 }
 
 #[test]
 fn test_compartment_variable_pressure_update() {
-    use crate::assert_approx_val;
     let mut compartment = Compartment::new(min(3.0), bar(3.0)).unwrap();
     // since the update is already tested by test_constant_pressure_update, just make sure that
     // the compartment pressure is updated to the mean ambient pressure
@@ -234,7 +225,7 @@ fn test_compartment_variable_pressure_update() {
 
 #[test]
 fn test_compartment_gradient_at() {
-    let mut compartment = Compartment::new(min(3.0), bar(3.0)).unwrap();
+    let compartment = Compartment::new(min(3.0), bar(3.0)).unwrap();
     assert_eq!(compartment.gradient_at(bar(3.0)).unwrap(), 0.0);
     assert_eq!(compartment.gradient_at(compartment.m0).unwrap(), 1.0);
     assert_eq!(
