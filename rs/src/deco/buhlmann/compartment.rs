@@ -2,13 +2,13 @@ use crate::constants::WATER_VAPOR_PRESSURE;
 use crate::units::{bar, min, Bar, Min, Pressure, Time};
 
 #[derive(Debug)]
-struct Params {
+pub struct Params {
     /// Half life of the compartment
-    hl: Time,
+    pub hl: Time,
     /// Coefficient `a` is the y-intercept of the M-value line
-    a: Pressure,
+    pub a: Pressure,
     /// Coefficient `b` is the reciprocal of the slope of the M-value line
-    b: f64,
+    pub b: f64,
 }
 
 impl Params {
@@ -49,15 +49,16 @@ fn calc_m0(params: &Params, pressure: Pressure) -> Pressure {
     (pressure - params.a) * params.b
 }
 
+/// A single tissue compartment in the Buhlmann decompression model.
 #[derive(Debug)]
 pub struct Compartment {
-    params: Params,
+    pub params: Params,
     /// The current pressure of the compartment
-    pressure: Pressure,
+    pub pressure: Pressure,
     /// The Buhlmann M0 value for the compartment. This is the lowest tolerable ambient gas pressure
     /// to which this compartment can be exposed bases on the current value of the compartment
     /// gas pressure stored in `pressure`.
-    m0: Pressure,
+    pub m0: Pressure,
 }
 
 impl Compartment {
