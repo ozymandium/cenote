@@ -134,7 +134,7 @@ impl Compartment {
     /// # Returns
     /// The gradient factor. Maybe be negative.
     pub fn gradient_at(&self, ambient_pressure: Pressure) -> Result<f64, &'static str> {
-        if self.pressure == ambient_pressure {
+        if self.pressure == self.m0 {
             return Err("deco::buhlmann::compartment::gradient_at: compartment pressure is equal to ambient pressure");
         }
         Ok(
@@ -231,4 +231,18 @@ fn test_compartment_variable_pressure_update() {
         min(100.0),
     );
     assert_approx_val!(compartment.pressure, bar(3.0), bar(1e-15));
+}
+
+#[test]
+fn test_compartment_gradient_at() {
+    use crate::assert_approx_val;
+    let mut compartment = Compartment::new(min(3.0), bar(3.0)).unwrap();
+    assert_eq!(compartment.gradient_at(bar(3.0)).unwrap(), 0.0);
+    assert_eq!(compartment.gradient_at(compartment.m0).unwrap(), 1.0);
+    assert_eq!(
+        compartment
+            .gradient_at(compartment.pressure - (compartment.pressure - compartment.m0) / 2.0)
+            .unwrap(),
+        0.5
+    );
 }
