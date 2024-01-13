@@ -3,7 +3,7 @@ use crate::units::{min, Pressure, Time};
 
 /// A specific set of compartment half lives
 ///
-/// https://www.shearwater.com/wp-content/uploads/2019/05/understanding_m-values.pdf
+/// <https://www.shearwater.com/wp-content/uploads/2019/05/understanding_m-values.pdf>
 ///
 /// TODO:
 /// * add a version for each fastest compartment for testing against various other implementations
@@ -64,7 +64,7 @@ impl Model {
 #[test]
 fn test_zhl6a_compartments_at() {
     use crate::assert_approx_ref;
-    use crate::units::{bar, psi};
+    use crate::units::bar;
 
     let model = Model::Zhl16a;
     let compartments = model.compartments_at(bar(1.0));
