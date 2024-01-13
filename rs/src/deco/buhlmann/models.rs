@@ -1,3 +1,4 @@
+use lazy_static::lazy_static;
 use crate::deco::buhlmann::compartment::Compartment;
 use crate::units::{min, Pressure, Time};
 
@@ -21,27 +22,12 @@ pub enum Model {
 
 impl Model {
     /// Get the half lives for the model
-    pub fn half_lives(&self) -> Vec<Time> {
+    ///
+    /// # Returns
+    /// A reference to the vector of half lives for the model
+    pub fn half_lives(&self) -> &'static Vec<Time> {
         match self {
-            Model::Zhl16a => vec![
-                min(4.0),
-                min(5.0),
-                min(8.0),
-                min(12.5),
-                min(18.5),
-                min(27.0),
-                min(38.3),
-                min(54.3),
-                min(77.0),
-                min(109.0),
-                min(146.0),
-                min(187.0),
-                min(239.0),
-                min(305.0),
-                min(390.0),
-                min(498.0),
-                min(635.0),
-            ],
+            Model::Zhl16a => &ZHL16A_HALF_LIVES,
         }
     }
 
@@ -53,12 +39,35 @@ impl Model {
     /// # Returns
     /// A vector of compartments initialized at the given pressure
     pub fn compartments_at(&self, pressure: Pressure) -> Vec<Compartment> {
-        let mut compartments = Vec::with_capacity(self.half_lives().len());
-        for (i, half_life) in self.half_lives().iter().enumerate() {
+        let half_lives = self.half_lives();
+        let mut compartments = Vec::with_capacity(half_lives.len());
+        for (i, half_life) in half_lives.iter().enumerate() {
             compartments.push(Compartment::new(*half_life, pressure).unwrap());
         }
         compartments
     }
+}
+
+lazy_static! {
+    pub static ref ZHL16A_HALF_LIVES: Vec<Time> = vec![
+        min(4.0),
+        min(5.0),
+        min(8.0),
+        min(12.5),
+        min(18.5),
+        min(27.0),
+        min(38.3),
+        min(54.3),
+        min(77.0),
+        min(109.0),
+        min(146.0),
+        min(187.0),
+        min(239.0),
+        min(305.0),
+        min(390.0),
+        min(498.0),
+        min(635.0),
+    ];
 }
 
 #[test]

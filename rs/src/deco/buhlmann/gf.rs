@@ -1,6 +1,8 @@
 /// Gradient Factors
 pub struct Gf {
+    /// The gradient factor to use for computing the first stop
     pub lo: f64,
+    /// The gradient factor to have once arriving at the surface
     pub hi: f64,
 }
 

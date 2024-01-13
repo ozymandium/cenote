@@ -3,7 +3,14 @@ use crate::units::{kg_per_m3, Density, Depth, Pressure, VolumeRate};
 
 /// The type of water
 pub enum Water {
+    /// water density varies with temperature, being more dense at lower temperatures. pure
+    /// water at 0C is 1000 kg/m3. pick a value of pure water at 25C, since contaminants
+    /// generally decrease the density, and this will offset changes due to colder water.
+    /// <https://en.wikipedia.org/wiki/Properties_of_water>
     Fresh,
+    /// Deep salt water has higher density (1050 kg/m3) than surface water, which varies from
+    /// 1020-1029 kg/m3. Pick a median value of surface seawater at 25C.
+    /// <https://en.wikipedia.org/wiki/Seawater>
     Salt,
 }
 
@@ -14,17 +21,6 @@ impl Water {
     /// Water Density
     ///
     /// <https://bluerobotics.com/learn/pressure-depth-calculator/#hydrostatic-water-pressure-formula>
-    ///
-    /// # Fresh water density
-    /// water density varies with temperature, being more dense at lower temperatures. pure
-    /// water at 0C is 1000 kg/m3. pick a value of pure water at 25C, since contaminants
-    /// generally decrease the density, and this will offset changes due to colder water.
-    /// <https://en.wikipedia.org/wiki/Properties_of_water>
-    ///
-    /// # Salt water density
-    /// Deep salt water has higher density (1050 kg/m3) than surface water, which varies from
-    /// 1020-1029 kg/m3. Pick a median value of surface seawater at 25C.
-    /// <https://en.wikipedia.org/wiki/Seawater>
     pub fn density(&self) -> Density {
         match *self {
             Water::Fresh => kg_per_m3(997.0474),
@@ -33,6 +29,12 @@ impl Water {
     }
 
     /// Pressure from the water at a given depth, not including surface pressure.
+    ///
+    /// # Arguments
+    /// * `depth` - The depth below the surface
+    ///
+    /// # Returns
+    /// The pressure from the water at the given depth
     pub fn rel_pressure_at_depth(&self, depth: Depth) -> Pressure {
         self.density() * (*GRAVITY) * depth
     }
