@@ -3,6 +3,7 @@ use crate::units::{Depth, Pressure};
 use crate::water::Water;
 use lazy_static::lazy_static;
 
+#[derive(Clone)]
 pub struct PartialPressure {
     /// The partial pressure of oxygen in the mix
     pub o2: Pressure,

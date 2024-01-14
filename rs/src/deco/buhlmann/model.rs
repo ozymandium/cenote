@@ -30,22 +30,6 @@ impl Model {
             Model::Zhl16a => &ZHL16A_HALF_LIVES,
         }
     }
-
-    /// Get the compartments for the model at the given internal pressure
-    ///
-    /// # Arguments
-    /// * `pressure` - The internal pressure at which to initialize the compartments
-    ///
-    /// # Returns
-    /// A vector of compartments initialized at the given pressure
-    pub fn compartments_at(&self, pressure: Pressure) -> Vec<Compartment> {
-        let half_lives = self.half_lives();
-        let mut compartments = Vec::with_capacity(half_lives.len());
-        for half_life in half_lives.iter() {
-            compartments.push(Compartment::new(*half_life, pressure).unwrap());
-        }
-        compartments
-    }
 }
 
 lazy_static! {
@@ -68,17 +52,4 @@ lazy_static! {
         min(498.0),
         min(635.0),
     ];
-}
-
-#[test]
-fn test_zhl6a_compartments_at() {
-    use crate::units::bar;
-
-    let model = Model::Zhl16a;
-    let compartments = model.compartments_at(bar(1.0));
-    assert_eq!(compartments.len(), 17);
-    for (i, compartment) in compartments.iter().enumerate() {
-        assert_eq!(compartment.params.hl, model.half_lives()[i]);
-        assert_eq!(compartment.pressure, bar(1.0));
-    }
 }
