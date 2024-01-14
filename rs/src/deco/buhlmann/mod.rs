@@ -30,9 +30,12 @@ impl Compartments {
     }
 }
 
-// pub struct Buhlmann {
-//     compartments: Compartments,
-// }
+pub struct Buhlmann {
+    /// The compartments for each gas for each half life.
+    compartments: Compartments,
+    /// The current ambient pressure.
+    ambient_pressure: Pressure,
+}
 
 // impl Deco for Buhlmann {
 //     /// Create a new Buhlmann decompression model. Choose a default model.
@@ -71,16 +74,16 @@ impl Compartments {
 
 #[test]
 fn test_zhl6a_compartments_at() {
-    use crate::mix::SURFACE_AIR_PP;
+    use crate::mix::SURFACE_AIR;
     use crate::units::bar;
 
     let model = Model::Zhl16a;
     // copy surface air partial pressure
-    let partial_pressure: &PartialPressure = &SURFACE_AIR_PP;
-    let compartments = Compartments::new(&model, partial_pressure);
+    let breath = &SURFACE_AIR;
+    let compartments = Compartments::new(&model, &breath.partial_pressure);
     assert_eq!(compartments.n2.len(), 17);
     for (i, compartment) in compartments.n2.iter().enumerate() {
         assert_eq!(compartment.params.hl, model.half_lives()[i]);
-        assert_eq!(compartment.pressure, partial_pressure.n2);
+        assert_eq!(compartment.pressure, breath.partial_pressure.n2);
     }
 }

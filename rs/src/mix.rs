@@ -12,7 +12,7 @@ pub struct PartialPressure {
 }
 
 /// A gas mixture. The sum of fo2 and fn2 must be 1.0. Helium is not currently supported.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Mix {
     /// The fraction of oxygen in the mix (0.0 - 1.0)
     pub fo2: f64,
@@ -31,26 +31,45 @@ impl Mix {
             fn2: 1.0 - fo2,
         })
     }
+}
 
-    pub fn pp(&self, depth: Depth, water: Water) -> PartialPressure {
-        let abs_pressure = water.abs_pressure_at_depth(depth);
-        PartialPressure {
-            o2: self.fo2 * abs_pressure,
-            n2: self.fn2 * abs_pressure,
+/// The current state of the diver's breathing gas
+pub struct Breath {
+    /// The absolute ambient pressure
+    pub ambient_pressure: Pressure,
+    /// The current breathing gas mixture
+    pub mix: Mix,
+    /// The partial pressure of the breathing gas
+    pub partial_pressure: PartialPressure,
+}
+
+impl Breath {
+    /// Create a new Breath
+    ///
+    /// # Arguments
+    /// * `ambient_pressure` - The absolute ambient pressure
+    /// * `mix` - The current breathing gas mixture
+    fn new(ambient_pressure: &Pressure, mix: &Mix) -> Self {
+        Breath {
+            /// FIXME: should we clone the ambient pressure?
+            ambient_pressure: *ambient_pressure,
+            /// FIXME: does this have to be cloned?
+            mix: (*mix).clone(),
+            partial_pressure: PartialPressure {
+                o2: mix.fo2 * (*ambient_pressure),
+                n2: mix.fn2 * (*ambient_pressure),
+            },
         }
     }
 }
 
 lazy_static! {
     pub static ref AIR: Mix = Mix::new(0.20946).expect("Failed to create AIR Mix");
-    pub static ref SURFACE_AIR_PP: PartialPressure = PartialPressure {
-        o2: (*SURFACE_PRESSURE) * (*AIR).fo2,
-        n2: (*SURFACE_PRESSURE) * (*AIR).fn2,
-    };
+    pub static ref SURFACE_AIR: Breath = Breath::new(&SURFACE_PRESSURE, &AIR);
 }
 
 #[test]
-fn test_mix_new() {
+fn test_mix() {
     assert_eq!(
         Mix::new(1.001).unwrap_err(),
         "Mix::new: fo2 must be 0. < fo2 <= 1.0"
@@ -62,11 +81,14 @@ fn test_mix_new() {
 }
 
 #[test]
-fn test_pp() {
-    use crate::assert_approx_val;
-    use crate::units::{atm, meter};
-
-    let pp = &AIR.pp(meter(30.3), Water::Salt);
-    assert_approx_val!(pp.o2, atm(0.83784), atm(2e-3));
-    assert_approx_val!(pp.n2, atm(3.16216), atm(2e-3));
+fn test_breath() {
+    use crate::units::atm;
+    let mix = Mix::new(0.5).expect("Failed to create Mix");
+    let ambient_pressure = atm(1.0);
+    let breath = Breath::new(&ambient_pressure, &mix);
+    assert_eq!(breath.partial_pressure.o2, atm(0.5));
+    assert_eq!(breath.partial_pressure.n2, atm(0.5));
+    assert_eq!(breath.mix.fo2, 0.5);
+    assert_eq!(breath.mix.fn2, 0.5);
+    assert_eq!(breath.ambient_pressure, atm(1.0));
 }
