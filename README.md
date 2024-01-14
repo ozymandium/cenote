@@ -3,10 +3,13 @@ cenote
 
 <img src="resources/icons/cenote.png" width=200/>
 
-Scuba decompression model explorer.
+Scuba decompression model explorer with a focus on gas planning for the special considerations of cave dives.
 
-This is not good, it's probably not even right, so don't use it to plan your dives.
-If you ignore this advice and get yourself bent or killed, that's not my problem.
+This is purely a toy, so don't use it to plan your dives.
+I make no guarantees on the reliability of this software right now.
+Technical diving and diving in overhead environments is dangerous, requiring advanced skills and training.
+DO NOT USE THIS TO PLAN YOUR DIVE.
+If you ignore this advice and get yourself bent or killed, that's your fault.
 
 ## Setup
 
