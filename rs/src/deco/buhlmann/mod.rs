@@ -4,10 +4,10 @@ mod model;
 
 use crate::deco::buhlmann::compartment::Compartment;
 use crate::deco::buhlmann::model::Model;
-use crate::mix::Breath;
-use crate::water::Water;
 use crate::deco::Deco;
+use crate::mix::Breath;
 use crate::units::{Pressure, Time};
+use crate::water::Water;
 
 /// Holds all tissue compartments.
 /// When multiple gases are used, there is one set of compartments for each gas.

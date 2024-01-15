@@ -88,7 +88,7 @@ impl Compartment {
     /// duration of the exposure.
     ///
     /// # Arguments
-    /// * `ambient_pressure` - The absolute ambient pressure during the exposure for the specific 
+    /// * `ambient_pressure` - The absolute ambient pressure during the exposure for the specific
     ///   gas to which this compartment corresponds. `ambient_pressure` here should be the same as
     ///   `partial_pressure` in the `Breath` struct.
     /// * `duration` - The duration of the exposure
