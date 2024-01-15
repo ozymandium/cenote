@@ -54,8 +54,6 @@ impl Compartments {
 pub struct Buhlmann {
     /// The compartments for each gas for each half life.
     compartments: Compartments,
-    /// The maximum ambient pressure that's been experienced.
-    max_ambient_pressure: Pressure,
 }
 
 impl Buhlmann {
@@ -64,7 +62,6 @@ impl Buhlmann {
         let model = Model::Zhl16a;
         Buhlmann {
             compartments: Compartments::new(&model, &breath.partial_pressure),
-            max_ambient_pressure: breath.ambient_pressure,
         }
     }
 }
@@ -169,7 +166,6 @@ fn test_buhlmann_new() {
         assert_eq!(compartment.params.hl, Model::Zhl16a.half_lives()[i]);
         assert_eq!(compartment.pressure, breath.partial_pressure.n2);
     }
-    assert_eq!(buhlmann.max_ambient_pressure, breath.ambient_pressure);
 }
 
 #[test]
