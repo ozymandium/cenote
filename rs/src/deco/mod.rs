@@ -3,14 +3,7 @@ pub mod buhlmann;
 use crate::mix::Breath;
 use crate::units::{Pressure, Time};
 
-pub trait Deco {
-    /// Create a new decompression model.
-    ///
-    /// # Arguments
-    /// * `breath` - The breathing gas at which the model should
-    ///   be initialized, assuming perfect equilibrium
-    fn new(breath: &Breath) -> Self;
-
+pub trait Tissue {
     /// Expose the diver to a constant partial pressure of gas for a given duration.
     ///
     /// # Arguments
@@ -22,10 +15,8 @@ pub trait Deco {
     // /// Assume that the partial pressure changes linearly over the duration.
     // ///
     // /// # Arguments
-    // /// * `breath_start` - The breathing gas at the start
-    // ///   of the exposure
-    // /// * `breath_end` - The breathing gas at the end of
-    // ///   the exposure
+    // /// * `breath_start` - The breathing gas at the start of the exposure
+    // /// * `breath_end` - The breathing gas at the end of the exposure
     // /// * `duration` - The duration of the exposure
     // fn variable_breath_update(
     //     &mut self,
@@ -33,7 +24,9 @@ pub trait Deco {
     //     breath_end: &Breath,
     //     duration: &Time,
     // );
+}
 
+pub trait Deco {
     // /// Get the lowest allowable ambient pressure for the current state of the model.
     // fn ceiling(&self) -> Pressure;
 }
