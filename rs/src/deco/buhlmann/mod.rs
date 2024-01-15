@@ -4,8 +4,8 @@ mod model;
 
 use crate::deco::buhlmann::compartment::Compartment;
 use crate::deco::buhlmann::model::Model;
-use crate::deco::{Deco, Tissue};
-use crate::mix::Breath;
+use crate::deco::Deco;
+use crate::mix::{Breath, PartialPressure};
 use crate::units::{Pressure, Time};
 use crate::water::Water;
 
@@ -21,37 +21,34 @@ impl Compartments {
     ///
     /// # Arguments
     /// * `model` - The decompression model
-    /// * `breath` - The breathing gas
-    fn new(model: &Model, breath: &Breath) -> Self {
+    fn new(model: &Model, partial_pressure: &PartialPressure) -> Self {
         let mut n2 = Vec::with_capacity(model.half_lives().len());
         for half_life in model.half_lives().iter() {
-            n2.push(Compartment::new(*half_life, breath.partial_pressure.n2).unwrap());
+            n2.push(Compartment::new(*half_life, partial_pressure.n2).unwrap());
         }
         Compartments { n2 }
     }
-}
 
-impl Tissue for Compartments {
-    fn constant_breath_update(&mut self, breath: &Breath, duration: &Time) {
+    fn constant_pressure_update(&mut self, partial_pressure: &PartialPressure, duration: &Time) {
         for compartment in self.n2.iter_mut() {
-            compartment.constant_pressure_update(&breath.partial_pressure.n2, duration);
+            compartment.constant_pressure_update(&partial_pressure.n2, duration);
         }
     }
 
-    // fn variable_breath_update(
-    //     &mut self,
-    //     breath_start: &Breath,
-    //     breath_end: &Breath,
-    //     duration: &Time,
-    // ) {
-    //     for compartment in self.compartments.n2.iter_mut() {
-    //         compartment.variable_pressure_update(
-    //             breath_start.partial_pressure.n2,
-    //             breath_end.partial_pressure.n2,
-    //             duration,
-    //         );
-    //     }
-    // }
+    fn variable_pressure_update(
+        &mut self,
+        partial_pressure_start: &PartialPressure,
+        partial_pressure_end: &PartialPressure,
+        duration: &Time,
+    ) {
+        for compartment in self.n2.iter_mut() {
+            compartment.variable_pressure_update(
+                &partial_pressure_start.n2,
+                &partial_pressure_end.n2,
+                duration,
+            );
+        }
+    }
 }
 
 pub struct Buhlmann {
@@ -66,19 +63,32 @@ impl Buhlmann {
     fn new(breath: &Breath) -> Self {
         let model = Model::Zhl16a;
         Buhlmann {
-            compartments: Compartments::new(&model, breath),
+            compartments: Compartments::new(&model, &breath.partial_pressure),
             max_ambient_pressure: breath.ambient_pressure,
         }
     }
 }
 
-impl Tissue for Buhlmann {
-    fn constant_breath_update(&mut self, breath: &Breath, duration: &Time) {
-        self.compartments.constant_breath_update(breath, duration);
-    }
-}
-
 impl Deco for Buhlmann {
+    fn constant_breath_update(&mut self, breath: &Breath, duration: &Time) {
+        self.compartments
+            .constant_pressure_update(&breath.partial_pressure, duration);
+    }
+
+    fn variable_breath_update(
+        &mut self,
+        breath_start: &Breath,
+        breath_end: &Breath,
+        duration: &Time,
+    ) {
+        // TODO: ensure mix is the same for breath_start and breath_end
+        self.compartments.variable_pressure_update(
+            &breath_start.partial_pressure,
+            &breath_end.partial_pressure,
+            duration,
+        );
+    }
+
     // fn ceiling(&self) -> Pressure {
     //     unimplemented!();
     // }
@@ -92,7 +102,7 @@ fn test_zhl6a_compartments_new() {
     let model = Model::Zhl16a;
     // copy surface air partial pressure
     let breath = &SURFACE_AIR;
-    let compartments = Compartments::new(&model, &breath);
+    let compartments = Compartments::new(&model, &breath.partial_pressure);
     assert_eq!(compartments.n2.len(), 17);
     for (i, compartment) in compartments.n2.iter().enumerate() {
         assert_eq!(compartment.params.hl, model.half_lives()[i]);
@@ -100,24 +110,113 @@ fn test_zhl6a_compartments_new() {
     }
 }
 
-// #[test]
-// fn test_buhlmann_constant_breath_update() {
-//     use crate::mix::SURFACE_AIR;
-//     use crate::units::{bar, min};
+#[test]
+fn test_compartments_constant_pressure_update() {
+    use crate::mix::SURFACE_AIR;
+    use crate::units::{bar, min};
 
-//     let breath = &SURFACE_AIR;
-//     let model = Model::Zhl16a;
-//     let duration = min(10.0);
+    let breath = &SURFACE_AIR;
+    let model = Model::Zhl16a;
+    let duration = min(10.0);
 
-//     let mut buhlmann = Buhlmann::new(&breath);
-//     buhlmann.constant_breath_update(&breath, &duration);
+    let mut compartments = Compartments::new(&model, &breath.partial_pressure);
+    compartments.constant_pressure_update(&breath.partial_pressure, &duration);
 
-//     let mut expected_compartments = Compartments::new(&model, &breath);
-//     for (i, expected_compartment) in expected_compartments.n2.iter_mut().enumerate() {
-//         expected_compartment.constant_pressure_update(&breath.partial_pressure.n2, &duration);
-//         assert_eq!(
-//             expected_compartment.pressure,
-//             buhlmann.compartments.n2[i].pressure
-//         );
-//     }
-// }
+    let mut expected_compartments = Compartments::new(&model, &breath.partial_pressure);
+    for (i, expected_compartment) in expected_compartments.n2.iter_mut().enumerate() {
+        expected_compartment.constant_pressure_update(&breath.partial_pressure.n2, &duration);
+        assert_eq!(expected_compartment.pressure, compartments.n2[i].pressure);
+    }
+}
+
+#[test]
+fn test_compartments_variable_pressure_update() {
+    use crate::mix::SURFACE_AIR;
+    use crate::units::{bar, min};
+
+    let breath_start = &SURFACE_AIR;
+    let breath_end = &SURFACE_AIR;
+    let model = Model::Zhl16a;
+    let duration = min(10.0);
+
+    let mut compartments = Compartments::new(&model, &breath_start.partial_pressure);
+    compartments.variable_pressure_update(
+        &breath_start.partial_pressure,
+        &breath_end.partial_pressure,
+        &duration,
+    );
+
+    let mut expected_compartments = Compartments::new(&model, &breath_start.partial_pressure);
+    for (i, expected_compartment) in expected_compartments.n2.iter_mut().enumerate() {
+        expected_compartment.variable_pressure_update(
+            &breath_start.partial_pressure.n2,
+            &breath_end.partial_pressure.n2,
+            &duration,
+        );
+        assert_eq!(expected_compartment.pressure, compartments.n2[i].pressure);
+    }
+}
+
+#[test]
+fn test_buhlmann_new() {
+    use crate::mix::SURFACE_AIR;
+    use crate::units::bar;
+
+    let breath = &SURFACE_AIR;
+    let buhlmann = Buhlmann::new(&breath);
+    assert_eq!(buhlmann.compartments.n2.len(), 17);
+    for (i, compartment) in buhlmann.compartments.n2.iter().enumerate() {
+        assert_eq!(compartment.params.hl, Model::Zhl16a.half_lives()[i]);
+        assert_eq!(compartment.pressure, breath.partial_pressure.n2);
+    }
+    assert_eq!(buhlmann.max_ambient_pressure, breath.ambient_pressure);
+}
+
+#[test]
+fn test_buhlmann_constant_breath_update() {
+    use crate::mix::SURFACE_AIR;
+    use crate::units::{bar, min};
+
+    let breath = &SURFACE_AIR;
+    let model = Model::Zhl16a;
+    let duration = min(10.0);
+
+    let mut buhlmann = Buhlmann::new(&breath);
+    buhlmann.constant_breath_update(&breath, &duration);
+
+    let mut expected_compartments = Compartments::new(&model, &breath.partial_pressure);
+    for (i, expected_compartment) in expected_compartments.n2.iter_mut().enumerate() {
+        expected_compartment.constant_pressure_update(&breath.partial_pressure.n2, &duration);
+        assert_eq!(
+            expected_compartment.pressure,
+            buhlmann.compartments.n2[i].pressure
+        );
+    }
+}
+
+#[test]
+fn test_buhlmann_variable_breath_update() {
+    use crate::mix::SURFACE_AIR;
+    use crate::units::{bar, min};
+
+    let breath_start = &SURFACE_AIR;
+    let breath_end = &SURFACE_AIR;
+    let model = Model::Zhl16a;
+    let duration = min(10.0);
+
+    let mut buhlmann = Buhlmann::new(&breath_start);
+    buhlmann.variable_breath_update(&breath_start, &breath_end, &duration);
+
+    let mut expected_compartments = Compartments::new(&model, &breath_start.partial_pressure);
+    for (i, expected_compartment) in expected_compartments.n2.iter_mut().enumerate() {
+        expected_compartment.variable_pressure_update(
+            &breath_start.partial_pressure.n2,
+            &breath_end.partial_pressure.n2,
+            &duration,
+        );
+        assert_eq!(
+            expected_compartment.pressure,
+            buhlmann.compartments.n2[i].pressure
+        );
+    }
+}
