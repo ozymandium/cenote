@@ -30,7 +30,7 @@ impl Params {
     }
 }
 
-/// A single tissue compartment in the Buhlmann decompression model.
+/// A single tissue compartment in the Buhlmann decompression model for a single gas
 #[derive(Debug)]
 pub struct Compartment {
     pub params: Params,
@@ -43,6 +43,11 @@ pub struct Compartment {
 }
 
 impl Compartment {
+    /// Create a new compartment with the given half life and initial pressure.
+    ///
+    /// # Arguments
+    /// * `half_life` - The half life of the compartment
+    /// * `pressure` - The initial absolute internal pressure of the compartment.
     pub fn new(half_life: Time, pressure: Pressure) -> Result<Self, &'static str> {
         let params = Params::new(half_life)?;
         let mut compartment = Compartment {
@@ -83,13 +88,15 @@ impl Compartment {
     /// duration of the exposure.
     ///
     /// # Arguments
-    /// * `ambient_pressure` - The absolute ambient pressure during the exposure
+    /// * `ambient_pressure` - The absolute ambient pressure during the exposure for the specific 
+    ///   gas to which this compartment corresponds. `ambient_pressure` here should be the same as
+    ///   `partial_pressure` in the `Breath` struct.
     /// * `duration` - The duration of the exposure
     ///
     /// # Returns
     /// The change in compartment pressure
-    fn pressure_change(&self, ambient_pressure: Pressure, duration: Time) -> Pressure {
-        let pressure_diff = ambient_pressure - *WATER_VAPOR_PRESSURE - self.pressure;
+    fn pressure_change(&self, ambient_pressure: &Pressure, duration: &Time) -> Pressure {
+        let pressure_diff = *ambient_pressure - *WATER_VAPOR_PRESSURE - self.pressure;
         // get the ratio of times as an f64
         let time_ratio: f64 = duration.get::<Min>() / self.params.hl.get::<Min>();
         // calculate the new compartment pressure
@@ -100,9 +107,11 @@ impl Compartment {
     /// pressure to account for new loading.
     ///
     /// # Arguments
-    /// * `ambient_pressure` - The absolute ambient pressure during the exposure
+    /// * `ambient_pressure` - The absolute ambient pressure during the exposure for the specific
+    ///   gas to which this compartment corresponds. `ambient_pressure` here should be the same as
+    ///   `partial_pressure` in the `Breath` struct.
     /// * `duration` - The duration of the exposure
-    pub fn constant_pressure_update(&mut self, ambient_pressure: Pressure, duration: Time) {
+    pub fn constant_pressure_update(&mut self, ambient_pressure: &Pressure, duration: &Time) {
         self.set(self.pressure + self.pressure_change(ambient_pressure, duration));
     }
 
@@ -111,14 +120,16 @@ impl Compartment {
     /// average ambient pressure the whole time.
     ///
     /// # Arguments
-    /// * `ambient_pressure_start` - The absolute ambient pressure at the start of the exposure
-    /// * `ambient_pressure_end` - The absolute ambient pressure at the end of the exposure
+    /// * `ambient_pressure_start` - The absolute ambient pressure at the start of the exposure.
+    ///   This should be the same as `partial_pressure` in the `Breath` struct.
+    /// * `ambient_pressure_end` - The absolute ambient pressure at the end of the exposure.
+    ///   This should be the same as `partial_pressure` in the `Breath` struct.
     /// * `duration` - The duration of the exposure
     pub fn variable_pressure_update(
         &mut self,
-        ambient_pressure_start: Pressure,
-        ambient_pressure_end: Pressure,
-        duration: Time,
+        ambient_pressure_start: &Pressure,
+        ambient_pressure_end: &Pressure,
+        duration: &Time,
     ) {
         let mean_ambient_pressure = (ambient_pressure_start + ambient_pressure_end) / 2.0;
         self.constant_pressure_update(mean_ambient_pressure, duration);
@@ -134,7 +145,7 @@ impl Compartment {
     ///
     /// # Returns
     /// The gradient factor. Maybe be negative.
-    pub fn gradient_at(&self, ambient_pressure: Pressure) -> Result<f64, &'static str> {
+    pub fn gradient_at(&self, ambient_pressure: &Pressure) -> Result<f64, &'static str> {
         if self.pressure == self.m0 {
             return Err("deco::buhlmann::compartment::gradient_at: compartment pressure is equal to ambient pressure");
         }
