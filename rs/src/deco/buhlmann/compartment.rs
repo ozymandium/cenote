@@ -152,6 +152,10 @@ impl Compartment {
         Ok((self.pressure - *ambient_pressure).get::<Bar>()
             / (self.pressure - self.m0).get::<Bar>())
     }
+
+    pub fn ceiling(&self, gradient: f64) -> Pressure {
+        self.pressure - (self.pressure - self.m0) * gradient
+    }
 }
 
 #[cfg(test)]
@@ -242,5 +246,18 @@ fn test_compartment_gradient_at() {
             .gradient_at(&(compartment.pressure - (compartment.pressure - compartment.m0) / 2.0))
             .unwrap(),
         0.5
+    );
+}
+
+#[test]
+fn test_compartment_ceiling() {
+    let tol = bar(1e-15);
+    let compartment = Compartment::new(min(3.0), bar(3.0)).unwrap();
+    assert_approx_val!(compartment.ceiling(1.0), compartment.m0, tol);
+    assert_approx_val!(compartment.ceiling(0.0), compartment.pressure, tol);
+    assert_approx_val!(
+        compartment.ceiling(0.5),
+        compartment.pressure - (compartment.pressure - compartment.m0) / 2.0,
+        tol
     );
 }
