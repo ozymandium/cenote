@@ -131,8 +131,8 @@ impl Compartment {
         ambient_pressure_end: &Pressure,
         duration: &Time,
     ) {
-        let mean_ambient_pressure = (ambient_pressure_start + ambient_pressure_end) / 2.0;
-        self.constant_pressure_update(mean_ambient_pressure, duration);
+        let mean_ambient_pressure = (*ambient_pressure_start + *ambient_pressure_end) / 2.0;
+        self.constant_pressure_update(&mean_ambient_pressure, duration);
     }
 
     /// Get the gradient factor if the compartment were instantaneously placed into an environment
@@ -149,10 +149,8 @@ impl Compartment {
         if self.pressure == self.m0 {
             return Err("deco::buhlmann::compartment::gradient_at: compartment pressure is equal to ambient pressure");
         }
-        Ok(
-            (self.pressure - ambient_pressure).get::<Bar>()
-                / (self.pressure - self.m0).get::<Bar>(),
-        )
+        Ok((self.pressure - *ambient_pressure).get::<Bar>()
+            / (self.pressure - self.m0).get::<Bar>())
     }
 }
 
@@ -203,13 +201,13 @@ fn test_compartment_pressure_change() {
     // stays the same when ambient pressure is the same, accounting for water vapor pressure
     assert_eq!(
         compartment
-            .pressure_change(bar(3.0) + *WATER_VAPOR_PRESSURE, min(100.0))
+            .pressure_change(&(bar(3.0) + *WATER_VAPOR_PRESSURE), &min(100.0))
             .get::<Bar>(),
         0.0
     );
     assert_eq!(
         compartment
-            .pressure_change(bar(4.0) + *WATER_VAPOR_PRESSURE, min(6.0))
+            .pressure_change(&(bar(4.0) + *WATER_VAPOR_PRESSURE), &min(6.0))
             .get::<Bar>(),
         0.75
     );
@@ -227,9 +225,9 @@ fn test_compartment_variable_pressure_update() {
     // since the update is already tested by test_constant_pressure_update, just make sure that
     // the compartment pressure is updated to the mean ambient pressure
     compartment.variable_pressure_update(
-        bar(2.0) + *WATER_VAPOR_PRESSURE,
-        bar(4.0) + *WATER_VAPOR_PRESSURE,
-        min(100.0),
+        &(bar(2.0) + *WATER_VAPOR_PRESSURE),
+        &(bar(4.0) + *WATER_VAPOR_PRESSURE),
+        &min(100.0),
     );
     assert_approx_val!(compartment.pressure, bar(3.0), bar(1e-15));
 }
@@ -237,11 +235,11 @@ fn test_compartment_variable_pressure_update() {
 #[test]
 fn test_compartment_gradient_at() {
     let compartment = Compartment::new(min(3.0), bar(3.0)).unwrap();
-    assert_eq!(compartment.gradient_at(bar(3.0)).unwrap(), 0.0);
-    assert_eq!(compartment.gradient_at(compartment.m0).unwrap(), 1.0);
+    assert_eq!(compartment.gradient_at(&bar(3.0)).unwrap(), 0.0);
+    assert_eq!(compartment.gradient_at(&compartment.m0).unwrap(), 1.0);
     assert_eq!(
         compartment
-            .gradient_at(compartment.pressure - (compartment.pressure - compartment.m0) / 2.0)
+            .gradient_at(&(compartment.pressure - (compartment.pressure - compartment.m0) / 2.0))
             .unwrap(),
         0.5
     );

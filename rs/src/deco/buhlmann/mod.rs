@@ -82,7 +82,7 @@ fn test_zhl6a_compartments_at() {
     let model = Model::Zhl16a;
     // copy surface air partial pressure
     let breath = &SURFACE_AIR;
-    let compartments = Compartments::new(&model, &breath.partial_pressure);
+    let compartments = Compartments::new(&model, &breath);
     assert_eq!(compartments.n2.len(), 17);
     for (i, compartment) in compartments.n2.iter().enumerate() {
         assert_eq!(compartment.params.hl, model.half_lives()[i]);
