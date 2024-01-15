@@ -17,7 +17,7 @@ struct Compartments {
 }
 
 impl Compartments {
-    /// Create a new set of compartments for the given model and pressure.
+    /// Create a new set of compartments that have reached equilibrium with the given breathing gas.
     ///
     /// # Arguments
     /// * `model` - The decompression model
@@ -48,11 +48,11 @@ impl Deco for Buhlmann {
         }
     }
 
-    // fn constant_breath_update(&mut self, breath: &Breath, duration: &Time) {
-    //     for compartment in self.compartments.n2.iter_mut() {
-    //         compartment.constant_pressure_update(breath.partial_pressure.n2, duration);
-    //     }
-    // }
+    fn constant_breath_update(&mut self, breath: &Breath, duration: &Time) {
+        for compartment in self.compartments.n2.iter_mut() {
+            compartment.constant_pressure_update(&breath.partial_pressure.n2, duration);
+        }
+    }
 
     // fn variable_breath_update(
     //     &mut self,
@@ -75,7 +75,7 @@ impl Deco for Buhlmann {
 }
 
 #[test]
-fn test_zhl6a_compartments_at() {
+fn test_zhl6a_compartments_new() {
     use crate::mix::SURFACE_AIR;
     use crate::units::bar;
 
@@ -87,5 +87,27 @@ fn test_zhl6a_compartments_at() {
     for (i, compartment) in compartments.n2.iter().enumerate() {
         assert_eq!(compartment.params.hl, model.half_lives()[i]);
         assert_eq!(compartment.pressure, breath.partial_pressure.n2);
+    }
+}
+
+#[test]
+fn test_buhlmann_constant_breath_update() {
+    use crate::mix::SURFACE_AIR;
+    use crate::units::{bar, min};
+
+    let breath = &SURFACE_AIR;
+    let model = Model::Zhl16a;
+    let duration = min(10.0);
+
+    let mut buhlmann = Buhlmann::new(&breath);
+    buhlmann.constant_breath_update(&breath, &duration);
+
+    let mut expected_compartments = Compartments::new(&model, &breath);
+    for (i, expected_compartment) in expected_compartments.n2.iter_mut().enumerate() {
+        expected_compartment.constant_pressure_update(&breath.partial_pressure.n2, &duration);
+        assert_eq!(
+            expected_compartment.pressure,
+            buhlmann.compartments.n2[i].pressure
+        );
     }
 }

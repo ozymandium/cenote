@@ -11,12 +11,12 @@ pub trait Deco {
     ///   be initialized, assuming perfect equilibrium
     fn new(breath: &Breath) -> Self;
 
-    // /// Expose the diver to a constant partial pressure of gas for a given duration.
-    // ///
-    // /// # Arguments
-    // /// * `breath` - The breathing gas
-    // /// * `duration` - The duration of the exposure
-    // fn constant_breath_update(&mut self, breath: &Breath, duration: &Time);
+    /// Expose the diver to a constant partial pressure of gas for a given duration.
+    ///
+    /// # Arguments
+    /// * `breath` - The breathing gas
+    /// * `duration` - The duration of the exposure
+    fn constant_breath_update(&mut self, breath: &Breath, duration: &Time);
 
     // /// Expose the diver to a variable partial pressure of gas for a given duration.
     // /// Assume that the partial pressure changes linearly over the duration.
