@@ -1,6 +1,5 @@
 use crate::constants::SURFACE_PRESSURE;
 use crate::units::{Depth, Pressure};
-use crate::water::Water;
 use lazy_static::lazy_static;
 
 #[derive(Clone)]
@@ -12,7 +11,7 @@ pub struct PartialPressure {
 }
 
 /// A gas mixture. The sum of fo2 and fn2 must be 1.0. Helium is not currently supported.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Mix {
     /// The fraction of oxygen in the mix (0.0 - 1.0)
     pub fo2: f64,
@@ -49,7 +48,7 @@ impl Breath {
     /// # Arguments
     /// * `ambient_pressure` - The absolute ambient pressure
     /// * `mix` - The current breathing gas mixture
-    fn new(ambient_pressure: &Pressure, mix: &Mix) -> Self {
+    pub fn new(ambient_pressure: &Pressure, mix: &Mix) -> Self {
         Breath {
             /// FIXME: should we clone the ambient pressure?
             ambient_pressure: *ambient_pressure,

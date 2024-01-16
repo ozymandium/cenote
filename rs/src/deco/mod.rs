@@ -9,7 +9,11 @@ pub trait Deco {
     /// # Arguments
     /// * `breath` - The breathing gas
     /// * `duration` - The duration of the exposure
-    fn constant_breath_update(&mut self, breath: &Breath, duration: &Time);
+    fn constant_breath_update(
+        &mut self,
+        breath: &Breath,
+        duration: &Time,
+    ) -> Result<(), &'static str>;
 
     /// Expose the diver to a variable partial pressure of gas for a given duration.
     /// Assume that the partial pressure changes linearly over the duration.
@@ -23,8 +27,8 @@ pub trait Deco {
         breath_start: &Breath,
         breath_end: &Breath,
         duration: &Time,
-    );
+    ) -> Result<(), &'static str>;
 
-    // /// Get the lowest allowable ambient pressure for the current state of the model.
-    // fn ceiling(&self) -> Pressure;
+    /// Get the lowest allowable ambient pressure for the current state of the model.
+    fn ceiling(&self) -> Pressure;
 }
