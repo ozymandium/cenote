@@ -35,6 +35,22 @@ struct Segment {
     mix: Mix,
 }
 
+impl Segment {
+    fn new(duration: Time, end_depth: Depth, mix: Mix) -> Result<Self, &'static str> {
+        if duration.get::<Min>() <= 0.0 {
+            return Err("plan::Segment::new: duration must be > 0.0");
+        }
+        if end_depth.get::<Meter>() < 0.0 {
+            return Err("plan::Segment::new: end_depth must be >= 0.0");
+        }
+        Ok(Segment {
+            duration,
+            end_depth,
+            mix,
+        })
+    }
+}
+
 struct Profile {
     /// Water is assumed to be constant throughout the dive
     water: Water,
@@ -63,9 +79,9 @@ impl Profile {
                 .expect("plan::Profil e::new: points is empty");
             // Then, push the new point
             points.push(Point::new(
-                time: last_time + segment.duration,
-                depth: segment.end_depth,
-                mix: segment.mix.clone(),
+                last_time + segment.duration,
+                segment.end_depth,
+                segment.mix,
             )?);
         }
         Ok(Profile { water, points })
@@ -83,6 +99,19 @@ fn test_point_new() {
     assert_eq!(point.mix, mix);
     assert!(Point::new(min(-1.0), depth, mix).is_err());
     assert!(Point::new(time, meter(-1.0), mix).is_err());
+}
+
+#[test]
+fn test_segment_new() {
+    let duration = min(10.0);
+    let end_depth = meter(10.0);
+    let mix = AIR.clone();
+    let segment = Segment::new(duration, end_depth, mix).unwrap();
+    assert_eq!(segment.duration, duration);
+    assert_eq!(segment.end_depth, end_depth);
+    assert_eq!(segment.mix, mix);
+    assert!(Segment::new(min(-1.0), end_depth, mix).is_err());
+    assert!(Segment::new(duration, meter(-1.0), mix).is_err());
 }
 
 #[test]
