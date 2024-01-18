@@ -1,4 +1,4 @@
-use crate::units::{VolumeRate,CuFtPerMin};
+use crate::units::{CuFtPerMin, VolumeRate};
 
 struct Scr {
     /// The surface consumption rate when working
