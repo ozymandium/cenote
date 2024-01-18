@@ -59,3 +59,31 @@ impl Profile {
         Ok(Profile { water, points })
     }
 }
+
+#[test]
+fn test_profile_new() {
+    let water = Water::Fresh;
+    let segments = vec![
+        Segment {
+            duration: min(10.0),
+            end_depth: meter(10.0),
+            mix: AIR.clone(),
+        },
+        Segment {
+            duration: min(10.0),
+            end_depth: meter(20.0),
+            mix: AIR.clone(),
+        },
+    ];
+    let profile = Profile::new(water, segments).unwrap();
+    assert_eq!(profile.points.len(), 3);
+    assert_eq!(profile.points[0].time, min(0.0));
+    assert_eq!(profile.points[0].depth, meter(0.0));
+    assert_eq!(profile.points[0].mix, AIR.clone());
+    assert_eq!(profile.points[1].time, min(10.0));
+    assert_eq!(profile.points[1].depth, meter(10.0));
+    assert_eq!(profile.points[1].mix, AIR.clone());
+    assert_eq!(profile.points[2].time, min(20.0));
+    assert_eq!(profile.points[2].depth, meter(20.0));
+    assert_eq!(profile.points[2].mix, AIR.clone());
+}
