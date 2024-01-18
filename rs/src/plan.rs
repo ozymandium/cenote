@@ -62,11 +62,11 @@ impl Profile {
                 .map(|p| (p.time, p.mix.clone()))
                 .expect("plan::Profil e::new: points is empty");
             // Then, push the new point
-            points.push(Point {
+            points.push(Point::new(
                 time: last_time + segment.duration,
                 depth: segment.end_depth,
                 mix: segment.mix.clone(),
-            });
+            )?);
         }
         Ok(Profile { water, points })
     }
