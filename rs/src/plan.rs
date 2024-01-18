@@ -1,5 +1,5 @@
 use crate::mix::{Mix, AIR};
-use crate::units::{meter, min, Depth, Time, VolumeRate};
+use crate::units::{meter, min, Depth, Meter, Min, Time, VolumeRate};
 use crate::water::Water;
 
 /// A dive plan is a series of points that describe the dive.
@@ -10,6 +10,18 @@ struct Point {
     depth: Depth,
     /// Breathing gas at this point, which will be used from now until the next point
     mix: Mix,
+}
+
+impl Point {
+    fn new(time: Time, depth: Depth, mix: Mix) -> Result<Self, &'static str> {
+        if time.get::<Min>() < 0.0 {
+            return Err("plan::Point::new: time must be >= 0.0");
+        }
+        if depth.get::<Meter>() < 0.0 {
+            return Err("plan::Point::new: depth must be >= 0.0");
+        }
+        Ok(Point { time, depth, mix })
+    }
 }
 
 /// A segment is the time between two Points. The user inputs segments, and points are generated
@@ -58,6 +70,19 @@ impl Profile {
         }
         Ok(Profile { water, points })
     }
+}
+
+#[test]
+fn test_point_new() {
+    let time = min(0.0);
+    let depth = meter(0.0);
+    let mix = AIR.clone();
+    let point = Point::new(time, depth, mix).unwrap();
+    assert_eq!(point.time, time);
+    assert_eq!(point.depth, depth);
+    assert_eq!(point.mix, mix);
+    assert!(Point::new(min(-1.0), depth, mix).is_err());
+    assert!(Point::new(time, meter(-1.0), mix).is_err());
 }
 
 #[test]

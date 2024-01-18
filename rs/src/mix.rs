@@ -11,7 +11,7 @@ pub struct PartialPressure {
 }
 
 /// A gas mixture. The sum of fo2 and fn2 must be 1.0. Helium is not currently supported.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Copy)]
 pub struct Mix {
     /// The fraction of oxygen in the mix (0.0 - 1.0)
     pub fo2: f64,
